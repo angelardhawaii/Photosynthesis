@@ -19,4 +19,6 @@ NOTE: the Phytotools package is no longer supported by CRAN, so you will need to
 Step 3. Hsat. Script titles that begin with hsat pair irradiance data from LiCor irradiance loggers with the dataset that now includes Ek, alpha, and Pmax from the previous step - phytotools. See the README for this folder for more details.
 
 ##The analyze folder (R)
-  The scripts contained in this folder can be run in any order. These feature mixed effects models
+  The scripts contained in this folder can be run in any order. These feature mixed effects model scripts for growth, pmax_ek_npq, and hsat_dspi. Markdowns are also saved in each species/project subfolder.
+
+  FOR MORE DETAILS ABOUT WHAT THE SCRIPTS IN EACH FOLDER DO, SEE THE README FILES.
