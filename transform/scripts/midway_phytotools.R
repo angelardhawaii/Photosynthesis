@@ -8,58 +8,61 @@ library("dplyr")
 library("hms")
 library("lubridate")
 
-mid_ptools <- read.csv("../../../../data/limu/midway/transformed/midway_pam_clean.csv", sep = ",")
+mid_ptools <- read.csv("../data/midway_2024/transformed/midway_pam_clean.csv", sep = ",")
 
 # add a column that turns date format into POSIXct
-mid_ptools$posix_date <- as.POSIXct(mid_ptools$Date, format = "%Y-%m-%d")
+mid_ptools$Date <- ymd(mid_ptools$Date)
 
 #same for time
-mid_ptools$hms_time <- as_hms(mid_ptools$Time)
+mid_ptools$Time <- as_hms(mid_ptools$Time)
 
 #add a new column that gets rid of characters in ID column
 mid_ptools$IDnumber <- as.numeric(substr(mid_ptools$ID, 3, 5))
 
 #get only last two digits from IDnumber for plantID to correspond to individuals
-mid_ptools$plantID <- mid_ptools$IDnumber
+mid_ptools$plantID <- as.numeric(substr(mid_ptools$IDnumber, 2, 3))
 
 #add a new column that assigns treatment based on the remainder of integer division by 8 (modulus)
 mid_ptools$treatment <- ifelse(mid_ptools$plantID %% 8 == 0, "4",(((mid_ptools$plantID %% 8) +1) %/% 2))
 
 #add a new column for salinity based on plantID
-mid_ptools$salinity <- ifelse(mid_ptools$plantID %% 2 == 0, "28 ppt", "35 ppt")
+mid_ptools$salinity <- ifelse(mid_ptools$plantID %% 2 == 0, "28", "35")
 
 #add a column for canopy or understory
 mid_ptools$plant_part <- ifelse(between(mid_ptools$plantID, 01, 48), "canopy", "under")
 
 #add a column for run
-mid_ptools$run <- as.character(ifelse(mid_ptools$Date == "2024-08-03" | mid_ptools$Date == "2024-08-07" | mid_ptools$Date == "2024-08-11", 1, 2))
+mid_ptools$run <- as.character(ifelse(mid_ptools$Date == "2024-08-03" | mid_ptools$Date == "2024-08-07" | mid_ptools$Date == "2024-08-11", 2, 3))
 
-#add a new column that bins the measurement periods by date and AM/PM
+#add a new column that bins the measurement periods by AM/PM
 bin_times <- list(
-        bin1 = c(hms("07:00:00"), hms("12:00:00")),
-        bin2 = c(hms("13:00:00"), hms("18:00:00"))        
+        bin1 = c(as_hms("07:00:00"), as_hms("12:00:00")),
+        bin2 = c(as_hms("13:00:00"), as_hms("18:00:00"))        
 )
 
 mid_ptools <- mid_ptools %>%
         mutate(day_group = case_when(
-                posix_date == as.Date("2024-08-03") & hms_time > bin_times$bin1[1] & hms_time < bin_times$bin1[2] ~ "A",
-                posix_date == as.Date("2024-08-03") & hms_time > bin_times$bin2[1] & hms_time < bin_times$bin2[2] ~ "B",
-                posix_date == as.Date("2024-08-07") & hms_time > bin_times$bin1[1] & hms_time < bin_times$bin1[2] ~ "C",
-                posix_date == as.Date("2024-08-07") & hms_time > bin_times$bin2[1] & hms_time < bin_times$bin2[2] ~ "D",
-                posix_date == as.Date("2024-08-11") & hms_time > bin_times$bin1[1] & hms_time < bin_times$bin1[2] ~ "E",
-                posix_date == as.Date("2024-08-11") & hms_time > bin_times$bin2[1] & hms_time < bin_times$bin2[2] ~ "F",
-                posix_date == as.Date("2024-08-12") & hms_time > bin_times$bin1[1] & hms_time < bin_times$bin1[2] ~ "G",
-                posix_date == as.Date("2024-08-12") & hms_time > bin_times$bin2[1] & hms_time < bin_times$bin2[2] ~ "H",
-                posix_date == as.Date("2024-08-16") & hms_time > bin_times$bin1[1] & hms_time < bin_times$bin1[2] ~ "I",
-                posix_date == as.Date("2024-08-16") & hms_time > bin_times$bin2[1] & hms_time < bin_times$bin2[2] ~ "J",
-                posix_date == as.Date("2024-08-20") & hms_time > bin_times$bin1[1] & hms_time < bin_times$bin1[2] ~ "K",
-                posix_date == as.Date("2024-08-20") & hms_time > bin_times$bin2[1] & hms_time < bin_times$bin2[2] ~ "L"
+                Date == as.Date("2024-08-03") & Time > bin_times$bin1[1] & Time < bin_times$bin1[2] ~ "c_d1_r2",
+                Date == as.Date("2024-08-03") & Time > bin_times$bin2[1] & Time < bin_times$bin2[2] ~ "u_d1_r2",
+                Date == as.Date("2024-08-07") & Time > bin_times$bin1[1] & Time < bin_times$bin1[2] ~ "c_d5_r2",
+                Date == as.Date("2024-08-07") & Time > bin_times$bin2[1] & Time < bin_times$bin2[2] ~ "u_d5_r2",
+                Date == as.Date("2024-08-11") & Time > bin_times$bin1[1] & Time < bin_times$bin1[2] ~ "c_d9_r2",
+                Date == as.Date("2024-08-11") & Time > bin_times$bin2[1] & Time < bin_times$bin2[2] ~ "u_d9_r2",
+                Date == as.Date("2024-08-12") & Time > bin_times$bin1[1] & Time < bin_times$bin1[2] ~ "c_d1_r3",
+                Date == as.Date("2024-08-12") & Time > bin_times$bin2[1] & Time < bin_times$bin2[2] ~ "u_d1_r3",
+                Date == as.Date("2024-08-16") & Time > bin_times$bin1[1] & Time < bin_times$bin1[2] ~ "u_d5_r3",
+                Date == as.Date("2024-08-16") & Time > bin_times$bin2[1] & Time < bin_times$bin2[2] ~ "c_d5_r3",
+                Date == as.Date("2024-08-20") & Time > bin_times$bin1[1] & Time < bin_times$bin1[2] ~ "u_d9_r3",
+                Date == as.Date("2024-08-20") & Time > bin_times$bin2[1] & Time < bin_times$bin2[2] ~ "u_d9_r3"
 ))
+
+#make new column with RLC Day from day_group 
+mid_ptools$rlc_day <- as.factor(substr(mid_ptools$day_group, 4, 4))
 
 ##RLC-order is added to dataset in model script
 
 # add a new column with date and specimen ID as unique key
-mid_ptools$uid <- paste(mid_ptools$posix_date, mid_ptools$ID, sep = "_")
+mid_ptools$uid <- paste(mid_ptools$Date, mid_ptools$ID, sep = "_")
 
 mid_ptools$NPQ <- as.numeric(mid_ptools$NPQ)
 
@@ -133,15 +136,6 @@ specimens = substr(uniqueIds, 12, 16)
 pmax <- array(NA, c(n,1))
 pmax = round(alpha[,1] * ek[,1], digits = 2)
 
-
-rlc_day_assign <- read.csv("../../../../data/limu/midway/input/date_rlcday/midway_date_rlcday.csv")
-
-rlc_days_by_date = array(dim = length(dates))
-hash_of_rlc_days_by_date <- hash(rlc_day_assign$date, rlc_day_assign$rlc_day)
-for (i in 1: length(dates)) {
-        rlc_days_by_date[i] = hash_of_rlc_days_by_date[[dates[i]]]
-}
-
 first_row_of_rlc <- subset(mid_ptools, Epar == 0)
 last_row_rlc <- subset(mid_ptools, Epar == 820)
 
@@ -157,7 +151,7 @@ result_df <- data.frame(Date = substr(uniqueIds, 1, 10),
                         "salinity" = first_row_of_rlc$salinity,
                         "treatment" = first_row_of_rlc$treatment,
                         "day_group" = first_row_of_rlc$day_group,
-                        "rlc_day" = rlc_days_by_date,
+                        "rlc_day" = first_row_of_rlc$rlc_day,
                         "pmax" = pmax,
                         "rETRmax" = rETRMaxes,
                         "rETRmaxYpoint1" = rETRmaxYpoint1,
@@ -170,4 +164,4 @@ result_df <- data.frame(Date = substr(uniqueIds, 1, 10),
 
 
 # save to file
-write.csv(result_df, "../../../../data/limu/midway/transformed/midway_ek_alpha_normalized_2024.csv")
+write.csv(result_df, "../data/midway_2024/transformed/midway_ek_alpha_normalized_2024.csv")
