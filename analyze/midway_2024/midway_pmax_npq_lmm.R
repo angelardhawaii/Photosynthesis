@@ -28,10 +28,14 @@ library(purrr)
 library(stringr)
 library(tidyr)
 library(hms)
+library(lubridate)
 
 
 #load this file for normalized to quantum efficiency of photosynthesis per Silsbe and Kromkamp
-mid_ps <- read.csv("../../../data/limu/midway/transformed/midway_ek_alpha_normalized_2024.csv")
+mid_ps <- read.csv("../data/midway_2024/transformed/midway_ek_alpha_normalized_2024.csv")
+glimpse(mid_ps)
+
+mid_ps$date <- ymd(mid_ps$Date)
 
 # make sure time is hms
 mid_ps$rlc_end_time <- as_hms(mid_ps$rlc_end_time)
@@ -43,7 +47,7 @@ mid_ps$run <- as.factor(mid_ps$run)
 mid_ps$salinity <- as.factor(mid_ps$salinity)
 
 #assigns treatment as characters from integers then to factors
-mid_ps$treatment <- as.factor(as.character(mid_ps$treatment))
+mid_ps$nitrate <- as.factor(as.character(mid_ps$treatment))
 
 # assign deltaNPQ as a numeric
 mid_ps$deltaNPQ <- as.numeric(mid_ps$deltaNPQ)
@@ -59,22 +63,60 @@ mid_ps <- mid_ps %>%
   group_by(day_group) %>%
   mutate(rlc_order = floor((rank -1)/3) +1)
 
+#combine nitrate and salinity for a treatment number
+mid_ps <- mid_ps %>%
+  mutate(treatment = case_when(
+    nitrate == 1 & salinity == 35 ~ "1",
+    nitrate == 1 & salinity == 28 ~ "2",
+    nitrate == 2 & salinity == 35 ~ "3",
+    nitrate == 2 & salinity == 28 ~ "4",
+    nitrate == 3 & salinity == 35 ~ "5",
+    nitrate == 3 & salinity == 28 ~ "6",
+    nitrate == 4 & salinity == 35 ~ "7",
+    nitrate == 4 & salinity == 28 ~ "8",
+  ))
+
 #toggle between the plant_part for output. Use Day 9 for final analysis
 canopy <- subset(mid_ps, rlc_day == 9 & plant_part == "canopy")
-canopy$treatment_graph[mid_day9$treatment == 1] <- "1) 0.5umol"
-canopy$treatment_graph[mid_day9$treatment == 2] <- "2) 2umol" 
-canopy$treatment_graph[mid_day9$treatment == 3] <- "3) 4umol"
-canopy$treatment_graph[mid_day9$treatment == 4] <- "4) 8umol" 
+canopy$treatment_graph[canopy$treatment == 1] <- "1) 0.5umol/35 ppt"
+canopy$treatment_graph[canopy$treatment == 2] <- "2) 0.5umol/28 ppt"
+canopy$treatment_graph[canopy$treatment == 3] <- "3) 2umol/35 ppt" 
+canopy$treatment_graph[canopy$treatment == 4] <- "4) 2umol/28 ppt"
+canopy$treatment_graph[canopy$treatment == 5] <- "5) 4umol/35 ppt"
+canopy$treatment_graph[canopy$treatment == 6] <- "6) 4umol/28 ppt"
+canopy$treatment_graph[canopy$treatment == 7] <- "7) 8umol/35 ppt"
+canopy$treatment_graph[canopy$treatment == 8] <- "8) 8umol/28 ppt"
+glimpse(canopy)
 
 under <- subset(mid_ps, rlc_day == 9 & plant_part == "under")
-under$treatment_graph[mid_day9$treatment == 1] <- "1) 0.5umol"
-under$treatment_graph[mid_day9$treatment == 2] <- "2) 2umol" 
-under$treatment_graph[mid_day9$treatment == 3] <- "3) 4umol"
-under$treatment_graph[mid_day9$treatment == 4] <- "4) 8umol"
+under$treatment_graph[under$treatment == 1] <- "1) 0.5umol/35 ppt"
+under$treatment_graph[under$treatment == 2] <- "2) 0.5umol/28 ppt"
+under$treatment_graph[under$treatment == 3] <- "3) 2umol/35 ppt" 
+under$treatment_graph[under$treatment == 4] <- "4) 2umol/28 ppt"
+under$treatment_graph[under$treatment == 5] <- "5) 4umol/35 ppt"
+under$treatment_graph[under$treatment == 6] <- "6) 4umol/28 ppt"
+under$treatment_graph[under$treatment == 7] <- "7) 8umol/35 ppt"
+under$treatment_graph[under$treatment == 8] <- "8) 8umol/28 ppt"
 
 
-mid_day9$plantpart_graph[mid_day9$plant_part == "canopy"] <- "canopy"
-mid_day9$plantpart_graph[mid_day9$plant_part == "under"] <- "under"
+#add new column to subsets from time over 28 summary dataset
+time_over_28 <- read_csv("../data/midway_2024/transformed/mins_28_plant_part.csv") #load dataset
+
+mean_mins28 <- time_over_28 %>%
+  select(plant_part, run, mean_mins28_plant_part) %>% #keep only relevant columns of data
+  mutate(run = as.factor(run), mean_mins28_plant_part = as.factor(mean_mins28_plant_part))
+  
+canopy <- canopy %>%
+  left_join(mean_mins28, by = c("run", "plant_part")) #join the datasets
+
+canopy <- canopy %>%
+  rename(mean_mins28 = mean_mins28_plant_part) #name is too long
+
+under <- under %>%
+  left_join(mean_mins28, by = c("run", "plant_part")) #join the datasets
+
+under <- under %>%
+  rename(mean_mins28 = mean_mins28_plant_part) #name is too long
 
 
 #------------Pmax----------------
@@ -86,26 +128,28 @@ under %>% ggplot(aes(pmax)) +
   geom_histogram(binwidth=5, fill = "maroon", color = "black", size = 0.25, alpha = 0.85) +
   theme_bw()
 
-#run model without interaction between the treatments and temperature
-canopy_pmax_model <- lmer(formula = pmax ~ treatment + salinity + (1 | run) + (1 | plantID) + (1 | rlc_order), data = canopy)
-under_pmax_model <- lmer(formula = pmax ~ treatment + salinity + (1 | run) + (1 | plantID), data = under)
+#run model for canopy and understory separately
+canopy_pmax_model <- lmer(formula = pmax ~ nitrate + salinity + (1 | plantID) +
+                            (1 | mean_mins28), data = canopy) #remove rlc_order
+under_pmax_model <- lmer(formula = pmax ~ nitrate + salinity + (1 | plantID) +
+                           (1 | mean_mins28), data = under) #remove rlc_order
 
 #construct null model to perform likelihood ratio test REML must be FALSE
-canopy_pmax_treatment_null <- lmer(formula = pmax ~ salinity + (1 | run) + (1 | plantID) + (1 | rlc_order), data = canopy, REML = FALSE)
-canopy_pmax_model2 <- lmer(formula = pmax ~ treatment + salinity + (1 | run) + (1 | plantID) + (1 | rlc_order), data = canopy, REML = FALSE)
-anova(canopy_pmax_treatment_null, canopy_pmax_model2)
-canopy_pmax_salinity_null <- lmer(formula = pmax ~ treatment + (1 | run) + (1 | plantID) + (1 | rlc_order), data = canopy, REML = FALSE)
-canopy_pmax_model3 <- lmer(formula = pmax ~ treatment + salinity + (1 | run) + (1 | plantID) + (1 | rlc_order), data = canopy, REML = FALSE)
+canopy_pmax_nitrate_null <- lmer(formula = pmax ~ salinity + (1 | mean_mins28) + (1 | plantID), data = canopy, REML = FALSE)
+canopy_pmax_model2 <- lmer(formula = pmax ~ nitrate + salinity + (1 | mean_mins28) + (1 | plantID), data = canopy, REML = FALSE)
+anova(canopy_pmax_nitrate_null, canopy_pmax_model2)
+canopy_pmax_salinity_null <- lmer(formula = pmax ~ nitrate + (1 | mean_mins28) + (1 | plantID), data = canopy, REML = FALSE)
+canopy_pmax_model3 <- lmer(formula = pmax ~ nitrate + salinity + (1 | mean_mins28) + (1 | plantID), data = canopy, REML = FALSE)
 anova(canopy_pmax_salinity_null, canopy_pmax_model3)
 
-under_pmax_treatment_null <- lmer(formula = pmax ~ salinity + (1 | run) + (1 | plantID), data = under, REML = FALSE)
-under_pmax_model2 <- lmer(formula = pmax ~ treatment + salinity + (1 | run) + (1 | plantID), data = under, REML = FALSE)
-anova(under_pmax_treatment_null, under_pmax_model2)
-under_pmax_salinity_null <- lmer(formula = pmax ~ treatment + (1 | run) + (1 | plantID), data = under, REML = FALSE)
-under_pmax_model3 <- lmer(formula = pmax ~ treatment + salinity + (1 | run) + (1 | plantID), data = under, REML = FALSE)
+under_pmax_nitrate_null <- lmer(formula = pmax ~ salinity + (1 | mean_mins28) + (1 | plantID), data = under, REML = FALSE)
+under_pmax_model2 <- lmer(formula = pmax ~ nitrate + salinity + (1 | mean_mins28) + (1 | plantID), data = under, REML = FALSE)
+anova(under_pmax_nitrate_null, under_pmax_model2)
+under_pmax_salinity_null <- lmer(formula = pmax ~ nitrate + (1 | mean_mins28) + (1 | plantID), data = under, REML = FALSE)
+under_pmax_model3 <- lmer(formula = pmax ~ nitrate + salinity + (1 | mean_mins28) + (1 | plantID), data = under, REML = FALSE)
 anova(under_pmax_salinity_null, under_pmax_model3)
 
-#make residual plots of the data for Acanthophora
+#make residual plots of the data for Chondria tumulosa canopy and understory
 hist(resid(canopy_pmax_model))
 plot(resid(canopy_pmax_model) ~ fitted(canopy_pmax_model))
 qqnorm(resid(canopy_pmax_model))
@@ -130,43 +174,48 @@ plot(allEffects(canopy_pmax_model))
 tab_model(under_pmax_model, show.intercept = TRUE, show.se = TRUE, show.stat = TRUE, show.df = TRUE, show.zeroinf = TRUE)
 plot(allEffects(under_pmax_model))
 
-canopy %>% ggplot(aes(treatment_graph, pmax)) + 
+canopy_pmax <- canopy %>% 
+  ggplot(aes(treatment_graph, pmax)) + 
   geom_boxplot(size=0.5) + 
   geom_point(alpha = 0.75, size = 5, aes(color = salinity), position = "jitter", show.legend = TRUE) + 
-  labs(x="nitrate", y= "Day 9 Pmax (μmols electrons m-2 s-1)", title= "A", subtitle = "Chondria tumulosa -- Canopy") + 
-  scale_x_discrete(labels = c("0.5umolN", "2umolN", "4umolN", "8umolN")) + 
+  labs(x="treatment", y= "Day 9 Pmax (μmols electrons m-2 s-1)", title= "A", subtitle = "Chondria tumulosa -- Canopy") + 
+  #scale_x_discrete(labels = c("0.5umolN", "2umolN", "4umolN", "8umolN")) + 
   ylim(25, 175) + stat_mean() + 
-  scale_color_manual(values = c("gold", "goldenrod")) +
+  scale_color_manual(values = c("gold", "orange")) +
   geom_hline(yintercept=100, color = "red", size = 0.5, alpha = 0.5) +
   theme_bw() +
   theme(legend.position = c(0.90,0.90), plot.title = element_text(face = "bold", vjust = -15, hjust = 0.05), 
         plot.subtitle = element_text(face = "italic", size = 14, vjust = -20, hjust = 0.05))
+canopy_pmax
+ggsave("canopy_pmax.png", path = "midway_2024/plots/")
 
-under %>% ggplot(aes(treatment_graph, pmax)) + 
+under_pmax <- under %>% 
+  ggplot(aes(treatment_graph, pmax)) + 
   geom_boxplot(size=0.5) + 
   geom_point(alpha = 0.75, size = 5, aes(color = salinity), position = "jitter", show.legend = TRUE) + 
-  labs(x="nitrate", y= "Day 9 Pmax (μmols electrons m-2 s-1)", title= "B", subtitle = "Chondria tumulosa understory") + 
-  scale_x_discrete(labels = c("0.5umolN", "2umolN", "4umolN", "8umolN")) + 
+  labs(x="treatment", y= "Day 9 Pmax (μmols electrons m-2 s-1)", title= "B", subtitle = "Chondria tumulosa understory") + 
+  #scale_x_discrete(labels = c("0.5umolN", "2umolN", "4umolN", "8umolN")) + 
   ylim(0, 150) + stat_mean() + 
-  scale_color_manual(values = c("maroon1", "maroon4")) +
+  scale_color_manual(values = c("purple", "maroon4")) +
   geom_hline(yintercept=100, color = "red", size = 0.5, alpha = 0.5) +
   theme_bw() +
   theme(legend.position = c(0.90,0.90), plot.title = element_text(face = "bold", vjust = -15, hjust = 0.05), 
         plot.subtitle = element_text(face = "italic", size = 14, vjust = -20, hjust = 0.05))
-
+under_pmax
+ggsave("under_pmax.png", path = "midway_2024/plots/")
 
 #summarize the means for pmax
-canopy %>% group_by(treatment) %>% summarise_at(vars(pmax), list(mean = mean))
+canopy %>% group_by(nitrate) %>% summarise_at(vars(pmax), list(mean = mean))
 canopy %>% group_by(salinity) %>% summarise_at(vars(pmax), list(mean = mean))
 
-under %>% group_by(treatment) %>% summarise_at(vars(pmax), list(mean = mean))
+under %>% group_by(nitrate) %>% summarise_at(vars(pmax), list(mean = mean))
 under %>% group_by(salinity) %>% summarise_at(vars(pmax), list(mean = mean))
 
 
 #Linear regression Pmax vs Growth--------------------------------------------------------------------------------
 
 #add growth rate from other dataset to this one and subset by species
-growth_rate <- read.csv("../../../data/limu/acan_2024/input/acanthophora_growth_r1.csv")
+growth_rate <- read.csv("../data/midway_2024/input/midway_growth.csv")
 growth_rate$treatment <- as.factor(growth_rate$treatment)
 
 #make a new column for weight change (difference final from initial)

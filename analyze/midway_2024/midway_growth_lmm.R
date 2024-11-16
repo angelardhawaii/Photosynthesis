@@ -33,47 +33,86 @@ library(easystats)
 library(magrittr)
 
 #open weight dataset and make columns for growth rate from initial and final weights
-mid_growth <- read.csv("../../../data/limu/midway/input/growth/midway_growth.csv")
+mid_growth <- read.csv("../data/midway_2024/input/midway_growth.csv")
 
 #make a new column for weight change (difference final from initial)
 mid_growth$d9_growth_percent <- round(((mid_growth$final_weight - mid_growth$initial_weight) / mid_growth$initial_weight * 100), digits = 2)
 mid_growth$d5_growth_percent <- round(((mid_growth$d5_weight - mid_growth$initial_weight) / mid_growth$initial_weight * 100), digits = 2)
 
 #add a new column that gets rid of characters in ID column
-mid_growth$plant_ID <- as.factor(substr(mid_growth$ID, 3, 5))
+mid_growth$plant_ID <- as.factor(substr(mid_growth$ID, 4, 5))
 
-#make a new column for run using the third value in the ID
-mid_growth$run <- as.factor(substr(mid_growth$ID, 3, 3))
+#make a new column for run using the third value in the ID, then change the 1 to 2 and 2 to 3
+mid_growth$run <- substr(mid_growth$ID, 3, 3)
+mid_growth$run <- as.factor(ifelse(mid_growth$run == 1, 2, 3)) #actual run numbers are 2 and 3
 
 #assigns treatment as characters from integers then to factors
-mid_growth$treatment <- as.factor(as.character(mid_growth$treatment))
+mid_growth$nitrate <- as.factor(as.character(mid_growth$treatment))
 
-#remove ppt from salinity data cells
+#get rid of the ppt in salinity
 mid_growth$salinity <- substr(mid_growth$salinity, 1, 2)
+
+#combine nitrate and salinity for a treatment number
+mid_growth <- mid_growth %>%
+  mutate(treatment = case_when(
+    nitrate == 1 & salinity == 35 ~ "1",
+    nitrate == 1 & salinity == 28 ~ "2",
+    nitrate == 2 & salinity == 35 ~ "3",
+    nitrate == 2 & salinity == 28 ~ "4",
+    nitrate == 3 & salinity == 35 ~ "5",
+    nitrate == 3 & salinity == 28 ~ "6",
+    nitrate == 4 & salinity == 35 ~ "7",
+    nitrate == 4 & salinity == 28 ~ "8",
+  ))
 
 #create subsets for the plots
 #toggle between the plant_part for output. Use Day 9 for final analysis
-canopy <- subset(mid_growth, plant_part == "canopy")
-canopy$treatment_graph[canopy$treatment == 1] <- "0.5umol"
-canopy$treatment_graph[canopy$treatment == 2] <- "2umol" 
-canopy$treatment_graph[canopy$treatment == 3] <- "4umol"
-canopy$treatment_graph[canopy$treatment == 4] <- "8umol" 
-
-under <- subset(mid_growth, plant_part == "under" & d9_growth_percent != -62.82)
-under$treatment_graph[under$treatment == 1] <- "0.5umol"
-under$treatment_graph[under$treatment == 2] <- "2umol" 
-under$treatment_graph[under$treatment == 3] <- "4umol"
-under$treatment_graph[under$treatment == 4] <- "8umol"
+canopy_g <- subset(mid_growth, plant_part == "canopy")
+canopy_g$treatment_graph[canopy_g$treatment == 1] <- "1) 0.5umol/35 ppt"
+canopy_g$treatment_graph[canopy_g$treatment == 2] <- "2) 0.5umol/28 ppt"
+canopy_g$treatment_graph[canopy_g$treatment == 3] <- "3) 2umol/35 ppt" 
+canopy_g$treatment_graph[canopy_g$treatment == 4] <- "4) 2umol/28 ppt"
+canopy_g$treatment_graph[canopy_g$treatment == 5] <- "5) 4umol/35 ppt"
+canopy_g$treatment_graph[canopy_g$treatment == 6] <- "6) 4umol/28 ppt"
+canopy_g$treatment_graph[canopy_g$treatment == 7] <- "7) 8umol/35 ppt"
+canopy_g$treatment_graph[canopy_g$treatment == 8] <- "8) 8umol/28 ppt"
 
 
-#-----------make a histogram of the growth rate data
-under %>% ggplot(aes(d5_growth_percent)) +
-  geom_histogram(binwidth=5, fill = "#990066", color = "black", linewidth = 0.25, alpha = 0.85) +
-  theme_bw()
-under %>% ggplot(aes(d9_growth_percent)) +
-  geom_histogram(binwidth=5, fill = "#990066", color = "black", linewidth = 0.25, alpha = 0.85) +
-  theme_bw()
+under_g <- subset(mid_growth, plant_part == "under" & d9_growth_percent != -62.82)
+under_g$treatment_graph[under_g$treatment == 1] <- "1) 0.5umol/35 ppt"
+under_g$treatment_graph[under_g$treatment == 2] <- "2) 0.5umol/28 ppt"
+under_g$treatment_graph[under_g$treatment == 3] <- "3) 2umol/35 ppt" 
+under_g$treatment_graph[under_g$treatment == 4] <- "4) 2umol/28 ppt"
+under_g$treatment_graph[under_g$treatment == 5] <- "5) 4umol/35 ppt"
+under_g$treatment_graph[under_g$treatment == 6] <- "6) 4umol/28 ppt"
+under_g$treatment_graph[under_g$treatment == 7] <- "7) 8umol/35 ppt"
+under_g$treatment_graph[under_g$treatment == 8] <- "8) 8umol/28 ppt"
 
+#add new column to subsets from time over 28 summary dataset
+time_over_28 <- read_csv("../data/midway_2024/transformed/mins_28_plant_part.csv") #load dataset
+
+mean_mins28 <- time_over_28 %>%
+  select(plant_part, run, mean_mins28_plant_part) %>% #keep only relevant columns of data
+  mutate(run = as.factor(run), mean_mins28_plant_part = as.factor(mean_mins28_plant_part))
+
+canopy_g <- canopy_g %>%
+  left_join(mean_mins28, by = c("run", "plant_part")) #join the datasets
+
+canopy_g <- canopy_g %>%
+  rename(mean_mins28 = mean_mins28_plant_part) #name is too long
+glimpse(canopy_g)
+
+under_g <- under_g %>%
+  left_join(mean_mins28, by = c("run", "plant_part")) #join the datasets
+
+under_g <- under_g %>%
+  rename(mean_mins28 = mean_mins28_plant_part) #name is too long
+glimpse(under_g)
+
+
+#CANOPY
+
+#make histograms
 canopy %>% ggplot(aes(d5_growth_percent)) +
   geom_histogram(binwidth=5, fill = "goldenrod1", color = "black", linewidth = 0.25, alpha = 0.85) +
   theme_bw()
@@ -82,124 +121,122 @@ canopy %>% ggplot(aes(d9_growth_percent)) +
   theme_bw()
 
 #run model without RLC_order as this has little effect
-#add number of initial axes to the random effects
-growth_model_canopy <- lmer(formula = d9_growth_percent ~ treatment +
-                            (1 | plant_ID) + (1 | run), data = canopy, REML = TRUE)
+#mean_min28 used as random effect in lieu of run
+growth_model_canopy <- lmer(formula = d9_growth_percent ~ salinity + nitrate +
+                            (1 | plant_ID) + (1 | mean_mins28), data = canopy_g, REML = TRUE)
 
-hist(resid(growth_model_acan))
-plot(resid(growth_model_acan) ~ fitted(growth_model_acan))
-qqnorm(resid(growth_model_acan))
-qqline(resid(growth_model_acan))
+isSingular(growth_model_canopy)
+hist(resid(growth_model_canopy))
+plot(resid(growth_model_canopy) ~ fitted(growth_model_canopy))
+qqnorm(resid(growth_model_canopy))
+qqline(resid(growth_model_canopy))
 
-#check the performance of the model for dataset: acan
-performance::check_model(growth_model_acan)
-rsquared(growth_model_acan)
-summary(growth_model_acan)
+#check the performance of the model for dataset: canopy
+performance::check_model(growth_model_canopy)
+r.squaredGLMM(growth_model_canopy)
+summary(growth_model_canopy)
 #view random effects levels
-ranef(growth_model_acan)
-tab_model(growth_model_acan, show.intercept = TRUE, show.se = TRUE, show.stat = TRUE, show.df = TRUE, show.zeroinf = TRUE)
-plot(allEffects(growth_model_acan))
+ranef(growth_model_canopy)
+tab_model(growth_model_canopy, show.intercept = TRUE, show.se = TRUE, show.stat = TRUE, show.df = TRUE, show.zeroinf = TRUE)
+plot(allEffects(growth_model_canopy))
 
 #construct null model to perform likelihood ratio test REML must be FALSE
-mid_growth_treatment_null <- lmer(formula = growth_rate_percent ~ temperature + (1 | plant_ID) + (1 | run), data = mid_growth, REML = FALSE)
-mid_growth_model2 <- lmer(formula = growth_rate_percent ~ treatment + temperature + (1 | plant_ID) + (1 | run), data = mid_growth, REML = FALSE)
-anova(mid_growth_treatment_null, mid_growth_model2)
-mid_growth_temperature_null <- lmer(formula = growth_rate_percent ~ treatment + (1 | plant_ID) + (1 | run), data = mid_growth, REML = FALSE)
-mid_growth_model3 <- lmer(formula = growth_rate_percent ~ treatment + temperature + (1 | plant_ID) + (1 | run), data = mid_growth, REML = FALSE)
-anova(mid_growth_temperature_null, mid_growth_model3)
+canopy_nitrate_null <- lmer(formula = d9_growth_percent ~ salinity + 
+                              (1 | plant_ID) + (1 | mean_mins28), data = canopy_g, REML = FALSE)
+canopy_model2 <- lmer(formula = d9_growth_percent ~ nitrate + salinity +
+                        (1 | plant_ID) + (1 | mean_mins28), data = canopy_g, REML = FALSE)
+anova(canopy_nitrate_null, canopy_model2)
+canopy_salinity_null <- lmer(formula = d9_growth_percent ~ nitrate + (1 | plant_ID) + (1 | mean_mins28), data = canopy_g, REML = FALSE)
+canopy_model3 <- lmer(formula = d9_growth_percent ~ nitrate + salinity + (1 | plant_ID) + (1 | mean_mins28), data = canopy_g, REML = FALSE)
+anova(canopy_salinity_null, canopy_model3)
 
-#plots
-mid_growth %>% ggplot(aes(treatment_graph, growth_rate_percent)) + 
+#plot canopy growth
+canopy_growth_plot <- canopy_g %>% 
+  ggplot(aes(treatment_graph, d9_growth_percent)) + 
   geom_boxplot(size=0.5) + 
-  geom_point(alpha = 0.75, size = 5, aes(color = temperature), position = "jitter", show.legend = TRUE) + 
-  labs(x="treatment", y= "9-Day Growth (%)", title= "A", subtitle = "Acanthophora spicifera") + 
-  scale_x_discrete(labels = c("T0) 35 ppt/0.5 μmol N", "T1) 28 ppt/14 μmol N")) + 
-  ylim(-60, 60) + stat_mean() + 
-  scale_color_manual(values = c("azure4", "darkgoldenrod1")) +
+  geom_point(alpha = 0.75, size = 5, aes(color = salinity), position = "jitter", show.legend = TRUE) + 
+  labs(x="treatment", y= "9-Day Growth (%)", title= "A", subtitle = "Chondria tumulosa -- Canopy") + 
+  scale_x_discrete(labels = c("35 ppt/0.5 μmol N", "28 ppt/0.5 μmol N", "35 ppt/2 μmol N", "28 ppt/2 μmol N", 
+                              "35 ppt/4 μmol N", "28 ppt/4 μmol N", "35 ppt/8 μmol N", "28 ppt/8 μmol N")) + 
+  ylim(-45, 50) + stat_mean() + 
+  scale_color_manual(values = c("goldenrod1", "darkgoldenrod3")) +
   geom_hline(yintercept=0, color = "red", linewidth = 0.5, alpha = 0.5) +
   theme_bw() +
-  theme(legend.position = c(0.90,0.90), plot.title = element_text(face = "bold", vjust = -15, hjust = 0.05), 
+  theme(legend.position.inside = c(0.90,0.90), plot.title = element_text(face = "bold", vjust = -15, hjust = 0.05), 
         plot.subtitle = element_text(face = "italic", size = 14, vjust = -20, hjust = 0.05))
+canopy_growth_plot
+ggsave("canopy_growth_plot.png", path = "midway_2024/plots/")
 
-#summarize the means
-mid_growth %>% group_by(treatment) %>% summarise_at(vars(growth_rate_percent), list(mean = mean))
-mid_growth %>% group_by(temperature) %>% summarise_at(vars(growth_rate_percent), list(mean = mean))
-
-#plot temperature
-mid_growth %>% ggplot(aes(temperature_graph, growth_rate_percent)) + 
-  geom_boxplot(size=0.5) + 
-  geom_point(alpha = 0.75, size = 5, aes(color = treatment), position = "jitter", show.legend = TRUE) + 
-  labs(x="Temperature", y= "9-day Growth (%)", title= "B", subtitle = "Acanthophora spicifera") + 
-  scale_x_discrete(labels = c("24°C", "28°C")) + 
-  ylim(-60, 50) + stat_mean() + 
-  geom_hline(yintercept=0, color = "red", linewidth = 0.5, alpha = 0.5) +
-  scale_color_manual(values = c("azure3", "darkgoldenrod")) +
-  theme_bw() +
-  theme(legend.position = c(0.90,0.90), plot.title = element_text(face = "bold", vjust = -15, hjust = 0.05), 
-        plot.subtitle = element_text(face = "italic", size = 14, vjust = -20, hjust = 0.05))
+#summarize the means for canopy
+mid_growth %>% group_by(nitrate, plant_part) %>% summarise_at(vars(d9_growth_percent), list(mean = mean))
+mid_growth %>% group_by(salinity, plant_part) %>% summarise_at(vars(d9_growth_percent), list(mean = mean))
 
 
 
+#UNDERSTORY
 
-
-#RUN MODEL FOR SECONDARY APICES
-mid_growth %>% ggplot(aes(secondary_apices)) +
+#-----------make a histogram of the growth rate data
+under_g %>% ggplot(aes(d5_growth_percent)) +
   geom_histogram(binwidth=5, fill = "#990066", color = "black", linewidth = 0.25, alpha = 0.85) +
   theme_bw()
+under_g %>% ggplot(aes(d9_growth_percent)) +
+  geom_histogram(binwidth=5, fill = "#990066", color = "black", linewidth = 0.25, alpha = 0.85) +
+  theme_bw()
+
 #run model without RLC_order as this has little effect
-apices_model_acan <- lmer(formula = secondary_apices ~ treatment + temperature +
-                            (1 | plant_ID) + (1 | run) + (1 | rlc_order), data = mid_growth, REML = TRUE)
+#mean_min28 used as random effect in lieu of run
+growth_model_under <- lmer(formula = d9_growth_percent ~ salinity + nitrate +
+                              (1 | plant_ID) + (1 | mean_mins28), data = under_g, REML = TRUE)
 
-hist(resid(apices_model_acan))
-plot(resid(apices_model_acan) ~ fitted(apices_model_acan))
-qqnorm(resid(apices_model_acan))
-qqline(resid(apices_model_acan))
+isSingular(growth_model_under)
+hist(resid(growth_model_under))
+plot(resid(growth_model_under) ~ fitted(growth_model_under))
+qqnorm(resid(growth_model_under))
+qqline(resid(growth_model_under))
 
-#check the performance of the model for dataset: acan
-performance::check_model(apices_model_acan)
-rsquared(apices_model_acan)
-summary(apices_model_acan)
+#check the performance of the model for dataset: under
+performance::check_model(growth_model_under)
+r.squaredGLMM(growth_model_under)
+summary(growth_model_under)
 #view random effects levels
-ranef(apices_model_acan)
-tab_model(apices_model_acan, show.intercept = TRUE, show.se = TRUE, show.stat = TRUE, show.df = TRUE, show.zeroinf = TRUE)
-plot(allEffects(apices_model_acan))
+ranef(growth_model_under)
+tab_model(growth_model_under, show.intercept = TRUE, show.se = TRUE, show.stat = TRUE, show.df = TRUE, show.zeroinf = TRUE)
+plot(allEffects(growth_model_under))
 
 #construct null model to perform likelihood ratio test REML must be FALSE
-acan_apices_treatment_null <- lmer(formula = secondary_apices~ temperature + (1 | plant_ID) + (1 | run) + (1 | rlc_order), data = mid_growth, REML = FALSE)
-acan_apices_model2 <- lmer(formula = secondary_apices ~ treatment + temperature + (1 | plant_ID) + (1 | run) + (1 | rlc_order), data = mid_growth, REML = FALSE)
-anova(acan_apices_treatment_null, acan_apices_model2)
-acan_apices_temperature_null <- lmer(formula = secondary_apices ~ treatment + (1 | plant_ID) + (1 | run) + (1 | rlc_order), data = mid_growth, REML = FALSE)
-acan_apices_model3 <- lmer(formula = secondary_apices ~ treatment + temperature + (1 | plant_ID) + (1 | run) + (1 | rlc_order), data = mid_growth, REML = FALSE)
-anova(acan_apices_temperature_null, acan_apices_model3)
+under_nitrate_null <- lmer(formula = d9_growth_percent ~ salinity + 
+                              (1 | plant_ID) + (1 | mean_mins28), data = under_g, REML = FALSE)
+under_model2 <- lmer(formula = d9_growth_percent ~ nitrate + salinity +
+                        (1 | plant_ID) + (1 | mean_mins28), data = under_g, REML = FALSE)
+anova(under_nitrate_null, under_model2)
+under_salinity_null <- lmer(formula = d9_growth_percent ~ nitrate + (1 | plant_ID) + (1 | mean_mins28), data = under_g, REML = FALSE)
+under_model3 <- lmer(formula = d9_growth_percent ~ nitrate + salinity + (1 | plant_ID) + (1 | mean_mins28), data = under_g, REML = FALSE)
+anova(under_salinity_null, under_model3)
 
-#plots
-mid_growth %>% ggplot(aes(treatment_graph, secondary_apices)) + 
+#plot under growth
+under_growth_plot <- under_g %>% 
+  ggplot(aes(treatment_graph, d9_growth_percent)) + 
   geom_boxplot(size=0.5) + 
-  geom_point(alpha = 0.75, size = 5, aes(color = temperature), position = "jitter", show.legend = TRUE) + 
-  labs(x="treatment", y= "Number of Secondary Apices", title= "A", subtitle = "Acanthophora spicifera") + 
-  scale_x_discrete(labels = c("T0) 35 ppt/0.5 μmol N", "T1) 28 ppt/14 μmol N")) + 
-  ylim(-1, 130) + stat_mean() + 
-  scale_color_manual(values = c("azure4", "darkgoldenrod1")) +
+  geom_point(alpha = 0.75, size = 5, aes(color = salinity), position = "jitter", show.legend = TRUE) + 
+  labs(x="treatment", y= "9-Day Growth (%)", title= "B", subtitle = "Chondria tumulosa -- Understory") + 
+  scale_x_discrete(labels = c("35 ppt/0.5 μmol N", "28 ppt/0.5 μmol N", "35 ppt/2 μmol N", "28 ppt/2 μmol N", 
+                              "35 ppt/4 μmol N", "28 ppt/4 μmol N", "35 ppt/8 μmol N", "28 ppt/8 μmol N")) + 
+  ylim(-35, 40) + stat_mean() + 
+  scale_color_manual(values = c("maroon", "maroon2")) +
   geom_hline(yintercept=0, color = "red", linewidth = 0.5, alpha = 0.5) +
   theme_bw() +
   theme(legend.position = c(0.90,0.90), plot.title = element_text(face = "bold", vjust = -15, hjust = 0.05), 
         plot.subtitle = element_text(face = "italic", size = 14, vjust = -20, hjust = 0.05))
+under_growth_plot
+ggsave("under_growth_plot.png", path = "midway_2024/plots/")
 
-#summarize the means
-mid_growth %>% group_by(treatment) %>% summarise_at(vars(secondary_apices), list(mean = mean))
-mid_growth %>% group_by(temperature) %>% summarise_at(vars(secondary_apices), list(mean = mean))
+#summarize the means for under
+mid_growth %>% group_by(nitrate, plant_part) %>% summarise_at(vars(d9_growth_percent), list(mean = mean))
+mid_growth %>% group_by(salinity, plant_part) %>% summarise_at(vars(d9_growth_percent), list(mean = mean))
 
 
-#plot temperature
-mid_growth %>% ggplot(aes(temperature_graph, secondary_apices)) + 
-  geom_boxplot(size=0.5) + 
-  geom_point(alpha = 0.75, size = 5, aes(color = treatment), position = "jitter", show.legend = TRUE) + 
-  labs(x="Temperature", y= "Number of Secondary Apices", title= "B", subtitle = "Acanthophora spicifera") + 
-  scale_x_discrete(labels = c("24°C", "28°C")) + 
-  ylim(-1, 130) + stat_mean() + 
-  geom_hline(yintercept=0, color = "red", linewidth = 0.5, alpha = 0.5) +
-  scale_color_manual(values = c("azure3", "darkgoldenrod")) +
-  theme_bw() +
-  theme(legend.position = c(0.90,0.90), plot.title = element_text(face = "bold", vjust = -15, hjust = 0.05), 
-        plot.subtitle = element_text(face = "italic", size = 14, vjust = -20, hjust = 0.05))
+
+
+
+
 

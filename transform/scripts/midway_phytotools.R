@@ -11,10 +11,10 @@ library("lubridate")
 mid_ptools <- read.csv("../data/midway_2024/transformed/midway_pam_clean.csv", sep = ",")
 
 # add a column that turns date format into POSIXct
-mid_ptools$Date <- ymd(mid_ptools$Date)
+mid_ptools$date <- ymd(mid_ptools$Date)
 
 #same for time
-mid_ptools$Time <- as_hms(mid_ptools$Time)
+mid_ptools$time <- as_hms(mid_ptools$Time)
 
 #add a new column that gets rid of characters in ID column
 mid_ptools$IDnumber <- as.numeric(substr(mid_ptools$ID, 3, 5))
@@ -140,6 +140,8 @@ first_row_of_rlc <- subset(mid_ptools, Epar == 0)
 last_row_rlc <- subset(mid_ptools, Epar == 820)
 
 deltaNPQ_ypoint1 <-  (maxNPQ_ypoint1 - minNPQ)
+
+
 
 # build the result data frame
 result_df <- data.frame(Date = substr(uniqueIds, 1, 10), 
