@@ -1,0 +1,743 @@
+---
+title: "Midway LMM for Pmax, NPQmax, deltaNPQ, Ek"
+author: "Angela Richards Donà"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: journal
+    toc: yes
+    toc_float:
+      collapsed: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+![Midway Experiment](../../../../photos/IMG_2314.jpeg){width=50%}
+
+# Prepare the data
+
+### Load the packages
+```{r}
+library(lme4)
+library(lmerTest)
+library(afex)
+library(effects)
+library(car)
+library(MuMIn)
+library (dplyr)
+library(emmeans)
+library(DHARMa)
+library(performance)
+library(patchwork)
+library(rstatix)
+#for plots and tables
+library(ggplot2)
+library(ggpubr)
+library(forcats)
+library(RColorBrewer)
+library(tidyverse)
+library(sjPlot)
+library(sjmisc)
+library(gt)
+library(purrr)
+library(stringr)
+library(tidyr)
+library(hms)
+library(lubridate)
+library(ggeffects)
+
+```
+
+
+### Load this file for normalized to quantum efficiency of photosynthesis per Silsbe and Kromkamp (2012)
+```{r}
+mid_ps <- read.csv("../../../data/midway_2024/transformed/midway_ek_alpha_normalized_2024.csv")
+
+```
+
+### Rename specimenID to simply ID
+```{r}
+mid_ps <- mid_ps %>% 
+  rename(ID = specimenID)
+```
+
+### Standardize date to ISO
+```{r}
+mid_ps$date <- ymd(mid_ps$Date)
+```
+
+### Make sure time is hms
+
+```{r}
+mid_ps$rlc_end_time <- as_hms(mid_ps$rlc_end_time)
+```
+
+### Assign run as a factor
+```{r}
+mid_ps$run <- as.factor(mid_ps$run)
+
+```
+
+### Assign temperature as a factor
+```{r}
+mid_ps$salinity <- as.factor(mid_ps$salinity)
+
+```
+
+### Assign treatment as characters from integers then to factors
+```{r}
+mid_ps$nitrate <- as.factor(as.character(mid_ps$treatment))
+
+```
+
+### Assign deltaNPQ as a numeric
+```{r}
+mid_ps$deltaNPQ <- as.numeric(mid_ps$deltaNPQ)
+
+```
+
+### Assign new column for chronological ranking of individuals in each day_group
+```{r}
+mid_ps <- mid_ps %>%
+  group_by(day_group) %>%
+  mutate(rank = rank(rlc_end_time)) %>%
+  ungroup()
+
+```
+
+### Use ranking to make smaller groups of ~15 minutes for rlc_order
+```{r}
+mid_ps <- mid_ps %>%
+  group_by(day_group) %>%
+  mutate(rlc_order = floor((rank -1)/3) +1)
+
+```
+
+### Combine nitrate and salinity for a treatment number
+```{r}
+mid_ps <- mid_ps %>%
+  mutate(treatment = case_when(
+    nitrate == 1 & salinity == 35 ~ "1",
+    nitrate == 1 & salinity == 28 ~ "2",
+    nitrate == 2 & salinity == 35 ~ "3",
+    nitrate == 2 & salinity == 28 ~ "4",
+    nitrate == 3 & salinity == 35 ~ "5",
+    nitrate == 3 & salinity == 28 ~ "6",
+    nitrate == 4 & salinity == 35 ~ "7",
+    nitrate == 4 & salinity == 28 ~ "8",
+  ))
+
+mid_ps_d9 <- subset(mid_ps, rlc_day == 9) #do not separate by plant_part
+```
+
+
+## Toggle between the plant_part for output. Use Day 9 for final analysis
+```{r}
+canopy <- subset(mid_ps, rlc_day == 9 & plant_part == "canopy")
+canopy$treatment_graph[canopy$treatment == 1] <- "1) 0.5μmol/35 ppt"
+canopy$treatment_graph[canopy$treatment == 2] <- "2) 0.5μmol/28 ppt"
+canopy$treatment_graph[canopy$treatment == 3] <- "3) 2μmol/35 ppt" 
+canopy$treatment_graph[canopy$treatment == 4] <- "4) 2μmol/28 ppt"
+canopy$treatment_graph[canopy$treatment == 5] <- "5) 4μmol/35 ppt"
+canopy$treatment_graph[canopy$treatment == 6] <- "6) 4μmol/28 ppt"
+canopy$treatment_graph[canopy$treatment == 7] <- "7) 8μmol/35 ppt"
+canopy$treatment_graph[canopy$treatment == 8] <- "8) 8μmol/28 ppt"
+```
+
+```{r}
+under <- subset(mid_ps, rlc_day == 9 & plant_part == "under")
+under$treatment_graph[under$treatment == 1] <- "1) 0.5μmol/35 ppt"
+under$treatment_graph[under$treatment == 2] <- "2) 0.5μmol/28 ppt"
+under$treatment_graph[under$treatment == 3] <- "3) 2μmol/35 ppt" 
+under$treatment_graph[under$treatment == 4] <- "4) 2μmol/28 ppt"
+under$treatment_graph[under$treatment == 5] <- "5) 4μmol/35 ppt"
+under$treatment_graph[under$treatment == 6] <- "6) 4μmol/28 ppt"
+under$treatment_graph[under$treatment == 7] <- "7) 8μmol/35 ppt"
+under$treatment_graph[under$treatment == 8] <- "8) 8μmol/28 ppt"
+
+```
+
+
+## Add new column to subsets from time over 28 summary dataset
+```{r}
+time_over_28 <- read_csv("../../../data/midway_2024/transformed/mins_28_plant_part.csv") #load dataset
+
+mean_mins28 <- time_over_28 %>%
+  select(plant_part, run, mean_mins28_plant_part) %>% #keep only relevant columns of data
+  mutate(run = as.factor(run), mean_mins28_plant_part = as.factor(mean_mins28_plant_part))
+  
+canopy <- canopy %>%
+  left_join(mean_mins28, by = c("run", "plant_part")) #join the datasets
+
+canopy <- canopy %>%
+  rename(mean_mins28 = mean_mins28_plant_part) #name is too long
+
+under <- under %>%
+  left_join(mean_mins28, by = c("run", "plant_part")) #join the datasets
+
+under <- under %>%
+  rename(mean_mins28 = mean_mins28_plant_part) #name is too long
+
+```
+
+
+### Add growth rate from growth dataset
+```{r}
+growth_rate <- read.csv("../../../data/midway_2024/input/midway_growth.csv")
+growth_rate$treatment <- as.factor(growth_rate$treatment)
+
+```
+
+### Make a new column for weight change (difference final from initial)
+```{r}
+growth_rate$d9_growth_percent <- (growth_rate$final_weight - growth_rate$initial_weight) / growth_rate$initial_weight * 100
+d9 <- growth_rate %>%
+  select(ID, d9_growth_percent)#keep only relevant columns of data
+
+canopy <- canopy %>%
+  left_join(d9, by = c("ID")) #join the datasets   
+
+under <- under %>%
+  left_join(d9, by = c("ID"))
+
+```
+
+# Datasets are ready, now let's run models
+
+### Function to run all of the checks with the individual models
+```{r}
+check_model_fit <- function(model, terms) {
+  print(r.squaredGLMM(model))
+  hist(resid(model))
+  plot(resid(model) ~ fitted(model))
+  qqnorm(resid(model))
+  qqline(resid(model))
+  print(performance::check_model(model))
+  #print(tab_model(model, show.intercept = TRUE, show.se = TRUE, show.stat = TRUE, 
+                  #show.df = TRUE, show.zeroinf = TRUE))
+  plot(ggpredict(model, terms = terms))
+  
+}
+```
+
+### Function to run the the models for likelihood ratio tests where REML must be FALSE. 
+### Dataset, response variables, fixed effects (predictors_list), and random effects as arguments.
+```{r}
+compare_lmer_models <- function(data, response, predictors_list, random_effects) {
+  
+  response <- as.character(response) # Ensure response is a string
+  
+  models <- list() # Create a list to store the models
+  
+  anova_result <- list() #initialize anova
+  
+  random_effects_part <- paste0("(1 | ", random_effects, ")", collapse = " + ") #random effects used for all
+  
+  fixed_effects_all <- paste(predictors_list, collapse = " + ") #make a formula for all predictors
+  formula <- as.formula(paste(response, "~", fixed_effects_all, "+", random_effects_part))
+  
+  model_all <- lmer(formula = formula, data = data, REML = FALSE) #model_all is the version with both predictors for comparison
+  
+  # Loop through predictors_list to create and fit models
+  for (i in seq_along(predictors_list)) {
+    fixed_effects <- paste(predictors_list[[i]], collapse = " + ")
+    formula <- as.formula(paste(response, "~", fixed_effects, "+", random_effects_part))
+    
+    models[[i]] <- lmer(formula = formula, data = data, REML = FALSE) # Fit the lmer model and store in the list
+    
+    anova_result[[i]] <- anova(models[[i]], model_all)
+  }
+  
+  # Return results as a list
+  return(list(
+    models = models,
+    model_all = model_all,
+    anova_result = anova_result
+  ))
+}
+
+predictors_list <- list("salinity", "nitrate") #set the predictors list 
+
+```
+
+# Run the models with the following inputs
+
+## Pmax_____________________________________
+### Inputs for Canopy/Pmax
+```{r}
+canopy_pmax_results <- compare_lmer_models(
+  data = canopy,
+  response = "pmax",
+  predictors_list,
+  random_effects = c("plantID", "rlc_order")
+)
+
+```
+### Access results
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+summary(canopy_pmax_results$models[[1]]) # Model 1 summary (salinity)
+summary(canopy_pmax_results$models[[2]]) # Model 2 summary (nitrate)
+summary(canopy_pmax_results$model_all) # Model 3 summary (salinity and nitrate)
+canopy_pmax_results$anova_result[[1]]        # ANOVA did nitrate have an effect on Pmax?
+canopy_pmax_results$anova_result[[2]]         # ANOVA did salinity have an effect on Pmax?
+check_model_fit(canopy_pmax_results$model_all, terms = predictors_list)
+
+```
+
+### Inputs for Understory/Pmax
+```{r}
+under_pmax_results <- compare_lmer_models(
+  data = under,
+  response = "pmax",
+  predictors_list,
+  random_effects = c("mean_mins28", "rlc_order")
+)
+
+```
+
+### Access results
+```{r, fig.width = 8, fig.height = 9}
+summary(under_pmax_results$models[[1]]) # Model 1 summary
+summary(under_pmax_results$models[[2]]) # Model 2 summary
+summary(under_pmax_results$model_all) # Model 3 summary
+under_pmax_results$anova_result[[1]]        # ANOVA did nitrate have an effect on Pmax?
+under_pmax_results$anova_result[[2]]         # ANOVA did salinity have an effect on Pmax?
+check_model_fit(under_pmax_results$model_all, terms = predictors_list)
+
+```
+
+
+## NPQmax______________________________
+### Inputs for Canopy/NPQmax
+```{r}
+canopy_npqmax_results <- compare_lmer_models(
+  data = canopy,
+  response = "maxNPQ_Ypoint1",
+  predictors_list,
+  random_effects = c("plantID", "mean_mins28", "rlc_order")
+)
+
+```
+
+### Access results
+```{r, fig.width = 8, fig.height = 9}
+summary(canopy_npqmax_results$models[[1]]) # Model 1 summary
+summary(canopy_npqmax_results$models[[2]]) # Model 2 summary
+summary(canopy_npqmax_results$model_all) # Model 3 summary
+canopy_npqmax_results$anova[[1]]        # ANOVA did nitrate have an effect on NPQmax?
+canopy_npqmax_results$anova[[2]]        # ANOVA did salinity have an effect on NPQmax?
+check_model_fit(canopy_npqmax_results$model_all, terms = predictors_list)
+
+```
+
+### Inputs for Understory/NPQmax
+```{r}
+under_npqmax_results <- compare_lmer_models(
+  data = under,
+  response = "maxNPQ_Ypoint1",
+  predictors_list,
+  random_effects = c("plantID")
+)
+
+```
+
+### Access results
+```{r, fig.width = 8, fig.height = 9}
+summary(under_npqmax_results$models[[1]]) # Model 1 summary
+summary(under_npqmax_results$models[[2]]) # Model 2 summary
+summary(under_npqmax_results$model_all) # Model 3 summary
+under_npqmax_results$anova[[1]]         # ANOVA did nitrate have an effect on NPQmax?
+under_npqmax_results$anova[[2]]         # ANOVA did salinity have an effect on NPQmax?
+check_model_fit(under_npqmax_results$model_all, terms = predictors_list)
+
+```
+
+## deltaNPQ____________________________
+### Inputs for Canopy/deltaNPQ
+```{r}
+canopy_delta_npq_results <- compare_lmer_models(
+  data = canopy,
+  response = "deltaNPQ",
+  predictors_list,
+  random_effects = c("plantID")
+)
+
+```
+
+### Access results
+```{r, fig.width = 8, fig.height = 9}
+summary(canopy_delta_npq_results$models[[1]]) # Model 1 summary
+summary(canopy_delta_npq_results$models[[2]]) # Model 2 summary
+summary(canopy_delta_npq_results$model_all) # Model 3 summary
+canopy_delta_npq_results$anova[[1]]         # ANOVA did nitrate have an effect on deltaNPQ?
+canopy_delta_npq_results$anova[[2]]         # ANOVA did salinity have an effect on deltaNPQ?
+check_model_fit(canopy_delta_npq_results$model_all, terms = predictors_list)
+
+```
+
+### Inputs for Understory/deltaNPQ
+```{r}
+under_delta_npq_results <- compare_lmer_models(
+  data = under,
+  response = "deltaNPQ",
+  predictors_list,
+  random_effects = c("plantID")
+)
+
+```
+
+### Access results
+```{r, fig.width = 8, fig.height = 9}
+summary(under_delta_npq_results$models[[1]]) # Model 1 summary
+summary(under_delta_npq_results$models[[2]]) # Model 2 summary
+summary(under_delta_npq_results$model_all) # Model 3 summary
+under_delta_npq_results$anova[[1]]         # ANOVA did nitrate have an effect on deltaNPQ?
+under_delta_npq_results$anova[[2]]         # ANOVA did salinity have an effect on deltaNPQ?
+check_model_fit(under_delta_npq_results$model_all, terms = predictors_list)
+
+```
+
+## Ek____________________________________________
+### Inputs for Canopy/Ek
+```{r}
+canopy_ek_results <- compare_lmer_models(
+  data = canopy,
+  response = "ek.est",
+  predictors_list,
+  random_effects = c("plantID", "mean_mins28", "rlc_order")
+)
+
+```
+
+### Access results
+```{r, fig.width = 8, fig.height = 9}
+summary(canopy_ek_results$models[[1]]) # Model 1 summary
+summary(canopy_ek_results$models[[2]]) # Model 2 summary
+summary(canopy_ek_results$model_all) # Model 3 summary
+canopy_ek_results$anova[[1]]         # ANOVA did nitrate have an effect on Ek?
+canopy_ek_results$anova[[2]]         # ANOVA did salinity have an effect on Ek?
+check_model_fit(canopy_ek_results$model_all, terms = predictors_list)
+
+```
+
+### Inputs for Understory/Ek
+```{r}
+under_ek_results <- compare_lmer_models(
+  data = under,
+  response = "ek.est",
+  predictors_list,
+  random_effects = c("mean_mins28", "rlc_order")
+)
+
+```
+
+### Access results
+```{r, fig.width = 8, fig.height = 9}
+summary(under_ek_results$models[[1]]) # Model 1 summary
+summary(under_ek_results$models[[2]]) # Model 2 summary
+summary(under_ek_results$model_all) # Model 3 summary
+under_ek_results$anova[[1]]         # ANOVA did nitrate have an effect on Ek?
+under_ek_results$anova[[2]]         # ANOVA did salinity have an effect on Ek?
+check_model_fit(under_ek_results$model_all, terms = predictors_list)
+
+```
+
+## ALL OF THE ABOVE RANDOM EFFECTS HAVE BEEN CHECKED AND MAXIMIZED FOR FIT
+
+# Plots for raw data
+
+## HISTOGRAMS and PLOTS_____________________________________
+### Function for raw data plots
+```{r}
+raw_plots <- function(data, response, label, pretty_color, aescolor, x, y, title, subtitle, ylim1, ylim2, 
+                      color1, color2, yint, vjust_t, hjust_t, vjust_s, hjust_s, labels1) {
+  histo <- data %>%
+    ggplot(aes(x = {{response}})) +
+    geom_histogram(fill = pretty_color, color = "black", size = 0.25, alpha = 0.85) +
+    labs(title = label) +
+    theme_bw()
+
+  plot <- data %>% 
+    ggplot(aes(x = treatment_graph, y = {{response}})) + 
+    geom_boxplot(size=0.5) + 
+    geom_point(alpha = 0.75, size = 3, aes(color = {{aescolor}}), position = "jitter", show.legend = TRUE) + 
+    labs(x = x, y = y, title = title, subtitle = subtitle) + 
+    #scale_x_discrete(labels = c("0.5μmolN", "2μmolN", "4μmolN", "8μmolN")) + 
+    ylim(ylim1, ylim2) + stat_mean() + 
+    scale_color_manual(values = c(color1, color2)) +
+    scale_x_discrete(labels = labels1) +
+    geom_hline(yintercept=yint, color = "red", size = 0.5, alpha = 0.5) +
+    theme_bw() +
+    theme(legend.position = c(0.90,0.90), plot.title = element_text(face = "bold", vjust = vjust_t, hjust = hjust_t), 
+          plot.subtitle = element_text(face = "italic", size = 14, vjust = vjust_s, hjust = hjust_s))
+  
+  return(list(
+    histo = histo,
+    plot = plot)) 
+}
+
+```
+
+## INPUTS for histograms and ggplots-----------------
+
+### Pmax ------------------------
+
+### Inputs for canopy/pmax
+```{r, fig.width = 7, fig.height = 6}
+pmax_canopy <- raw_plots(
+  data = canopy,
+  response = pmax,
+  label = "Canopy",
+  pretty_color = "goldenrod1",
+  aescolor = salinity,
+  x = "Nitrate",
+  y = "Day 9 Pmax (μmols electrons m-2 s-1)",
+  title = "A - Canopy",
+  subtitle = "Chondria tumulosa",
+  ylim1 = 0, 
+  ylim2 = 175,
+  color1 = "goldenrod3",
+  color2 = "darkgoldenrod1",
+  yint = 100,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -20,
+  hjust_s = 0.05,
+  labels1 = c("0.5 μmol", "0.5 μmol", 
+              "2 μmol", "2 μmol",
+              "4 μmol", "4 μmol",
+              "8 μmol", "8 μmol")
+)
+plot(pmax_canopy$histo)
+plot(pmax_canopy$plot)
+
+```
+
+### Inputs for under/pmax
+```{r, fig.width = 7, fig.height = 6}
+pmax_under <- raw_plots(
+  data = under,
+  response = pmax,
+  label = "Understory",
+  pretty_color = "maroon4",
+  aescolor = salinity,
+  x = "Nitrate",
+  y = "Day 9 Pmax (μmols electrons m-2 s-1)",
+  title = "B - Understory",
+  subtitle = "Chondria tumulosa",
+  ylim1 = 0, 
+  ylim2 = 175,
+  color1 = "deeppink4",
+  color2 = "deeppink3",
+  yint = 100,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -20,
+  hjust_s = 0.05,
+  labels1 = c("0.5 μmol", "0.5 μmol", 
+              "2 μmol", "2 μmol",
+              "4 μmol", "4 μmol",
+              "8 μmol", "8 μmol")
+)
+plot(pmax_under$histo)
+plot(pmax_under$plot)
+
+```
+
+## NPQmax---------------------
+
+### Inputs for canopy/NPQmax
+```{r, fig.width = 7, fig.height = 6}
+npqmax_canopy <- raw_plots(
+  data = canopy,
+  response = maxNPQ_Ypoint1,
+  label = "Canopy",
+  pretty_color = "goldenrod2",
+  aescolor = salinity,
+  x = "Nitrate",
+  y = "Day 9 NPQmax",
+  title = "C - Canopy",
+  subtitle = "Chondria tumulosa",
+  ylim1 = 0, 
+  ylim2 = 2,
+  color1 = "gold1",
+  color2 = "gold3",
+  yint = 1,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -20,
+  hjust_s = 0.05,
+  labels1 = c("0.5 μmol", "0.5 μmol", 
+              "2 μmol", "2 μmol",
+              "4 μmol", "4 μmol",
+              "8 μmol", "8 μmol")
+)
+plot(npqmax_canopy$histo)
+plot(npqmax_canopy$plot)
+
+```
+
+### Inputs for under/NPQmax
+```{r, fig.width = 7, fig.height = 6}
+npqmax_under <- raw_plots(
+  data = under,
+  response = maxNPQ_Ypoint1,
+  label = "Understory",
+  pretty_color = "maroon1",
+  aescolor = salinity,
+  x = "Nitrate",
+  y = "Day 9 NPQmax",
+  title = "D - Understory",
+  subtitle = "Chondria tumulosa",
+  ylim1 = 0, 
+  ylim2 = 2,
+  color1 = "hotpink2",
+  color2 = "hotpink4",
+  yint = 1,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -20,
+  hjust_s = 0.05,
+  labels1 = c("0.5 μmol", "0.5 μmol", 
+              "2 μmol", "2 μmol",
+              "4 μmol", "4 μmol",
+              "8 μmol", "8 μmol")
+)
+plot(npqmax_under$histo)
+plot(npqmax_under$plot)
+
+```
+
+
+## deltaNPQ-------------------
+
+### Inputs for canopy/deltaNPQ
+```{r, fig.width = 7, fig.height = 6}
+delta_npq_canopy <- raw_plots(
+  data = canopy,
+  response = deltaNPQ,
+  label = "Canopy",
+  pretty_color = "goldenrod3",
+  aescolor = salinity,
+  x = "Nitrate",
+  y = "Day 9 deltaNPQ",
+  title = "E - Canopy",
+  subtitle = "Chondria tumulosa",
+  ylim1 = 0, 
+  ylim2 = 2,
+  color1 = "lightgoldenrod2",
+  color2 = "lightgoldenrod3",
+  yint = 0.5,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -20,
+  hjust_s = 0.05,
+  labels1 = c("0.5 μmol", "0.5 μmol", 
+              "2 μmol", "2 μmol",
+              "4 μmol", "4 μmol",
+              "8 μmol", "8 μmol")
+)
+plot(delta_npq_canopy$histo)
+plot(delta_npq_canopy$plot)
+
+```
+
+### Inputs for under/deltaNPQ
+```{r, fig.width = 7, fig.height = 6}
+delta_npq_under <- raw_plots(
+  data = under,
+  response = deltaNPQ,
+  label = "Understory",
+  pretty_color = "maroon3",
+  aescolor = salinity,
+  x = "Nitrate",
+  y = "Day 9 deltaNPQ",
+  title = "F - Understory",
+  subtitle = "Chondria tumulosa",
+  ylim1 = 0, 
+  ylim2 = 2,
+  color1 = "hotpink1",
+  color2 = "hotpink3",
+  yint = 0.5,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -20,
+  hjust_s = 0.05,
+  labels1 = c("0.5 μmol", "0.5 μmol", 
+              "2 μmol", "2 μmol",
+              "4 μmol", "4 μmol",
+              "8 μmol", "8 μmol")
+)
+plot(delta_npq_under$histo)
+plot(delta_npq_under$plot)
+
+```
+
+
+## Ek------------------------
+
+### Inputs for canopy/Ek
+```{r, fig.width = 7, fig.height = 6}
+ek_canopy <- raw_plots(
+  data = canopy,
+  response = ek.est,
+  label = "Canopy",
+  pretty_color = "goldenrod4",
+  aescolor = salinity,
+  x = "Nitrate",
+  y = "Day 9 Ek (μmols electrons m-2 s-1)",
+  title = "G - Canopy",
+  subtitle = "Chondria tumulosa",
+  ylim1 = 50, 
+  ylim2 = 300,
+  color1 = "khaki4",
+  color2 = "khaki3",
+  yint = 150,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -20,
+  hjust_s = 0.05,
+  labels1 = c("0.5 μmol", "0.5 μmol", 
+              "2 μmol", "2 μmol",
+              "4 μmol", "4 μmol",
+              "8 μmol", "8 μmol")
+)
+plot(ek_canopy$histo)
+plot(ek_canopy$plot)
+
+```
+
+### Inputs for under/Ek
+```{r, fig.width = 7, fig.height = 6}
+ek_under <- raw_plots(
+  data = under,
+  response = ek.est,
+  label = "Understory",
+  pretty_color = "maroon3",
+  aescolor = salinity,
+  x = "Nitrate",
+  y = "Day 9 Ek (μmols electrons m-2 s-1)",
+  title = "H - Understory",
+  subtitle = "Chondria tumulosa",
+  ylim1 = 50, 
+  ylim2 = 300,
+  color1 = "palevioletred3",
+  color2 = "palevioletred4",
+  yint = 150,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -20,
+  hjust_s = 0.05,
+  labels1 = c("0.5 μmol", "0.5 μmol", 
+              "2 μmol", "2 μmol",
+              "4 μmol", "4 μmol",
+              "8 μmol", "8 μmol")
+)
+plot(ek_under$histo)
+plot(ek_under$plot)
+
+```
+
