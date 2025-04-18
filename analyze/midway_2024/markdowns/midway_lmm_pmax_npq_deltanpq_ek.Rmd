@@ -223,6 +223,16 @@ check_model_fit <- function(model, terms) {
 }
 ```
 
+### Get means for each predictor
+```{r}
+get_data_means <- function(data, predictors_list, response) {
+  data %>%
+  group_by(across(all_of(c("nitrate", setdiff(predictors_list, "nitrate"))))) %>%
+  summarise(across(all_of(response), list(mean = mean), .group = "drop"))
+  
+}
+```
+
 ### Function to run the the models for likelihood ratio tests where REML must be FALSE. 
 ### Dataset, response variables, fixed effects (predictors_list), and random effects as arguments.
 ```{r}
@@ -251,15 +261,18 @@ compare_lmer_models <- function(data, response, predictors_list, random_effects)
     anova_result[[i]] <- anova(models[[i]], model_all)
   }
   
+  data_means <- get_data_means(data, predictors_list, response)
+  
   # Return results as a list
   return(list(
     models = models,
     model_all = model_all,
-    anova_result = anova_result
+    anova_result = anova_result,
+    data_means = data_means
   ))
 }
 
-predictors_list <- list("salinity", "nitrate") #set the predictors list 
+predictors_list <- c("salinity", "nitrate") #set the predictors list 
 
 ```
 
@@ -276,6 +289,7 @@ canopy_pmax_results <- compare_lmer_models(
 )
 
 ```
+
 ### Access results
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
 summary(canopy_pmax_results$models[[1]]) # Model 1 summary (salinity)
@@ -284,7 +298,7 @@ summary(canopy_pmax_results$model_all) # Model 3 summary (salinity and nitrate)
 canopy_pmax_results$anova_result[[1]]        # ANOVA did nitrate have an effect on Pmax?
 canopy_pmax_results$anova_result[[2]]         # ANOVA did salinity have an effect on Pmax?
 check_model_fit(canopy_pmax_results$model_all, terms = predictors_list)
-
+canopy_pmax_results$data_means
 ```
 
 ### Inputs for Understory/Pmax
@@ -306,7 +320,7 @@ summary(under_pmax_results$model_all) # Model 3 summary
 under_pmax_results$anova_result[[1]]        # ANOVA did nitrate have an effect on Pmax?
 under_pmax_results$anova_result[[2]]         # ANOVA did salinity have an effect on Pmax?
 check_model_fit(under_pmax_results$model_all, terms = predictors_list)
-
+under_pmax_results$data_means
 ```
 
 
@@ -330,7 +344,7 @@ summary(canopy_npqmax_results$model_all) # Model 3 summary
 canopy_npqmax_results$anova[[1]]        # ANOVA did nitrate have an effect on NPQmax?
 canopy_npqmax_results$anova[[2]]        # ANOVA did salinity have an effect on NPQmax?
 check_model_fit(canopy_npqmax_results$model_all, terms = predictors_list)
-
+canopy_npqmax_results$data_means
 ```
 
 ### Inputs for Understory/NPQmax
@@ -352,7 +366,7 @@ summary(under_npqmax_results$model_all) # Model 3 summary
 under_npqmax_results$anova[[1]]         # ANOVA did nitrate have an effect on NPQmax?
 under_npqmax_results$anova[[2]]         # ANOVA did salinity have an effect on NPQmax?
 check_model_fit(under_npqmax_results$model_all, terms = predictors_list)
-
+under_npqmax_results$data_means
 ```
 
 ## deltaNPQ____________________________
@@ -375,7 +389,7 @@ summary(canopy_delta_npq_results$model_all) # Model 3 summary
 canopy_delta_npq_results$anova[[1]]         # ANOVA did nitrate have an effect on deltaNPQ?
 canopy_delta_npq_results$anova[[2]]         # ANOVA did salinity have an effect on deltaNPQ?
 check_model_fit(canopy_delta_npq_results$model_all, terms = predictors_list)
-
+canopy_delta_npq_results$data_means
 ```
 
 ### Inputs for Understory/deltaNPQ
@@ -397,7 +411,7 @@ summary(under_delta_npq_results$model_all) # Model 3 summary
 under_delta_npq_results$anova[[1]]         # ANOVA did nitrate have an effect on deltaNPQ?
 under_delta_npq_results$anova[[2]]         # ANOVA did salinity have an effect on deltaNPQ?
 check_model_fit(under_delta_npq_results$model_all, terms = predictors_list)
-
+under_delta_npq_results$data_means
 ```
 
 ## Ek____________________________________________
@@ -420,7 +434,7 @@ summary(canopy_ek_results$model_all) # Model 3 summary
 canopy_ek_results$anova[[1]]         # ANOVA did nitrate have an effect on Ek?
 canopy_ek_results$anova[[2]]         # ANOVA did salinity have an effect on Ek?
 check_model_fit(canopy_ek_results$model_all, terms = predictors_list)
-
+canopy_ek_results$data_means
 ```
 
 ### Inputs for Understory/Ek
@@ -442,7 +456,7 @@ summary(under_ek_results$model_all) # Model 3 summary
 under_ek_results$anova[[1]]         # ANOVA did nitrate have an effect on Ek?
 under_ek_results$anova[[2]]         # ANOVA did salinity have an effect on Ek?
 check_model_fit(under_ek_results$model_all, terms = predictors_list)
-
+under_ek_results$data_means
 ```
 
 ## ALL OF THE ABOVE RANDOM EFFECTS HAVE BEEN CHECKED AND MAXIMIZED FOR FIT
