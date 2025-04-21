@@ -110,7 +110,7 @@ under_g <- under_g %>%
   rename(mean_mins28 = mean_mins28_plant_part) #name is too long
 glimpse(under_g)
 
-
+#Is there a sig difference between canopy and understory growth?
 #CANOPY
 
 #make histograms
@@ -187,7 +187,7 @@ under_g %>% ggplot(aes(d9_growth_percent)) +
 #run model without RLC_order as this has little effect
 #mean_min28 used as random effect in lieu of run
 growth_model_under <- lmer(formula = d9_growth_percent ~ salinity + nitrate +
-                              (1 | plant_ID) + (1 | mean_mins28), data = under_g, REML = TRUE)
+                              (1 | plant_ID) + (1 | run), data = under_g, REML = TRUE)
 
 isSingular(growth_model_under)
 hist(resid(growth_model_under))
@@ -206,12 +206,12 @@ plot(allEffects(growth_model_under))
 
 #construct null model to perform likelihood ratio test REML must be FALSE
 under_nitrate_null <- lmer(formula = d9_growth_percent ~ salinity + 
-                              (1 | plant_ID) + (1 | mean_mins28), data = under_g, REML = FALSE)
+                              (1 | plant_ID) + (1 | run), data = under_g, REML = FALSE)
 under_model2 <- lmer(formula = d9_growth_percent ~ nitrate + salinity +
-                        (1 | plant_ID) + (1 | mean_mins28), data = under_g, REML = FALSE)
+                        (1 | plant_ID) + (1 | run), data = under_g, REML = FALSE)
 anova(under_nitrate_null, under_model2)
-under_salinity_null <- lmer(formula = d9_growth_percent ~ nitrate + (1 | plant_ID) + (1 | mean_mins28), data = under_g, REML = FALSE)
-under_model3 <- lmer(formula = d9_growth_percent ~ nitrate + salinity + (1 | plant_ID) + (1 | mean_mins28), data = under_g, REML = FALSE)
+under_salinity_null <- lmer(formula = d9_growth_percent ~ nitrate + (1 | plant_ID) + (1 | run), data = under_g, REML = FALSE)
+under_model3 <- lmer(formula = d9_growth_percent ~ nitrate + salinity + (1 | plant_ID) + (1 | run), data = under_g, REML = FALSE)
 anova(under_salinity_null, under_model3)
 
 #plot under growth
@@ -222,7 +222,7 @@ under_growth_plot <- under_g %>%
   labs(x="treatment", y= "9-Day Growth (%)", title= "B", subtitle = "Chondria tumulosa -- Understory") + 
   scale_x_discrete(labels = c("35 ppt/0.5 μmol N", "28 ppt/0.5 μmol N", "35 ppt/2 μmol N", "28 ppt/2 μmol N", 
                               "35 ppt/4 μmol N", "28 ppt/4 μmol N", "35 ppt/8 μmol N", "28 ppt/8 μmol N")) + 
-  ylim(-35, 40) + stat_mean() + 
+  ylim(-45, 50) + stat_mean() + 
   scale_color_manual(values = c("maroon", "maroon2")) +
   geom_hline(yintercept=0, color = "red", linewidth = 0.5, alpha = 0.5) +
   theme_bw() +

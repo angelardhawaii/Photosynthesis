@@ -81,10 +81,16 @@ mid_ps <- mid_ps %>%
     nitrate == 4 & salinity == 28 ~ "8",
   ))
 
+#subset for days during the experiments
 mid_ps_d9 <- subset(mid_ps, rlc_day == 9) #do not separate by plant_part
+mid_ps_d1 <- subset(mid_ps, rlc_day == 1) #do not separate by plant_part
 
-#toggle between the plant_part for output. Use Day 9 for final analysis
-canopy <- subset(mid_ps, rlc_day == 9 & plant_part == "canopy")
+#subset the plant_part for output. Use Day 9 for analysis
+canopy <- subset(mid_ps_d9, plant_part == "canopy")
+#OR use day 1
+canopy <- subset(mid_ps_d1, plant_part == "canopy")
+glimpse(canopy)
+
 canopy$treatment_graph[canopy$treatment == 1] <- "1) 0.5μmol/35 ppt"
 canopy$treatment_graph[canopy$treatment == 2] <- "2) 0.5μmol/28 ppt"
 canopy$treatment_graph[canopy$treatment == 3] <- "3) 2μmol/35 ppt" 
@@ -95,7 +101,11 @@ canopy$treatment_graph[canopy$treatment == 7] <- "7) 8μmol/35 ppt"
 canopy$treatment_graph[canopy$treatment == 8] <- "8) 8μmol/28 ppt"
 glimpse(canopy)
 
+
 under <- subset(mid_ps, rlc_day == 9 & plant_part == "under")
+#OR
+under <- subset(mid_ps, rlc_day == 1 & plant_part == "under")
+
 under$treatment_graph[under$treatment == 1] <- "1) 0.5μmol/35 ppt"
 under$treatment_graph[under$treatment == 2] <- "2) 0.5μmol/28 ppt"
 under$treatment_graph[under$treatment == 3] <- "3) 2μmol/35 ppt" 
@@ -409,13 +419,13 @@ raw_plots <- function(data, response, response2, label, pretty_color, aescolor, 
 pmax_canopy <- raw_plots(
   data = canopy,
   response = pmax,
-  response2 = d9_growth_percent,
+  #response2 = d1_growth_percent,
   label = "Canopy",
   pretty_color = "goldenrod1",
   aescolor = salinity,
   x = "Nitrate",
   x2 = "Pmax (μmols electrons m-2 s-1)",
-  y = "Day 9 Pmax (μmols electrons m-2 s-1)",
+  y = "Day 1 Pmax (μmols electrons m-2 s-1)",
   y2 = "9-Day Growth (%)",
   title = "A - Canopy",
   title2 = "Chondria tumulosa Canopy --- Pmax vs 9-Day Growth (%)",
@@ -437,20 +447,20 @@ pmax_canopy <- raw_plots(
 plot(pmax_canopy$histo)
 plot(pmax_canopy$plot)
 plot(pmax_canopy$lin_regr)
-ggsave("pmax_canopy.png", path = "midway_2024/plots/", 
+ggsave("pmax_canopy_d1.png", path = "midway_2024/plots/", 
        width = 7, height = 6, units = "in", dpi = 300, scale = 1)
 
 #inputs for under/pmax
 pmax_under <- raw_plots(
   data = under,
   response = pmax,
-  response2 = d9_growth_percent,
+  #response2 = d9_growth_percent,
   label = "Understory",
   pretty_color = "maroon4",
   aescolor = salinity,
   x = "Nitrate",
   x2 = "Pmax (μmols electrons m-2 s-1)",
-  y = "Day 9 Pmax (μmols electrons m-2 s-1)",
+  y = "Day 1 Pmax (μmols electrons m-2 s-1)",
   y2 = "9-Day Growth (%)",
   title = "B - Understory",
   title2 = "Chondria tumulosa Understory --- Pmax vs 9-Day Growth (%)",
@@ -472,7 +482,7 @@ pmax_under <- raw_plots(
 plot(pmax_under$histo)
 plot(pmax_under$plot)
 plot(pmax_under$lin_regr)
-ggsave("pmax_under.png", path = "midway_2024/plots/", 
+ggsave("pmax_under_d1.png", path = "midway_2024/plots/", 
        width = 7, height = 6, units = "in", dpi = 300, scale = 1)
 
 #NPQmax----------------
