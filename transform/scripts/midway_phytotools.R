@@ -10,7 +10,7 @@ library("lubridate")
 
 mid_ptools <- read.csv("../data/midway_2024/transformed/midway_pam_clean.csv", sep = ",")
 
-# add a column that turns date format into POSIXct
+# add a column that turns date format into ymd
 mid_ptools$date <- ymd(mid_ptools$Date)
 
 #same for time
@@ -20,6 +20,7 @@ mid_ptools$time <- as_hms(mid_ptools$Time)
 mid_ptools$IDnumber <- as.numeric(substr(mid_ptools$ID, 3, 5))
 
 #get only last two digits from IDnumber for plantID to correspond to individuals
+#this will be used to assign canopy or understory
 mid_ptools$plantID <- as.numeric(substr(mid_ptools$IDnumber, 2, 3))
 
 #add a new column that assigns treatment based on the remainder of integer division by 8 (modulus)
@@ -34,6 +35,7 @@ mid_ptools$plant_part <- ifelse(between(mid_ptools$plantID, 01, 48), "canopy", "
 #add a column for run
 mid_ptools$run <- as.character(ifelse(mid_ptools$Date == "2024-08-03" | mid_ptools$Date == "2024-08-07" | mid_ptools$Date == "2024-08-11", 2, 3))
 
+#This dataset was produced with RLCs done in the morning and afternoon
 #add a new column that bins the measurement periods by AM/PM
 bin_times <- list(
         bin1 = c(as_hms("07:00:00"), as_hms("12:00:00")),
@@ -42,18 +44,18 @@ bin_times <- list(
 
 mid_ptools <- mid_ptools %>%
         mutate(day_group = case_when(
-                Date == as.Date("2024-08-03") & Time > bin_times$bin1[1] & Time < bin_times$bin1[2] ~ "c_d1_r2",
-                Date == as.Date("2024-08-03") & Time > bin_times$bin2[1] & Time < bin_times$bin2[2] ~ "u_d1_r2",
-                Date == as.Date("2024-08-07") & Time > bin_times$bin1[1] & Time < bin_times$bin1[2] ~ "c_d5_r2",
-                Date == as.Date("2024-08-07") & Time > bin_times$bin2[1] & Time < bin_times$bin2[2] ~ "u_d5_r2",
-                Date == as.Date("2024-08-11") & Time > bin_times$bin1[1] & Time < bin_times$bin1[2] ~ "c_d9_r2",
-                Date == as.Date("2024-08-11") & Time > bin_times$bin2[1] & Time < bin_times$bin2[2] ~ "u_d9_r2",
-                Date == as.Date("2024-08-12") & Time > bin_times$bin1[1] & Time < bin_times$bin1[2] ~ "c_d1_r3",
-                Date == as.Date("2024-08-12") & Time > bin_times$bin2[1] & Time < bin_times$bin2[2] ~ "u_d1_r3",
-                Date == as.Date("2024-08-16") & Time > bin_times$bin1[1] & Time < bin_times$bin1[2] ~ "u_d5_r3",
-                Date == as.Date("2024-08-16") & Time > bin_times$bin2[1] & Time < bin_times$bin2[2] ~ "c_d5_r3",
-                Date == as.Date("2024-08-20") & Time > bin_times$bin1[1] & Time < bin_times$bin1[2] ~ "u_d9_r3",
-                Date == as.Date("2024-08-20") & Time > bin_times$bin2[1] & Time < bin_times$bin2[2] ~ "u_d9_r3"
+                date == as.Date("2024-08-03") & time > bin_times$bin1[1] & time < bin_times$bin1[2] ~ "c_d1_r2",
+                date == as.Date("2024-08-03") & time > bin_times$bin2[1] & time < bin_times$bin2[2] ~ "u_d1_r2",
+                date == as.Date("2024-08-07") & time > bin_times$bin1[1] & time < bin_times$bin1[2] ~ "c_d5_r2",
+                date == as.Date("2024-08-07") & time > bin_times$bin2[1] & time < bin_times$bin2[2] ~ "u_d5_r2",
+                date == as.Date("2024-08-11") & time > bin_times$bin1[1] & time < bin_times$bin1[2] ~ "c_d9_r2",
+                date == as.Date("2024-08-11") & time > bin_times$bin2[1] & time < bin_times$bin2[2] ~ "u_d9_r2",
+                date == as.Date("2024-08-12") & time > bin_times$bin1[1] & time < bin_times$bin1[2] ~ "c_d1_r3",
+                date == as.Date("2024-08-12") & time > bin_times$bin2[1] & time < bin_times$bin2[2] ~ "u_d1_r3",
+                date == as.Date("2024-08-16") & time > bin_times$bin1[1] & time < bin_times$bin1[2] ~ "u_d5_r3",
+                date == as.Date("2024-08-16") & time > bin_times$bin2[1] & time < bin_times$bin2[2] ~ "c_d5_r3",
+                date == as.Date("2024-08-20") & time > bin_times$bin1[1] & time < bin_times$bin1[2] ~ "u_d9_r3",
+                date == as.Date("2024-08-20") & time > bin_times$bin2[1] & time < bin_times$bin2[2] ~ "c_d9_r3"
 ))
 
 #make new column with RLC Day from day_group 
@@ -64,6 +66,7 @@ mid_ptools$rlc_day <- as.factor(substr(mid_ptools$day_group, 4, 4))
 # add a new column with date and specimen ID as unique key
 mid_ptools$uid <- paste(mid_ptools$Date, mid_ptools$ID, sep = "_")
 
+#make sure NPQ is numeric
 mid_ptools$NPQ <- as.numeric(mid_ptools$NPQ)
 
 # create a new column based on Y(II) at Epar 0 (Effective quantum yield)

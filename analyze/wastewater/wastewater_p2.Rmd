@@ -94,7 +94,7 @@ ulva_g %>% ggplot(aes(growth_d9)) +
 
 # Run the model (removed lunar_phase since this had no effect and caused issues of Singularity)
 ```{r}
-ulva_growth_model <- lmer(formula = growth_d9 ~ salinity + treatment +
+ulva_growth_model <- lmer(formula = growth_d9 ~ 0 + salinity + treatment +
                               (1 | plant_id) + (1 | run), data = ulva_g, REML = TRUE)
 ```
 
@@ -112,6 +112,10 @@ qqline(resid(ulva_growth_model))
 performance::check_model(ulva_growth_model)
 r.squaredGLMM(ulva_growth_model)
 summary(ulva_growth_model)
+emms_t <- emmeans(ulva_growth_model, ~treatment)
+summary (emms_t)
+emms_s <- emmeans(ulva_growth_model, ~salinity)
+summary(emms_s)
 ```
 
 # View random effects levels

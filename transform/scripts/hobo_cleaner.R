@@ -55,7 +55,7 @@ print(temp_summary)
 
 #Get summaries for the data based on time
 temp_summary_time <- hobo_all_clean %>%
-  group_by(plant_part, bin, run, date, time) %>% #summary based on whether canopy or understory, which bin, and run
+  group_by(plant_part, run, date, time) %>% #summary based on whether canopy or understory, which bin, and run
   summarise(max_temp = max(temp), #get max temps
             min_temp = min(temp), #get min temps
             mean_temp = mean(temp)) #get mean temps
