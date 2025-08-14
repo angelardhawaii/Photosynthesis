@@ -1,0 +1,1337 @@
+﻿Datetime,Date,Time,Type,no,F,FmPrime,PAR,YII,ETR,FvFm
+,,,D,,"Device Nr: #1, JUNIOR-PAM-III (CFMG1231B) ",,,,,
+06:09.5,6/17/25,09:06:09,SLCS,,Light Curve start ,1,,,,
+06:09.5,6/17/25,09:06:09,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:09.5,6/17/25,09:06:09,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:10.9,6/17/25,09:06:10,FO,2,416,624,0,0.333,0,0.333
+06:17.6,6/17/25,09:06:17,SLCE,,Light Curve end ,,,,,
+06:50.0,6/17/25,09:06:49,SLCS,,Light Curve start ,1,,,,
+06:50.0,6/17/25,09:06:49,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:50.0,6/17/25,09:06:49,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:51.4,6/17/25,09:06:51,FO,3,122,305,0,0.6,0,0.6
+06:59.0,6/17/25,09:06:58,SLCE,,Light Curve end ,,,,,
+07:34.8,6/17/25,09:07:34,SLCS,,Light Curve start ,1,,,,
+07:34.8,6/17/25,09:07:34,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:34.8,6/17/25,09:07:34,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:36.1,6/17/25,09:07:36,FO,4,396,646,0,0.387,0,0.387
+07:52.4,6/17/25,09:07:52,SLCE,,Light Curve end ,,,,,
+08:20.1,6/17/25,09:08:20,SLCS,,Light Curve start ,2,,,,
+08:20.1,6/17/25,09:08:20,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:20.1,6/17/25,09:08:20,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:21.5,6/17/25,09:08:21,FO,5,134,356,0,0.624,0,0.624
+08:30.1,6/17/25,09:08:30,SLCE,,Light Curve end ,,,,,
+08:47.2,6/17/25,09:08:47,SLCS,,Light Curve start ,2,,,,
+08:47.2,6/17/25,09:08:47,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:47.2,6/17/25,09:08:47,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:48.6,6/17/25,09:08:48,FO,6,157,454,0,0.654,0,0.654
+08:54.7,6/17/25,09:08:54,SLCE,,Light Curve end ,,,,,
+09:20.0,6/17/25,09:09:19,SLCS,,Light Curve start ,2,,,,
+09:20.0,6/17/25,09:09:19,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:20.0,6/17/25,09:09:19,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:21.4,6/17/25,09:09:21,FO,7,97,219,0,0.557,0,0.557
+09:26.6,6/17/25,09:09:26,SLCE,,Light Curve end ,,,,,
+10:03.2,6/17/25,09:10:03,SLCS,,Light Curve start ,3,,,,
+10:03.2,6/17/25,09:10:03,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:03.2,6/17/25,09:10:03,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:04.6,6/17/25,09:10:04,FO,8,112,324,0,0.654,0,0.654
+10:13.7,6/17/25,09:10:13,SLCE,,Light Curve end ,,,,,
+10:51.5,6/17/25,09:10:51,SLCS,,Light Curve start ,3,,,,
+10:51.5,6/17/25,09:10:51,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:51.5,6/17/25,09:10:51,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:52.9,6/17/25,09:10:52,FO,9,44,111,0,0.604,0,0.604
+10:57.3,6/17/25,09:10:57,SLCE,,Light Curve end ,,,,,
+11:44.8,6/17/25,09:11:44,SLCS,,Light Curve start ,3,,,,
+11:44.8,6/17/25,09:11:44,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:44.8,6/17/25,09:11:44,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:46.2,6/17/25,09:11:46,FO,10,123,294,0,0.582,0,0.582
+11:51.5,6/17/25,09:11:51,SLCE,,Light Curve end ,,,,,
+12:19.4,6/17/25,09:12:19,SLCS,,Light Curve start ,4,,,,
+12:19.4,6/17/25,09:12:19,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:19.4,6/17/25,09:12:19,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:20.8,6/17/25,09:12:20,FO,11,73,190,0,0.616,0,0.616
+12:25.5,6/17/25,09:12:25,SLCE,,Light Curve end ,,,,,
+12:46.6,6/17/25,09:12:46,SLCS,,Light Curve start ,4,,,,
+12:46.6,6/17/25,09:12:46,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:46.6,6/17/25,09:12:46,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:48.0,6/17/25,09:12:47,FO,12,102,322,0,0.683,0,0.683
+13:04.7,6/17/25,09:13:04,SLCE,,Light Curve end ,,,,,
+13:41.8,6/17/25,09:13:41,SLCS,,Light Curve start ,4,,,,
+13:41.8,6/17/25,09:13:41,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:41.8,6/17/25,09:13:41,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:43.2,6/17/25,09:13:43,FO,13,187,532,0,0.648,0,0.648
+13:48.7,6/17/25,09:13:48,SLCE,,Light Curve end ,,,,,
+16:33.7,6/17/25,09:16:33,SLCS,,Light Curve start ,5,,,,
+16:33.7,6/17/25,09:16:33,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:33.7,6/17/25,09:16:33,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:35.1,6/17/25,09:16:35,FO,14,70,186,0,0.624,0,0.624
+16:43.0,6/17/25,09:16:42,SLCE,,Light Curve end ,,,,,
+17:01.3,6/17/25,09:17:01,SLCS,,Light Curve start ,5,,,,
+17:01.3,6/17/25,09:17:01,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:01.3,6/17/25,09:17:01,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:02.7,6/17/25,09:17:02,FO,15,280,582,0,0.519,0,0.519
+17:08.8,6/17/25,09:17:08,SLCE,,Light Curve end ,,,,,
+17:25.3,6/17/25,09:17:25,SLCS,,Light Curve start ,5,,,,
+17:25.3,6/17/25,09:17:25,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:25.3,6/17/25,09:17:25,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:26.7,6/17/25,09:17:26,FO,16,105,301,0,0.651,0,0.651
+17:38.5,6/17/25,09:17:38,SLCE,,Light Curve end ,,,,,
+17:58.0,6/17/25,09:17:57,SLCS,,Light Curve start ,6,,,,
+17:58.0,6/17/25,09:17:57,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:58.0,6/17/25,09:17:57,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:59.4,6/17/25,09:17:59,FO,17,230,541,0,0.575,0,0.575
+18:09.5,6/17/25,09:18:09,SLCE,,Light Curve end ,,,,,
+18:25.8,6/17/25,09:18:25,SLCS,,Light Curve start ,6,,,,
+18:25.8,6/17/25,09:18:25,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+18:25.8,6/17/25,09:18:25,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+18:27.2,6/17/25,09:18:27,FO,18,201,527,0,0.619,0,0.619
+18:36.0,6/17/25,09:18:35,SLCE,,Light Curve end ,,,,,
+18:57.4,6/17/25,09:18:57,SLCS,,Light Curve start ,6,,,,
+18:57.4,6/17/25,09:18:57,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+18:57.4,6/17/25,09:18:57,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+18:58.8,6/17/25,09:18:58,FO,19,66,223,0,0.704,0,0.704
+19:09.8,6/17/25,09:19:09,SLCE,,Light Curve end ,,,,,
+19:28.1,6/17/25,09:19:28,SLCS,,Light Curve start ,7,,,,
+19:28.1,6/17/25,09:19:28,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+19:28.1,6/17/25,09:19:28,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+19:29.5,6/17/25,09:19:29,FO,20,129,322,0,0.599,0,0.599
+19:41.5,6/17/25,09:19:41,SLCE,,Light Curve end ,,,,,
+20:04.4,6/17/25,09:20:04,SLCS,,Light Curve start ,7,,,,
+20:04.4,6/17/25,09:20:04,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+20:04.4,6/17/25,09:20:04,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+20:05.8,6/17/25,09:20:05,FO,21,95,278,0,0.658,0,0.658
+20:24.1,6/17/25,09:20:24,SLCE,,Light Curve end ,,,,,
+20:41.9,6/17/25,09:20:41,SLCS,,Light Curve start ,,,,,
+20:42.3,6/17/25,09:20:42,SLCE,,Light Curve end ,,,,,
+20:43.1,6/17/25,09:20:43,SLCS,,Light Curve start ,7,,,,
+20:43.1,6/17/25,09:20:43,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+20:43.1,6/17/25,09:20:43,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+20:44.5,6/17/25,09:20:44,FO,22,55,197,0,0.721,0,0.721
+20:53.2,6/17/25,09:20:53,SLCE,,Light Curve end ,,,,,
+21:33.0,6/17/25,09:21:32,SLCS,,Light Curve start ,8,,,,
+21:33.0,6/17/25,09:21:32,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+21:33.0,6/17/25,09:21:32,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+21:34.4,6/17/25,09:21:34,FO,23,66,231,0,0.714,0,0.714
+21:44.4,6/17/25,09:21:44,SLCE,,Light Curve end ,,,,,
+21:54.3,6/17/25,09:21:54,SLCS,,Light Curve start ,8,,,,
+21:54.3,6/17/25,09:21:54,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+21:54.3,6/17/25,09:21:54,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+21:55.7,6/17/25,09:21:55,FO,24,61,68,0,0.103,0,0.103
+22:05.2,6/17/25,09:22:05,SLCE,,Light Curve end ,,,,,
+22:27.4,6/17/25,09:22:27,SLCS,,Light Curve start ,8,,,,
+22:27.4,6/17/25,09:22:27,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+22:27.4,6/17/25,09:22:27,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+22:28.8,6/17/25,09:22:28,FO,25,109,141,0,0.227,0,0.227
+22:40.6,6/17/25,09:22:40,SLCE,,Light Curve end ,,,,,
+00:38.0,6/17/25,10:00:37,SLCS,,Light Curve start ,1,,,,
+00:38.0,6/17/25,10:00:37,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:38.0,6/17/25,10:00:37,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:39.4,6/17/25,10:00:39,FO,26,428,547,0,0.218,0,0.218
+00:51.3,6/17/25,10:00:51,SLCE,,Light Curve end ,,,,,
+01:24.3,6/17/25,10:01:24,SLCS,,Light Curve start ,1,,,,
+01:24.3,6/17/25,10:01:24,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:24.3,6/17/25,10:01:24,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:25.7,6/17/25,10:01:25,FO,27,70,139,0,0.496,0,0.496
+01:36.1,6/17/25,10:01:36,SLCE,,Light Curve end ,,,,,
+01:57.7,6/17/25,10:01:57,SLCS,,Light Curve start ,1,,,,
+01:57.7,6/17/25,10:01:57,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:57.7,6/17/25,10:01:57,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:59.0,6/17/25,10:01:59,FO,28,253,434,0,0.417,0,0.417
+02:10.5,6/17/25,10:02:10,SLCE,,Light Curve end ,,,,,
+02:41.1,6/17/25,10:02:41,SLCS,,Light Curve start ,2,,,,
+02:41.1,6/17/25,10:02:41,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:41.1,6/17/25,10:02:41,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:42.5,6/17/25,10:02:42,FO,29,96,176,0,0.455,0,0.455
+02:51.9,6/17/25,10:02:51,SLCE,,Light Curve end ,,,,,
+03:33.3,6/17/25,10:03:33,SLCS,,Light Curve start ,2,,,,
+03:33.3,6/17/25,10:03:33,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:33.3,6/17/25,10:03:33,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:34.7,6/17/25,10:03:34,FO,30,62,144,0,0.569,0,0.569
+03:40.9,6/17/25,10:03:40,SLCE,,Light Curve end ,,,,,
+04:52.9,6/17/25,10:04:52,SLCS,,Light Curve start ,2,,,,
+04:52.9,6/17/25,10:04:52,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:52.9,6/17/25,10:04:52,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:54.3,6/17/25,10:04:54,FO,31,56,167,0,0.665,0,0.665
+05:00.2,6/17/25,10:05:00,SLCE,,Light Curve end ,,,,,
+05:12.2,6/17/25,10:05:12,SLCS,,Light Curve start ,3,,,,
+05:12.2,6/17/25,10:05:12,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:12.2,6/17/25,10:05:12,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:13.6,6/17/25,10:05:13,FO,32,109,218,0,0.5,0,0.5
+05:17.5,6/17/25,10:05:17,SLCE,,Light Curve end ,,,,,
+05:32.2,6/17/25,10:05:32,SLCS,,Light Curve start ,3,,,,
+05:32.2,6/17/25,10:05:32,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:32.2,6/17/25,10:05:32,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:33.6,6/17/25,10:05:33,FO,33,73,162,0,0.549,0,0.549
+05:40.3,6/17/25,10:05:40,SLCE,,Light Curve end ,,,,,
+06:17.1,6/17/25,10:06:17,SLCS,,Light Curve start ,3,,,,
+06:17.1,6/17/25,10:06:17,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:17.1,6/17/25,10:06:17,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:18.5,6/17/25,10:06:18,FO,34,107,248,0,0.569,0,0.569
+06:24.7,6/17/25,10:06:24,SLCE,,Light Curve end ,,,,,
+07:08.9,6/17/25,10:07:08,SLCS,,Light Curve start ,4,,,,
+07:08.9,6/17/25,10:07:08,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:08.9,6/17/25,10:07:08,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:10.3,6/17/25,10:07:10,FO,35,93,186,0,0.5,0,0.5
+07:14.2,6/17/25,10:07:14,SLCE,,Light Curve end ,,,,,
+07:26.1,6/17/25,10:07:26,SLCS,,Light Curve start ,4,,,,
+07:26.1,6/17/25,10:07:26,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:26.1,6/17/25,10:07:26,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:27.5,6/17/25,10:07:27,FO,36,78,196,0,0.602,0,0.602
+07:33.7,6/17/25,10:07:33,SLCE,,Light Curve end ,,,,,
+07:56.6,6/17/25,10:07:56,SLCS,,Light Curve start ,4,,,,
+07:56.6,6/17/25,10:07:56,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:56.6,6/17/25,10:07:56,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:58.0,6/17/25,10:07:58,FO,37,242,468,0,0.483,0,0.483
+08:06.1,6/17/25,10:08:06,SLCE,,Light Curve end ,,,,,
+11:08.9,6/17/25,10:11:08,SLCS,,Light Curve start ,5,,,,
+11:08.9,6/17/25,10:11:08,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:08.9,6/17/25,10:11:08,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:10.3,6/17/25,10:11:10,FO,38,143,282,0,0.493,0,0.493
+11:14.9,6/17/25,10:11:14,SLCE,,Light Curve end ,,,,,
+11:30.8,6/17/25,10:11:30,SLCS,,Light Curve start ,5,,,,
+11:30.8,6/17/25,10:11:30,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:30.8,6/17/25,10:11:30,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:32.2,6/17/25,10:11:32,FO,39,189,302,0,0.374,0,0.374
+11:36.9,6/17/25,10:11:36,SLCE,,Light Curve end ,,,,,
+11:52.3,6/17/25,10:11:52,SLCS,,Light Curve start ,5,,,,
+11:52.3,6/17/25,10:11:52,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:52.3,6/17/25,10:11:52,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:53.7,6/17/25,10:11:53,FO,40,89,219,0,0.594,0,0.594
+11:56.9,6/17/25,10:11:56,SLCE,,Light Curve end ,,,,,
+12:21.5,6/17/25,10:12:21,SLCS,,Light Curve start ,6,,,,
+12:21.5,6/17/25,10:12:21,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:21.5,6/17/25,10:12:21,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:22.8,6/17/25,10:12:22,FO,41,224,482,0,0.535,0,0.535
+12:28.7,6/17/25,10:12:28,SLCE,,Light Curve end ,,,,,
+12:41.6,6/17/25,10:12:41,SLCS,,Light Curve start ,6,,,,
+12:41.6,6/17/25,10:12:41,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:41.6,6/17/25,10:12:41,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:43.0,6/17/25,10:12:43,FO,42,51,113,0,0.549,0,0.549
+12:51.0,6/17/25,10:12:51,SLCE,,Light Curve end ,,,,,
+12:58.7,6/17/25,10:12:58,SLCS,,Light Curve start ,6,,,,
+12:58.7,6/17/25,10:12:58,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:58.7,6/17/25,10:12:58,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:00.1,6/17/25,10:13:00,FO,43,114,286,0,0.601,0,0.601
+13:04.5,6/17/25,10:13:04,SLCE,,Light Curve end ,,,,,
+13:48.0,6/17/25,10:13:47,SLCS,,Light Curve start ,7,,,,
+13:48.0,6/17/25,10:13:47,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:48.0,6/17/25,10:13:47,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:49.4,6/17/25,10:13:49,FO,44,99,239,0,0.586,0,0.586
+13:54.7,6/17/25,10:13:54,SLCE,,Light Curve end ,,,,,
+14:26.2,6/17/25,10:14:26,SLCS,,Light Curve start ,7,,,,
+14:26.2,6/17/25,10:14:26,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:26.2,6/17/25,10:14:26,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:27.6,6/17/25,10:14:27,FO,45,66,155,0,0.574,0,0.574
+14:34.1,6/17/25,10:14:34,SLCE,,Light Curve end ,,,,,
+14:46.3,6/17/25,10:14:46,SLCS,,Light Curve start ,7,,,,
+14:46.3,6/17/25,10:14:46,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:46.3,6/17/25,10:14:46,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:47.7,6/17/25,10:14:47,FO,46,66,191,0,0.654,0,0.654
+14:52.1,6/17/25,10:14:52,SLCE,,Light Curve end ,,,,,
+15:14.1,6/17/25,10:15:14,SLCS,,Light Curve start ,8,,,,
+15:14.1,6/17/25,10:15:14,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:14.1,6/17/25,10:15:14,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:15.5,6/17/25,10:15:15,FO,47,67,174,0,0.615,0,0.615
+15:19.8,6/17/25,10:15:19,SLCE,,Light Curve end ,,,,,
+16:34.2,6/17/25,10:16:34,SLCS,,Light Curve start ,8,,,,
+16:34.2,6/17/25,10:16:34,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:34.2,6/17/25,10:16:34,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:35.6,6/17/25,10:16:35,FO,48,57,138,0,0.587,0,0.587
+16:40.3,6/17/25,10:16:40,SLCE,,Light Curve end ,,,,,
+17:22.9,6/17/25,10:17:22,SLCS,,Light Curve start ,8,,,,
+17:22.9,6/17/25,10:17:22,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:22.9,6/17/25,10:17:22,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:24.3,6/17/25,10:17:24,FO,49,62,94,0,0.34,0,0.34
+17:30.4,6/17/25,10:17:30,SLCE,,Light Curve end ,,,,,
+59:09.1,6/17/25,10:59:09,SLCS,,Light Curve start ,1,,,,
+59:09.1,6/17/25,10:59:09,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:09.1,6/17/25,10:59:09,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:10.4,6/17/25,10:59:10,FO,50,350,426,0,0.178,0,0.178
+59:16.5,6/17/25,10:59:16,SLCE,,Light Curve end ,,,,,
+59:45.8,6/17/25,10:59:45,SLCS,,Light Curve start ,1,,,,
+59:45.8,6/17/25,10:59:45,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:45.8,6/17/25,10:59:45,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:47.2,6/17/25,10:59:47,FO,51,114,184,0,0.38,0,0.38
+59:53.8,6/17/25,10:59:53,SLCE,,Light Curve end ,,,,,
+00:02.2,6/17/25,11:00:02,SLCS,,Light Curve start ,1,,,,
+00:02.2,6/17/25,11:00:02,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:02.2,6/17/25,11:00:02,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:03.6,6/17/25,11:00:03,FO,52,167,262,0,0.363,0,0.363
+00:09.7,6/17/25,11:00:09,SLCE,,Light Curve end ,,,,,
+00:27.5,6/17/25,11:00:27,SLCS,,Light Curve start ,2,,,,
+00:27.5,6/17/25,11:00:27,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:27.5,6/17/25,11:00:27,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:28.8,6/17/25,11:00:28,FO,53,75,147,0,0.49,0,0.49
+00:36.1,6/17/25,11:00:36,SLCE,,Light Curve end ,,,,,
+01:03.2,6/17/25,11:01:03,SLCS,,Light Curve start ,2,,,,
+01:03.2,6/17/25,11:01:03,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:03.2,6/17/25,11:01:03,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:04.6,6/17/25,11:01:04,FO,54,155,225,0,0.311,0,0.311
+01:08.3,6/17/25,11:01:08,SLCE,,Light Curve end ,,,,,
+01:24.5,6/17/25,11:01:24,SLCS,,Light Curve start ,2,,,,
+01:24.5,6/17/25,11:01:24,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:24.5,6/17/25,11:01:24,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:25.9,6/17/25,11:01:25,FO,55,80,179,0,0.553,0,0.553
+01:31.3,6/17/25,11:01:31,SLCE,,Light Curve end ,,,,,
+01:55.2,6/17/25,11:01:55,SLCS,,Light Curve start ,3,,,,
+01:55.2,6/17/25,11:01:55,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:55.2,6/17/25,11:01:55,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:56.5,6/17/25,11:01:56,FO,56,80,155,0,0.484,0,0.484
+02:01.8,6/17/25,11:02:01,SLCE,,Light Curve end ,,,,,
+02:18.9,6/17/25,11:02:18,SLCS,,Light Curve start ,3,,,,
+02:18.9,6/17/25,11:02:18,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:18.9,6/17/25,11:02:18,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:20.3,6/17/25,11:02:20,FO,57,116,235,0,0.506,0,0.506
+02:25.5,6/17/25,11:02:25,SLCE,,Light Curve end ,,,,,
+02:49.2,6/17/25,11:02:49,SLCS,,Light Curve start ,3,,,,
+02:49.2,6/17/25,11:02:49,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:49.2,6/17/25,11:02:49,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:50.6,6/17/25,11:02:50,FO,58,62,140,0,0.557,0,0.557
+02:58.8,6/17/25,11:02:58,SLCE,,Light Curve end ,,,,,
+03:50.6,6/17/25,11:03:50,SLCS,,Light Curve start ,4,,,,
+03:50.6,6/17/25,11:03:50,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:50.6,6/17/25,11:03:50,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:52.0,6/17/25,11:03:51,FO,59,81,174,0,0.534,0,0.534
+04:00.5,6/17/25,11:04:00,SLCE,,Light Curve end ,,,,,
+04:23.6,6/17/25,11:04:23,SLCS,,Light Curve start ,4,,,,
+04:23.6,6/17/25,11:04:23,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:23.6,6/17/25,11:04:23,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:25.0,6/17/25,11:04:25,FO,60,70,150,0,0.533,0,0.533
+04:31.4,6/17/25,11:04:31,SLCE,,Light Curve end ,,,,,
+04:41.6,6/17/25,11:04:41,SLCS,,Light Curve start ,4,,,,
+04:41.6,6/17/25,11:04:41,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:41.6,6/17/25,11:04:41,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:43.0,6/17/25,11:04:42,FO,61,72,115,0,0.374,0,0.374
+04:52.6,6/17/25,11:04:52,SLCE,,Light Curve end ,,,,,
+07:13.4,6/17/25,11:07:13,SLCS,,Light Curve start ,5,,,,
+07:13.4,6/17/25,11:07:13,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:13.4,6/17/25,11:07:13,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:14.8,6/17/25,11:07:14,FO,62,258,412,0,0.374,0,0.374
+07:20.7,6/17/25,11:07:20,SLCE,,Light Curve end ,,,,,
+07:36.7,6/17/25,11:07:36,SLCS,,Light Curve start ,5,,,,
+07:36.7,6/17/25,11:07:36,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:36.7,6/17/25,11:07:36,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:38.0,6/17/25,11:07:38,FO,63,116,190,0,0.389,0,0.389
+07:43.4,6/17/25,11:07:43,SLCE,,Light Curve end ,,,,,
+07:51.9,6/17/25,11:07:51,SLCS,,Light Curve start ,5,,,,
+07:51.9,6/17/25,11:07:51,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:51.9,6/17/25,11:07:51,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:53.3,6/17/25,11:07:53,FO,64,180,300,0,0.4,0,0.4
+07:58.0,6/17/25,11:07:57,SLCE,,Light Curve end ,,,,,
+08:28.2,6/17/25,11:08:28,SLCS,,Light Curve start ,6,,,,
+08:28.2,6/17/25,11:08:28,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:28.2,6/17/25,11:08:28,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:29.6,6/17/25,11:08:29,FO,65,235,472,0,0.502,0,0.502
+08:37.2,6/17/25,11:08:37,SLCE,,Light Curve end ,,,,,
+08:57.7,6/17/25,11:08:57,SLCS,,Light Curve start ,6,,,,
+08:57.7,6/17/25,11:08:57,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:57.7,6/17/25,11:08:57,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:59.1,6/17/25,11:08:59,FO,66,289,523,0,0.447,0,0.447
+09:05.6,6/17/25,11:09:05,SLCE,,Light Curve end ,,,,,
+09:16.8,6/17/25,11:09:16,SLCS,,Light Curve start ,6,,,,
+09:16.8,6/17/25,11:09:16,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:16.8,6/17/25,11:09:16,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:18.2,6/17/25,11:09:18,FO,67,86,161,0,0.466,0,0.466
+09:25.2,6/17/25,11:09:25,SLCE,,Light Curve end ,,,,,
+09:50.5,6/17/25,11:09:50,SLCS,,Light Curve start ,7,,,,
+09:50.5,6/17/25,11:09:50,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:50.5,6/17/25,11:09:50,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:51.9,6/17/25,11:09:51,FO,68,67,151,0,0.556,0,0.556
+09:57.6,6/17/25,11:09:57,SLCE,,Light Curve end ,,,,,
+10:03.3,6/17/25,11:10:03,SLCS,,Light Curve start ,7,,,,
+10:03.3,6/17/25,11:10:03,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:03.3,6/17/25,11:10:03,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:04.7,6/17/25,11:10:04,FO,69,49,130,0,0.623,0,0.623
+10:12.1,6/17/25,11:10:12,SLCE,,Light Curve end ,,,,,
+10:44.7,6/17/25,11:10:44,SLCS,,Light Curve start ,7,,,,
+10:44.7,6/17/25,11:10:44,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:44.7,6/17/25,11:10:44,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:46.1,6/17/25,11:10:46,FO,70,49,135,0,0.637,0,0.637
+10:53.1,6/17/25,11:10:53,SLCE,,Light Curve end ,,,,,
+11:19.1,6/17/25,11:11:19,SLCS,,Light Curve start ,8,,,,
+11:19.1,6/17/25,11:11:19,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:19.1,6/17/25,11:11:19,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:20.5,6/17/25,11:11:20,FO,71,70,170,0,0.588,0,0.588
+11:26.5,6/17/25,11:11:26,SLCE,,Light Curve end ,,,,,
+12:10.3,6/17/25,11:12:10,SLCS,,Light Curve start ,8,,,,
+12:10.3,6/17/25,11:12:10,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:10.3,6/17/25,11:12:10,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:11.7,6/17/25,11:12:11,FO,72,85,181,0,0.53,0,0.53
+12:17.3,6/17/25,11:12:17,SLCE,,Light Curve end ,,,,,
+12:37.5,6/17/25,11:12:37,SLCS,,Light Curve start ,8,,,,
+12:37.5,6/17/25,11:12:37,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:37.5,6/17/25,11:12:37,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:38.9,6/17/25,11:12:38,FO,73,76,170,0,0.553,0,0.553
+12:46.6,6/17/25,11:12:46,SLCE,,Light Curve end ,,,,,
+59:16.0,6/17/25,11:59:15,SLCS,,Light Curve start ,1,,,,
+59:16.0,6/17/25,11:59:15,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:16.0,6/17/25,11:59:15,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:17.3,6/17/25,11:59:17,FO,74,193,221,0,0.127,0,0.127
+59:22.1,6/17/25,11:59:22,SLCE,,Light Curve end ,,,,,
+59:35.3,6/17/25,11:59:35,SLCS,,Light Curve start ,1,,,,
+59:35.3,6/17/25,11:59:35,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:35.3,6/17/25,11:59:35,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:36.7,6/17/25,11:59:36,FO,75,84,131,0,0.359,0,0.359
+59:41.3,6/17/25,11:59:41,SLCE,,Light Curve end ,,,,,
+59:50.4,6/17/25,11:59:50,SLCS,,Light Curve start ,1,,,,
+59:50.4,6/17/25,11:59:50,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:50.4,6/17/25,11:59:50,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:51.8,6/17/25,11:59:51,FO,76,84,156,0,0.462,0,0.462
+59:56.7,6/17/25,11:59:56,SLCE,,Light Curve end ,,,,,
+01:32.9,6/17/25,12:01:32,SLCS,,Light Curve start ,2,,,,
+01:32.9,6/17/25,12:01:32,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:32.9,6/17/25,12:01:32,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:34.3,6/17/25,12:01:34,FO,77,73,130,0,0.438,0,0.438
+01:38.8,6/17/25,12:01:38,SLCE,,Light Curve end ,,,,,
+02:24.4,6/17/25,12:02:24,SLCS,,Light Curve start ,2,,,,
+02:24.4,6/17/25,12:02:24,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:24.4,6/17/25,12:02:24,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:25.8,6/17/25,12:02:25,FO,78,77,154,0,0.5,0,0.5
+02:31.8,6/17/25,12:02:31,SLCE,,Light Curve end ,,,,,
+02:47.6,6/17/25,12:02:47,SLCS,,Light Curve start ,2,,,,
+02:47.6,6/17/25,12:02:47,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:47.6,6/17/25,12:02:47,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:48.9,6/17/25,12:02:48,FO,79,129,221,0,0.416,0,0.416
+02:53.3,6/17/25,12:02:53,SLCE,,Light Curve end ,,,,,
+03:46.2,6/17/25,12:03:46,SLCS,,Light Curve start ,3,,,,
+03:46.2,6/17/25,12:03:46,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:46.2,6/17/25,12:03:46,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:47.5,6/17/25,12:03:47,FO,80,55,101,0,0.455,0,0.455
+03:53.9,6/17/25,12:03:53,SLCE,,Light Curve end ,,,,,
+04:04.1,6/17/25,12:04:04,SLCS,,Light Curve start ,3,,,,
+04:04.1,6/17/25,12:04:04,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:04.1,6/17/25,12:04:04,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:05.5,6/17/25,12:04:05,FO,81,88,155,0,0.432,0,0.432
+04:14.9,6/17/25,12:04:14,SLCE,,Light Curve end ,,,,,
+05:09.6,6/17/25,12:05:09,SLCS,,Light Curve start ,3,,,,
+05:09.6,6/17/25,12:05:09,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:09.6,6/17/25,12:05:09,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:11.0,6/17/25,12:05:11,FO,82,121,212,0,0.429,0,0.429
+05:18.4,6/17/25,12:05:18,SLCE,,Light Curve end ,,,,,
+05:44.3,6/17/25,12:05:44,SLCS,,Light Curve start ,4,,,,
+05:44.3,6/17/25,12:05:44,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:44.3,6/17/25,12:05:44,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:45.8,6/17/25,12:05:45,FO,83,115,234,0,0.509,0,0.509
+05:51.9,6/17/25,12:05:51,SLCE,,Light Curve end ,,,,,
+06:45.0,6/17/25,12:06:45,SLCS,,Light Curve start ,4,,,,
+06:45.0,6/17/25,12:06:45,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:45.0,6/17/25,12:06:45,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:46.4,6/17/25,12:06:46,FO,84,168,181,0,0.072,0,0.072
+06:55.8,6/17/25,12:06:55,SLCE,,Light Curve end ,,,,,
+07:04.4,6/17/25,12:07:04,SLCS,,Light Curve start ,4,,,,
+07:04.4,6/17/25,12:07:04,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:04.4,6/17/25,12:07:04,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:05.8,6/17/25,12:07:05,FO,85,152,348,0,0.563,0,0.563
+07:13.2,6/17/25,12:07:13,SLCE,,Light Curve end ,,,,,
+07:22.5,6/17/25,12:07:22,SLCS,,Light Curve start ,4,,,,
+07:22.5,6/17/25,12:07:22,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:22.5,6/17/25,12:07:22,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:23.9,6/17/25,12:07:23,FO,86,288,374,0,0.23,0,0.23
+07:30.5,6/17/25,12:07:30,SLCE,,Light Curve end ,,,,,
+10:14.0,6/17/25,12:10:13,SLCS,,Light Curve start ,5,,,,
+10:14.0,6/17/25,12:10:13,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:14.0,6/17/25,12:10:13,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:15.4,6/17/25,12:10:15,FO,87,187,309,0,0.395,0,0.395
+10:21.1,6/17/25,12:10:21,SLCE,,Light Curve end ,,,,,
+10:46.1,6/17/25,12:10:46,SLCS,,Light Curve start ,5,,,,
+10:46.1,6/17/25,12:10:46,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:46.1,6/17/25,12:10:46,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:47.5,6/17/25,12:10:47,FO,88,163,253,0,0.356,0,0.356
+10:52.3,6/17/25,12:10:52,SLCE,,Light Curve end ,,,,,
+11:02.8,6/17/25,12:11:02,SLCS,,Light Curve start ,5,,,,
+11:02.8,6/17/25,12:11:02,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:02.8,6/17/25,12:11:02,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:04.2,6/17/25,12:11:04,FO,89,228,384,0,0.406,0,0.406
+11:10.1,6/17/25,12:11:10,SLCE,,Light Curve end ,,,,,
+12:25.6,6/17/25,12:12:25,SLCS,,Light Curve start ,6,,,,
+12:25.6,6/17/25,12:12:25,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:25.6,6/17/25,12:12:25,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:27.0,6/17/25,12:12:26,FO,90,199,381,0,0.478,0,0.478
+12:33.5,6/17/25,12:12:33,SLCE,,Light Curve end ,,,,,
+12:43.9,6/17/25,12:12:43,SLCS,,Light Curve start ,6,,,,
+12:43.9,6/17/25,12:12:43,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:43.9,6/17/25,12:12:43,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:45.3,6/17/25,12:12:45,FO,91,350,683,0,0.488,0,0.488
+12:50.7,6/17/25,12:12:50,SLCE,,Light Curve end ,,,,,
+13:07.1,6/17/25,12:13:07,SLCS,,Light Curve start ,6,,,,
+13:07.1,6/17/25,12:13:07,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:07.1,6/17/25,12:13:07,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:08.4,6/17/25,12:13:08,FO,92,232,433,0,0.464,0,0.464
+13:13.5,6/17/25,12:13:13,SLCE,,Light Curve end ,,,,,
+14:58.3,6/17/25,12:14:58,SLCS,,Light Curve start ,7,,,,
+14:58.3,6/17/25,12:14:58,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:58.3,6/17/25,12:14:58,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:59.7,6/17/25,12:14:59,FO,93,139,255,0,0.455,0,0.455
+15:05.9,6/17/25,12:15:05,SLCE,,Light Curve end ,,,,,
+15:16.9,6/17/25,12:15:16,SLCS,,Light Curve start ,7,,,,
+15:16.9,6/17/25,12:15:16,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:16.9,6/17/25,12:15:16,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:18.3,6/17/25,12:15:18,FO,94,148,291,0,0.491,0,0.491
+15:25.1,6/17/25,12:15:25,SLCE,,Light Curve end ,,,,,
+15:58.2,6/17/25,12:15:58,SLCS,,Light Curve start ,7,,,,
+15:58.2,6/17/25,12:15:58,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:58.2,6/17/25,12:15:58,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:59.6,6/17/25,12:15:59,FO,95,70,159,0,0.56,0,0.56
+16:10.7,6/17/25,12:16:10,SLCE,,Light Curve end ,,,,,
+16:46.1,6/17/25,12:16:46,SLCS,,Light Curve start ,8,,,,
+16:46.1,6/17/25,12:16:46,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:46.1,6/17/25,12:16:46,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:47.5,6/17/25,12:16:47,FO,96,59,88,0,0.33,0,0.33
+16:51.2,6/17/25,12:16:51,SLCE,,Light Curve end ,,,,,
+17:45.7,6/17/25,12:17:45,SLCS,,Light Curve start ,8,,,,
+17:45.7,6/17/25,12:17:45,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:45.7,6/17/25,12:17:45,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:47.1,6/17/25,12:17:47,FO,97,46,97,0,0.526,0,0.526
+17:53.2,6/17/25,12:17:53,SLCE,,Light Curve end ,,,,,
+18:02.6,6/17/25,12:18:02,SLCS,,Light Curve start ,8,,,,
+18:02.6,6/17/25,12:18:02,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+18:02.6,6/17/25,12:18:02,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+18:04.0,6/17/25,12:18:04,FO,98,102,177,0,0.424,0,0.424
+18:08.4,6/17/25,12:18:08,SLCE,,Light Curve end ,,,,,
+02:10.7,6/17/25,13:02:10,SLCS,,Light Curve start ,1,,,,
+02:10.7,6/17/25,13:02:10,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:10.7,6/17/25,13:02:10,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:12.1,6/17/25,13:02:12,FO,99,39,93,0,0.581,0,0.581
+02:23.1,6/17/25,13:02:23,SLCE,,Light Curve end ,,,,,
+03:11.2,6/17/25,13:03:11,SLCS,,Light Curve start ,1,,,,
+03:11.2,6/17/25,13:03:11,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:11.2,6/17/25,13:03:11,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:12.6,6/17/25,13:03:12,FO,100,117,219,0,0.466,0,0.466
+03:17.6,6/17/25,13:03:17,SLCE,,Light Curve end ,,,,,
+03:28.7,6/17/25,13:03:28,SLCS,,Light Curve start ,1,,,,
+03:28.7,6/17/25,13:03:28,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:28.7,6/17/25,13:03:28,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:30.1,6/17/25,13:03:30,FO,101,379,447,0,0.152,0,0.152
+03:35.4,6/17/25,13:03:35,SLCE,,Light Curve end ,,,,,
+04:18.8,6/17/25,13:04:18,SLCS,,Light Curve start ,2,,,,
+04:18.8,6/17/25,13:04:18,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:18.8,6/17/25,13:04:18,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:20.2,6/17/25,13:04:20,FO,102,56,142,0,0.606,0,0.606
+04:26.4,6/17/25,13:04:26,SLCE,,Light Curve end ,,,,,
+04:52.2,6/17/25,13:04:52,SLCS,,Light Curve start ,2,,,,
+04:52.2,6/17/25,13:04:52,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:52.2,6/17/25,13:04:52,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:53.6,6/17/25,13:04:53,FO,103,107,181,0,0.409,0,0.409
+05:04.0,6/17/25,13:05:03,SLCE,,Light Curve end ,,,,,
+05:12.8,6/17/25,13:05:12,SLCS,,Light Curve start ,2,,,,
+05:12.8,6/17/25,13:05:12,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:12.8,6/17/25,13:05:12,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:14.2,6/17/25,13:05:14,FO,104,87,144,0,0.396,0,0.396
+05:22.5,6/17/25,13:05:22,SLCE,,Light Curve end ,,,,,
+06:05.5,6/17/25,13:06:05,SLCS,,Light Curve start ,3,,,,
+06:05.5,6/17/25,13:06:05,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:05.5,6/17/25,13:06:05,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:06.9,6/17/25,13:06:06,FO,105,85,166,0,0.488,0,0.488
+06:16.1,6/17/25,13:06:16,SLCE,,Light Curve end ,,,,,
+06:37.0,6/17/25,13:06:36,SLCS,,Light Curve start ,3,,,,
+06:37.0,6/17/25,13:06:36,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:37.0,6/17/25,13:06:36,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:38.4,6/17/25,13:06:38,FO,106,129,216,0,0.403,0,0.403
+06:44.6,6/17/25,13:06:44,SLCE,,Light Curve end ,,,,,
+07:40.5,6/17/25,13:07:40,SLCS,,Light Curve start ,3,,,,
+07:40.5,6/17/25,13:07:40,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:40.5,6/17/25,13:07:40,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:41.9,6/17/25,13:07:41,FO,107,201,361,0,0.443,0,0.443
+07:54.6,6/17/25,13:07:54,SLCE,,Light Curve end ,,,,,
+08:29.8,6/17/25,13:08:29,SLCS,,Light Curve start ,4,,,,
+08:29.8,6/17/25,13:08:29,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:29.8,6/17/25,13:08:29,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:31.2,6/17/25,13:08:31,FO,108,60,155,0,0.613,0,0.613
+08:38.0,6/17/25,13:08:38,SLCE,,Light Curve end ,,,,,
+09:22.3,6/17/25,13:09:22,SLCS,,Light Curve start ,4,,,,
+09:22.3,6/17/25,13:09:22,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:22.3,6/17/25,13:09:22,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:23.7,6/17/25,13:09:23,FO,109,99,237,0,0.582,0,0.582
+09:30.1,6/17/25,13:09:30,SLCE,,Light Curve end ,,,,,
+09:41.2,6/17/25,13:09:41,SLCS,,Light Curve start ,4,,,,
+09:41.2,6/17/25,13:09:41,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:41.2,6/17/25,13:09:41,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:42.6,6/17/25,13:09:42,FO,110,135,293,0,0.539,0,0.539
+09:49.3,6/17/25,13:09:49,SLCE,,Light Curve end ,,,,,
+11:54.6,6/17/25,13:11:54,SLCS,,Light Curve start ,5,,,,
+11:54.6,6/17/25,13:11:54,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:54.6,6/17/25,13:11:54,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:56.0,6/17/25,13:11:56,FO,111,161,265,0,0.392,0,0.392
+11:59.7,6/17/25,13:11:59,SLCE,,Light Curve end ,,,,,
+12:06.7,6/17/25,13:12:06,SLCS,,Light Curve start ,5,,,,
+12:06.7,6/17/25,13:12:06,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:06.7,6/17/25,13:12:06,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:08.0,6/17/25,13:12:08,FO,112,148,235,0,0.37,0,0.37
+12:13.0,6/17/25,13:12:13,SLCE,,Light Curve end ,,,,,
+12:24.1,6/17/25,13:12:24,SLCS,,Light Curve start ,5,,,,
+12:24.1,6/17/25,13:12:24,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:24.1,6/17/25,13:12:24,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:25.5,6/17/25,13:12:25,FO,113,164,293,0,0.44,0,0.44
+12:29.4,6/17/25,13:12:29,SLCE,,Light Curve end ,,,,,
+12:41.5,6/17/25,13:12:41,SLCS,,Light Curve start ,6,,,,
+12:41.5,6/17/25,13:12:41,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:41.5,6/17/25,13:12:41,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:42.9,6/17/25,13:12:42,FO,114,103,212,0,0.514,0,0.514
+12:48.3,6/17/25,13:12:48,SLCE,,Light Curve end ,,,,,
+12:54.4,6/17/25,13:12:54,SLCS,,Light Curve start ,6,,,,
+12:54.4,6/17/25,13:12:54,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:54.4,6/17/25,13:12:54,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:55.8,6/17/25,13:12:55,FO,115,225,412,0,0.454,0,0.454
+12:59.7,6/17/25,13:12:59,SLCE,,Light Curve end ,,,,,
+13:07.8,6/17/25,13:13:07,SLCS,,Light Curve start ,6,,,,
+13:07.8,6/17/25,13:13:07,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:07.8,6/17/25,13:13:07,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:09.2,6/17/25,13:13:09,FO,116,169,338,0,0.5,0,0.5
+13:13.6,6/17/25,13:13:13,SLCE,,Light Curve end ,,,,,
+14:28.5,6/17/25,13:14:28,SLCS,,Light Curve start ,7,,,,
+14:28.5,6/17/25,13:14:28,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:28.5,6/17/25,13:14:28,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:29.8,6/17/25,13:14:29,FO,117,132,138,0,0.043,0,0.043
+14:36.2,6/17/25,13:14:36,SLCE,,Light Curve end ,,,,,
+15:00.3,6/17/25,13:15:00,SLCS,,Light Curve start ,7,,,,
+15:00.3,6/17/25,13:15:00,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:00.3,6/17/25,13:15:00,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:01.7,6/17/25,13:15:01,FO,118,183,352,0,0.48,0,0.48
+15:07.5,6/17/25,13:15:07,SLCE,,Light Curve end ,,,,,
+15:26.9,6/17/25,13:15:26,SLCS,,Light Curve start ,7,,,,
+15:26.9,6/17/25,13:15:26,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:26.9,6/17/25,13:15:26,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:28.3,6/17/25,13:15:28,FO,119,55,122,0,0.549,0,0.549
+15:35.2,6/17/25,13:15:35,SLCE,,Light Curve end ,,,,,
+15:51.7,6/17/25,13:15:51,SLCS,,Light Curve start ,8,,,,
+15:51.7,6/17/25,13:15:51,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:51.7,6/17/25,13:15:51,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:53.0,6/17/25,13:15:53,FO,120,70,196,0,0.643,0,0.643
+15:58.8,6/17/25,13:15:58,SLCE,,Light Curve end ,,,,,
+16:08.4,6/17/25,13:16:08,SLCS,,Light Curve start ,8,,,,
+16:08.4,6/17/25,13:16:08,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:08.4,6/17/25,13:16:08,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:09.8,6/17/25,13:16:09,FO,121,48,135,0,0.644,0,0.644
+16:16.4,6/17/25,13:16:16,SLCE,,Light Curve end ,,,,,
+16:41.9,6/17/25,13:16:41,SLCS,,Light Curve start ,8,,,,
+16:41.9,6/17/25,13:16:41,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:41.9,6/17/25,13:16:41,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:43.3,6/17/25,13:16:43,FO,122,63,151,0,0.583,0,0.583
+16:48.9,6/17/25,13:16:48,SLCE,,Light Curve end ,,,,,
+16:59.7,6/17/25,13:16:59,SLCS,,Light Curve start ,8,,,,
+16:59.7,6/17/25,13:16:59,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:59.7,6/17/25,13:16:59,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:01.1,6/17/25,13:17:01,FO,123,86,183,0,0.53,0,0.53
+17:05.7,6/17/25,13:17:05,SLCE,,Light Curve end ,,,,,
+03:11.0,6/17/25,14:03:11,SLCS,,Light Curve start ,1,,,,
+03:11.0,6/17/25,14:03:11,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:11.0,6/17/25,14:03:11,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:12.4,6/17/25,14:03:12,FO,124,267,337,0,0.208,0,0.208
+03:19.6,6/17/25,14:03:19,SLCE,,Light Curve end ,,,,,
+03:29.0,6/17/25,14:03:28,SLCS,,Light Curve start ,1,,,,
+03:29.0,6/17/25,14:03:28,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:29.0,6/17/25,14:03:28,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:30.4,6/17/25,14:03:30,FO,125,210,319,0,0.342,0,0.342
+03:35.4,6/17/25,14:03:35,SLCE,,Light Curve end ,,,,,
+03:54.9,6/17/25,14:03:54,SLCS,,Light Curve start ,1,,,,
+03:54.9,6/17/25,14:03:54,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:54.9,6/17/25,14:03:54,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:56.3,6/17/25,14:03:56,FO,126,85,173,0,0.509,0,0.509
+04:03.6,6/17/25,14:04:03,SLCE,,Light Curve end ,,,,,
+04:34.4,6/17/25,14:04:34,SLCS,,Light Curve start ,2,,,,
+04:34.4,6/17/25,14:04:34,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:34.4,6/17/25,14:04:34,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:35.8,6/17/25,14:04:35,FO,127,80,150,0,0.467,0,0.467
+04:40.2,6/17/25,14:04:40,SLCE,,Light Curve end ,,,,,
+04:50.1,6/17/25,14:04:50,SLCS,,Light Curve start ,2,,,,
+04:50.1,6/17/25,14:04:50,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:50.1,6/17/25,14:04:50,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:51.5,6/17/25,14:04:51,FO,128,114,284,0,0.599,0,0.599
+04:56.2,6/17/25,14:04:56,SLCE,,Light Curve end ,,,,,
+05:16.4,6/17/25,14:05:16,SLCS,,Light Curve start ,2,,,,
+05:16.4,6/17/25,14:05:16,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:16.4,6/17/25,14:05:16,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:17.8,6/17/25,14:05:17,FO,129,99,175,0,0.434,0,0.434
+05:23.0,6/17/25,14:05:22,SLCE,,Light Curve end ,,,,,
+05:45.2,6/17/25,14:05:45,SLCS,,Light Curve start ,3,,,,
+05:45.2,6/17/25,14:05:45,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:45.2,6/17/25,14:05:45,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:46.6,6/17/25,14:05:46,FO,130,103,213,0,0.516,0,0.516
+05:52.0,6/17/25,14:05:52,SLCE,,Light Curve end ,,,,,
+06:02.7,6/17/25,14:06:02,SLCS,,Light Curve start ,3,,,,
+06:02.7,6/17/25,14:06:02,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:02.7,6/17/25,14:06:02,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:04.1,6/17/25,14:06:04,FO,131,96,175,0,0.451,0,0.451
+06:13.0,6/17/25,14:06:12,SLCE,,Light Curve end ,,,,,
+07:03.7,6/17/25,14:07:03,SLCS,,Light Curve start ,3,,,,
+07:03.7,6/17/25,14:07:03,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:03.7,6/17/25,14:07:03,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:05.1,6/17/25,14:07:05,FO,132,80,170,0,0.529,0,0.529
+07:11.6,6/17/25,14:07:11,SLCE,,Light Curve end ,,,,,
+07:28.9,6/17/25,14:07:28,SLCS,,Light Curve start ,4,,,,
+07:28.9,6/17/25,14:07:28,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:28.9,6/17/25,14:07:28,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:30.3,6/17/25,14:07:30,FO,133,178,418,0,0.574,0,0.574
+07:36.6,6/17/25,14:07:36,SLCE,,Light Curve end ,,,,,
+07:43.0,6/17/25,14:07:42,SLCS,,Light Curve start ,4,,,,
+07:43.0,6/17/25,14:07:42,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:43.0,6/17/25,14:07:42,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:44.4,6/17/25,14:07:44,FO,134,64,152,0,0.579,0,0.579
+07:50.6,6/17/25,14:07:50,SLCE,,Light Curve end ,,,,,
+08:04.6,6/17/25,14:08:04,SLCS,,Light Curve start ,4,,,,
+08:04.6,6/17/25,14:08:04,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:04.6,6/17/25,14:08:04,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:06.0,6/17/25,14:08:06,FO,135,124,224,0,0.446,0,0.446
+08:12.2,6/17/25,14:08:12,SLCE,,Light Curve end ,,,,,
+12:00.0,6/17/25,14:12:00,SLCS,,Light Curve start ,5,,,,
+12:00.0,6/17/25,14:12:00,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:00.0,6/17/25,14:12:00,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:01.4,6/17/25,14:12:01,FO,136,133,193,0,0.311,0,0.311
+12:15.4,6/17/25,14:12:15,SLCE,,Light Curve end ,,,,,
+12:22.4,6/17/25,14:12:22,SLCS,,Light Curve start ,5,,,,
+12:22.4,6/17/25,14:12:22,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:22.4,6/17/25,14:12:22,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:23.8,6/17/25,14:12:23,FO,137,229,399,0,0.426,0,0.426
+12:27.1,6/17/25,14:12:27,SLCE,,Light Curve end ,,,,,
+12:37.6,6/17/25,14:12:37,SLCS,,Light Curve start ,5,,,,
+12:37.6,6/17/25,14:12:37,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:37.6,6/17/25,14:12:37,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:39.0,6/17/25,14:12:39,FO,138,156,236,0,0.339,0,0.339
+12:45.6,6/17/25,14:12:45,SLCE,,Light Curve end ,,,,,
+13:12.0,6/17/25,14:13:11,SLCS,,Light Curve start ,6,,,,
+13:12.0,6/17/25,14:13:11,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:12.0,6/17/25,14:13:11,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:13.4,6/17/25,14:13:13,FO,139,43,84,0,0.488,0,0.488
+13:18.0,6/17/25,14:13:18,SLCE,,Light Curve end ,,,,,
+13:23.7,6/17/25,14:13:23,SLCS,,Light Curve start ,6,,,,
+13:23.7,6/17/25,14:13:23,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:23.7,6/17/25,14:13:23,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:25.1,6/17/25,14:13:25,FO,140,53,127,0,0.583,0,0.583
+13:31.2,6/17/25,14:13:31,SLCE,,Light Curve end ,,,,,
+13:41.2,6/17/25,14:13:41,SLCS,,Light Curve start ,6,,,,
+13:41.2,6/17/25,14:13:41,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:41.2,6/17/25,14:13:41,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:42.6,6/17/25,14:13:42,FO,141,123,264,0,0.534,0,0.534
+13:47.0,6/17/25,14:13:46,SLCE,,Light Curve end ,,,,,
+14:00.8,6/17/25,14:14:00,SLCS,,Light Curve start ,7,,,,
+14:00.8,6/17/25,14:14:00,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:00.8,6/17/25,14:14:00,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:02.2,6/17/25,14:14:02,FO,142,72,165,0,0.564,0,0.564
+14:06.7,6/17/25,14:14:06,SLCE,,Light Curve end ,,,,,
+14:17.8,6/17/25,14:14:17,SLCS,,Light Curve start ,7,,,,
+14:17.8,6/17/25,14:14:17,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:17.8,6/17/25,14:14:17,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:19.2,6/17/25,14:14:19,FO,143,62,157,0,0.605,0,0.605
+14:24.3,6/17/25,14:14:24,SLCE,,Light Curve end ,,,,,
+14:49.3,6/17/25,14:14:49,SLCS,,Light Curve start ,7,,,,
+14:49.3,6/17/25,14:14:49,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:49.3,6/17/25,14:14:49,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:50.7,6/17/25,14:14:50,FO,144,108,242,0,0.554,0,0.554
+14:58.4,6/17/25,14:14:58,SLCE,,Light Curve end ,,,,,
+15:30.6,6/17/25,14:15:30,SLCS,,Light Curve start ,8,,,,
+15:30.6,6/17/25,14:15:30,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:30.6,6/17/25,14:15:30,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:32.0,6/17/25,14:15:32,FO,145,72,178,0,0.596,0,0.596
+15:38.7,6/17/25,14:15:38,SLCE,,Light Curve end ,,,,,
+16:02.4,6/17/25,14:16:02,SLCS,,Light Curve start ,8,,,,
+16:02.4,6/17/25,14:16:02,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:02.4,6/17/25,14:16:02,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:03.8,6/17/25,14:16:03,FO,146,66,174,0,0.621,0,0.621
+16:08.6,6/17/25,14:16:08,SLCE,,Light Curve end ,,,,,
+16:23.3,6/17/25,14:16:23,SLCS,,Light Curve start ,8,,,,
+16:23.3,6/17/25,14:16:23,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:23.3,6/17/25,14:16:23,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:24.7,6/17/25,14:16:24,FO,147,83,165,0,0.497,0,0.497
+16:46.7,6/17/25,14:16:46,SLCE,,Light Curve end ,,,,,
+59:24.4,6/17/25,14:59:24,SLCS,,Light Curve start ,1,,,,
+59:24.4,6/17/25,14:59:24,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:24.4,6/17/25,14:59:24,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:25.7,6/17/25,14:59:25,FO,148,164,267,0,0.386,0,0.386
+59:33.3,6/17/25,14:59:33,SLCE,,Light Curve end ,,,,,
+59:54.0,6/17/25,14:59:53,SLCS,,Light Curve start ,1,,,,
+59:54.0,6/17/25,14:59:53,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:54.0,6/17/25,14:59:53,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:55.4,6/17/25,14:59:55,FO,149,230,331,0,0.305,0,0.305
+59:59.4,6/17/25,14:59:59,SLCE,,Light Curve end ,,,,,
+00:21.2,6/17/25,15:00:21,SLCS,,Light Curve start ,1,,,,
+00:21.2,6/17/25,15:00:21,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:21.2,6/17/25,15:00:21,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:22.5,6/17/25,15:00:22,FO,150,61,143,0,0.573,0,0.573
+00:26.9,6/17/25,15:00:26,SLCE,,Light Curve end ,,,,,
+00:52.7,6/17/25,15:00:52,SLCS,,Light Curve start ,2,,,,
+00:52.7,6/17/25,15:00:52,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:52.7,6/17/25,15:00:52,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:54.1,6/17/25,15:00:54,FO,151,48,155,0,0.69,0,0.69
+01:01.8,6/17/25,15:01:01,SLCE,,Light Curve end ,,,,,
+01:24.2,6/17/25,15:01:24,SLCS,,Light Curve start ,2,,,,
+01:25.6,6/17/25,15:01:25,FO,152,52,142,0,0.634,0,0.634
+01:26.0,6/17/25,15:01:25,SLCE,,Light Curve end ,,,,,
+01:47.2,6/17/25,15:01:47,SLCS,,Light Curve start ,2,,,,
+01:47.2,6/17/25,15:01:47,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:47.2,6/17/25,15:01:47,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:48.6,6/17/25,15:01:48,FO,154,59,153,0,0.614,0,0.614
+01:57.8,6/17/25,15:01:57,SLCE,,Light Curve end ,,,,,
+02:25.2,6/17/25,15:02:25,SLCS,,Light Curve start ,2,,,,
+02:25.2,6/17/25,15:02:25,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:25.2,6/17/25,15:02:25,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:26.5,6/17/25,15:02:26,FO,155,54,171,0,0.684,0,0.684
+02:31.9,6/17/25,15:02:31,SLCE,,Light Curve end ,,,,,
+03:06.0,6/17/25,15:03:05,SLCS,,Light Curve start ,3,,,,
+03:06.0,6/17/25,15:03:05,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:06.0,6/17/25,15:03:05,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:07.4,6/17/25,15:03:07,FO,156,60,154,0,0.61,0,0.61
+03:13.6,6/17/25,15:03:13,SLCE,,Light Curve end ,,,,,
+03:38.9,6/17/25,15:03:38,SLCS,,Light Curve start ,3,,,,
+03:38.9,6/17/25,15:03:38,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:38.9,6/17/25,15:03:38,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:40.3,6/17/25,15:03:40,FO,157,58,122,0,0.525,0,0.525
+03:46.6,6/17/25,15:03:46,SLCE,,Light Curve end ,,,,,
+04:05.7,6/17/25,15:04:05,SLCS,,Light Curve start ,3,,,,
+04:05.7,6/17/25,15:04:05,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:05.7,6/17/25,15:04:05,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:07.1,6/17/25,15:04:07,FO,158,47,130,0,0.638,0,0.638
+04:12.7,6/17/25,15:04:12,SLCE,,Light Curve end ,,,,,
+04:42.6,6/17/25,15:04:42,SLCS,,Light Curve start ,4,,,,
+04:42.6,6/17/25,15:04:42,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:42.6,6/17/25,15:04:42,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:43.9,6/17/25,15:04:43,FO,159,97,272,0,0.643,0,0.643
+04:49.8,6/17/25,15:04:49,SLCE,,Light Curve end ,,,,,
+05:51.3,6/17/25,15:05:51,SLCS,,Light Curve start ,4,,,,
+05:51.3,6/17/25,15:05:51,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:51.3,6/17/25,15:05:51,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:52.7,6/17/25,15:05:52,FO,160,58,170,0,0.659,0,0.659
+05:58.0,6/17/25,15:05:58,SLCE,,Light Curve end ,,,,,
+06:06.6,6/17/25,15:06:06,SLCS,,Light Curve start ,4,,,,
+06:06.6,6/17/25,15:06:06,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:06.6,6/17/25,15:06:06,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:08.0,6/17/25,15:06:08,FO,161,39,136,0,0.713,0,0.713
+06:17.4,6/17/25,15:06:17,SLCE,,Light Curve end ,,,,,
+09:15.0,6/17/25,15:09:15,SLCS,,Light Curve start ,5,,,,
+09:15.0,6/17/25,15:09:15,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:15.0,6/17/25,15:09:15,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:16.4,6/17/25,15:09:16,FO,162,83,150,0,0.447,0,0.447
+09:22.6,6/17/25,15:09:22,SLCE,,Light Curve end ,,,,,
+09:28.8,6/17/25,15:09:28,SLCS,,Light Curve start ,5,,,,
+09:28.8,6/17/25,15:09:28,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:28.8,6/17/25,15:09:28,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:30.2,6/17/25,15:09:30,FO,163,172,354,0,0.514,0,0.514
+09:34.6,6/17/25,15:09:34,SLCE,,Light Curve end ,,,,,
+09:43.2,6/17/25,15:09:43,SLCS,,Light Curve start ,5,,,,
+09:43.2,6/17/25,15:09:43,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:43.2,6/17/25,15:09:43,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:44.6,6/17/25,15:09:44,FO,164,75,161,0,0.534,0,0.534
+09:48.5,6/17/25,15:09:48,SLCE,,Light Curve end ,,,,,
+10:17.4,6/17/25,15:10:17,SLCS,,Light Curve start ,6,,,,
+10:17.4,6/17/25,15:10:17,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:17.4,6/17/25,15:10:17,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:18.8,6/17/25,15:10:18,FO,165,196,412,0,0.524,0,0.524
+10:27.5,6/17/25,15:10:27,SLCE,,Light Curve end ,,,,,
+10:44.2,6/17/25,15:10:44,SLCS,,Light Curve start ,6,,,,
+10:44.2,6/17/25,15:10:44,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:44.2,6/17/25,15:10:44,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:45.6,6/17/25,15:10:45,FO,166,104,218,0,0.523,0,0.523
+10:49.9,6/17/25,15:10:49,SLCE,,Light Curve end ,,,,,
+10:57.4,6/17/25,15:10:57,SLCS,,Light Curve start ,6,,,,
+10:57.4,6/17/25,15:10:57,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:57.4,6/17/25,15:10:57,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:58.8,6/17/25,15:10:58,FO,167,137,292,0,0.531,0,0.531
+11:04.8,6/17/25,15:11:04,SLCE,,Light Curve end ,,,,,
+11:31.3,6/17/25,15:11:31,SLCS,,Light Curve start ,7,,,,
+11:31.3,6/17/25,15:11:31,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:31.3,6/17/25,15:11:31,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:32.7,6/17/25,15:11:32,FO,168,137,262,0,0.477,0,0.477
+11:37.5,6/17/25,15:11:37,SLCE,,Light Curve end ,,,,,
+12:22.7,6/17/25,15:12:22,SLCS,,Light Curve start ,7,,,,
+12:22.7,6/17/25,15:12:22,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:22.7,6/17/25,15:12:22,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:24.1,6/17/25,15:12:24,FO,169,74,163,0,0.546,0,0.546
+12:30.6,6/17/25,15:12:30,SLCE,,Light Curve end ,,,,,
+12:56.8,6/17/25,15:12:56,SLCS,,Light Curve start ,7,,,,
+12:56.8,6/17/25,15:12:56,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:56.8,6/17/25,15:12:56,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:58.2,6/17/25,15:12:58,FO,170,119,292,0,0.592,0,0.592
+13:02.8,6/17/25,15:13:02,SLCE,,Light Curve end ,,,,,
+13:48.7,6/17/25,15:13:48,SLCS,,Light Curve start ,8,,,,
+13:48.7,6/17/25,15:13:48,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:48.7,6/17/25,15:13:48,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:50.1,6/17/25,15:13:50,FO,171,64,175,0,0.634,0,0.634
+13:54.1,6/17/25,15:13:54,SLCE,,Light Curve end ,,,,,
+14:38.5,6/17/25,15:14:38,SLCS,,Light Curve start ,8,,,,
+14:38.5,6/17/25,15:14:38,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:38.5,6/17/25,15:14:38,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:39.9,6/17/25,15:14:39,FO,172,105,256,0,0.59,0,0.59
+14:43.9,6/17/25,15:14:43,SLCE,,Light Curve end ,,,,,
+15:16.8,6/17/25,15:15:16,SLCS,,Light Curve start ,8,,,,
+15:16.8,6/17/25,15:15:16,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:16.8,6/17/25,15:15:16,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:18.2,6/17/25,15:15:18,FO,173,70,177,0,0.605,0,0.605
+15:22.5,6/17/25,15:15:22,SLCE,,Light Curve end ,,,,,
+58:58.7,6/17/25,15:58:58,SLCS,,Light Curve start ,1,,,,
+58:58.7,6/17/25,15:58:58,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+58:58.7,6/17/25,15:58:58,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+59:00.0,6/17/25,15:59:00,FO,174,52,125,0,0.584,0,0.584
+59:04.8,6/17/25,15:59:04,SLCE,,Light Curve end ,,,,,
+00:04.4,6/17/25,16:00:04,SLCS,,Light Curve start ,1,,,,
+00:04.4,6/17/25,16:00:04,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:04.4,6/17/25,16:00:04,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:05.7,6/17/25,16:00:05,FO,176,323,464,0,0.304,0,0.304
+00:11.3,6/17/25,16:00:11,SLCE,,Light Curve end ,,,,,
+00:36.3,6/17/25,16:00:36,SLCS,,Light Curve start ,1,,,,
+00:36.3,6/17/25,16:00:36,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:36.3,6/17/25,16:00:36,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:37.7,6/17/25,16:00:37,FO,177,69,129,0,0.465,0,0.465
+00:43.5,6/17/25,16:00:43,SLCE,,Light Curve end ,,,,,
+01:05.7,6/17/25,16:01:05,SLCS,,Light Curve start ,2,,,,
+01:05.7,6/17/25,16:01:05,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:05.7,6/17/25,16:01:05,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:07.1,6/17/25,16:01:07,FO,178,87,190,0,0.542,0,0.542
+01:11.9,6/17/25,16:01:11,SLCE,,Light Curve end ,,,,,
+01:25.2,6/17/25,16:01:25,SLCS,,Light Curve start ,2,,,,
+01:25.2,6/17/25,16:01:25,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:25.2,6/17/25,16:01:25,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:26.6,6/17/25,16:01:26,FO,179,40,98,0,0.592,0,0.592
+01:33.1,6/17/25,16:01:33,SLCE,,Light Curve end ,,,,,
+01:44.1,6/17/25,16:01:44,SLCS,,Light Curve start ,2,,,,
+01:44.1,6/17/25,16:01:44,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:44.1,6/17/25,16:01:44,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:45.5,6/17/25,16:01:45,FO,180,91,184,0,0.505,0,0.505
+01:50.2,6/17/25,16:01:50,SLCE,,Light Curve end ,,,,,
+02:06.1,6/17/25,16:02:06,SLCS,,Light Curve start ,3,,,,
+02:06.1,6/17/25,16:02:06,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:06.1,6/17/25,16:02:06,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:07.5,6/17/25,16:02:07,FO,181,90,163,0,0.448,0,0.448
+02:12.1,6/17/25,16:02:12,SLCE,,Light Curve end ,,,,,
+02:20.8,6/17/25,16:02:20,SLCS,,Light Curve start ,3,,,,
+02:20.8,6/17/25,16:02:20,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:20.8,6/17/25,16:02:20,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:22.2,6/17/25,16:02:22,FO,182,66,124,0,0.468,0,0.468
+02:26.9,6/17/25,16:02:26,SLCE,,Light Curve end ,,,,,
+02:38.7,6/17/25,16:02:38,SLCS,,Light Curve start ,3,,,,
+02:38.7,6/17/25,16:02:38,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:38.7,6/17/25,16:02:38,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:40.1,6/17/25,16:02:40,FO,183,62,97,0,0.361,0,0.361
+02:45.6,6/17/25,16:02:45,SLCE,,Light Curve end ,,,,,
+03:14.1,6/17/25,16:03:14,SLCS,,Light Curve start ,4,,,,
+03:14.1,6/17/25,16:03:14,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:14.1,6/17/25,16:03:14,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:15.6,6/17/25,16:03:15,FO,184,196,359,0,0.454,0,0.454
+03:21.7,6/17/25,16:03:21,SLCE,,Light Curve end ,,,,,
+03:43.1,6/17/25,16:03:43,SLCS,,Light Curve start ,4,,,,
+03:43.1,6/17/25,16:03:43,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:43.1,6/17/25,16:03:43,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:44.5,6/17/25,16:03:44,FO,185,217,472,0,0.54,0,0.54
+03:50.1,6/17/25,16:03:50,SLCE,,Light Curve end ,,,,,
+03:59.3,6/17/25,16:03:59,SLCS,,Light Curve start ,4,,,,
+03:59.3,6/17/25,16:03:59,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:59.3,6/17/25,16:03:59,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:00.7,6/17/25,16:04:00,FO,186,67,167,0,0.599,0,0.599
+04:07.1,6/17/25,16:04:07,SLCE,,Light Curve end ,,,,,
+07:16.8,6/17/25,16:07:16,SLCS,,Light Curve start ,5,,,,
+07:16.8,6/17/25,16:07:16,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:16.8,6/17/25,16:07:16,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:18.2,6/17/25,16:07:18,FO,187,230,390,0,0.41,0,0.41
+07:23.5,6/17/25,16:07:23,SLCE,,Light Curve end ,,,,,
+07:32.5,6/17/25,16:07:32,SLCS,,Light Curve start ,5,,,,
+07:32.5,6/17/25,16:07:32,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:32.5,6/17/25,16:07:32,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:33.9,6/17/25,16:07:33,FO,188,76,127,0,0.402,0,0.402
+07:39.7,6/17/25,16:07:39,SLCE,,Light Curve end ,,,,,
+07:50.6,6/17/25,16:07:50,SLCS,,Light Curve start ,5,,,,
+07:50.6,6/17/25,16:07:50,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:50.6,6/17/25,16:07:50,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:52.0,6/17/25,16:07:51,FO,189,79,128,0,0.383,0,0.383
+07:57.1,6/17/25,16:07:57,SLCE,,Light Curve end ,,,,,
+08:18.0,6/17/25,16:08:18,SLCS,,Light Curve start ,6,,,,
+08:18.0,6/17/25,16:08:18,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:18.0,6/17/25,16:08:18,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:19.4,6/17/25,16:08:19,FO,190,255,532,0,0.521,0,0.521
+08:23.7,6/17/25,16:08:23,SLCE,,Light Curve end ,,,,,
+08:32.6,6/17/25,16:08:32,SLCS,,Light Curve start ,6,,,,
+08:32.6,6/17/25,16:08:32,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:32.6,6/17/25,16:08:32,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:34.0,6/17/25,16:08:34,FO,191,246,506,0,0.514,0,0.514
+08:38.6,6/17/25,16:08:38,SLCE,,Light Curve end ,,,,,
+08:48.1,6/17/25,16:08:48,SLCS,,Light Curve start ,6,,,,
+08:48.1,6/17/25,16:08:48,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:48.1,6/17/25,16:08:48,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:49.5,6/17/25,16:08:49,FO,192,211,469,0,0.55,0,0.55
+08:55.2,6/17/25,16:08:55,SLCE,,Light Curve end ,,,,,
+09:15.2,6/17/25,16:09:15,SLCS,,Light Curve start ,7,,,,
+09:15.2,6/17/25,16:09:15,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:15.2,6/17/25,16:09:15,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:16.6,6/17/25,16:09:16,FO,193,73,174,0,0.58,0,0.58
+09:21.1,6/17/25,16:09:21,SLCE,,Light Curve end ,,,,,
+09:27.9,6/17/25,16:09:27,SLCS,,Light Curve start ,7,,,,
+09:27.9,6/17/25,16:09:27,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:27.9,6/17/25,16:09:27,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:29.3,6/17/25,16:09:29,FO,194,115,225,0,0.489,0,0.489
+09:33.0,6/17/25,16:09:32,SLCE,,Light Curve end ,,,,,
+10:21.7,6/17/25,16:10:21,SLCS,,Light Curve start ,7,,,,
+10:21.7,6/17/25,16:10:21,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:21.7,6/17/25,16:10:21,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:23.1,6/17/25,16:10:23,FO,195,76,181,0,0.58,0,0.58
+10:29.0,6/17/25,16:10:29,SLCE,,Light Curve end ,,,,,
+10:45.3,6/17/25,16:10:45,SLCS,,Light Curve start ,8,,,,
+10:45.3,6/17/25,16:10:45,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:45.3,6/17/25,16:10:45,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:46.7,6/17/25,16:10:46,FO,196,63,169,0,0.627,0,0.627
+10:50.8,6/17/25,16:10:50,SLCE,,Light Curve end ,,,,,
+11:15.5,6/17/25,16:11:15,SLCS,,Light Curve start ,8,,,,
+11:15.5,6/17/25,16:11:15,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:15.5,6/17/25,16:11:15,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:16.9,6/17/25,16:11:16,FO,197,109,277,0,0.606,0,0.606
+11:21.4,6/17/25,16:11:21,SLCE,,Light Curve end ,,,,,
+12:06.8,6/17/25,16:12:06,SLCS,,Light Curve start ,8,,,,
+12:06.8,6/17/25,16:12:06,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:06.8,6/17/25,16:12:06,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:08.2,6/17/25,16:12:08,FO,198,45,95,0,0.526,0,0.526
+12:15.5,6/17/25,16:12:15,SLCE,,Light Curve end ,,,,,
+01:12.9,6/17/25,17:01:12,SLCS,,Light Curve start ,1,,,,
+01:12.9,6/17/25,17:01:12,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:12.9,6/17/25,17:01:12,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:14.3,6/17/25,17:01:14,FO,199,92,181,0,0.492,0,0.492
+01:18.7,6/17/25,17:01:18,SLCE,,Light Curve end ,,,,,
+01:33.5,6/17/25,17:01:33,SLCS,,Light Curve start ,1,,,,
+01:33.5,6/17/25,17:01:33,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:33.5,6/17/25,17:01:33,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:34.9,6/17/25,17:01:34,FO,200,192,322,0,0.404,0,0.404
+01:39.2,6/17/25,17:01:39,SLCE,,Light Curve end ,,,,,
+01:48.8,6/17/25,17:01:48,SLCS,,Light Curve start ,1,,,,
+01:48.8,6/17/25,17:01:48,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:48.8,6/17/25,17:01:48,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:50.2,6/17/25,17:01:50,FO,201,72,118,0,0.39,0,0.39
+01:54.8,6/17/25,17:01:54,SLCE,,Light Curve end ,,,,,
+02:28.1,6/17/25,17:02:28,SLCS,,Light Curve start ,2,,,,
+02:28.1,6/17/25,17:02:28,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:28.1,6/17/25,17:02:28,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:29.5,6/17/25,17:02:29,FO,202,44,128,0,0.656,0,0.656
+02:34.3,6/17/25,17:02:34,SLCE,,Light Curve end ,,,,,
+02:50.4,6/17/25,17:02:50,SLCS,,Light Curve start ,2,,,,
+02:50.4,6/17/25,17:02:50,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:50.4,6/17/25,17:02:50,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:51.8,6/17/25,17:02:51,FO,203,130,277,0,0.531,0,0.531
+02:57.4,6/17/25,17:02:57,SLCE,,Light Curve end ,,,,,
+03:14.5,6/17/25,17:03:14,SLCS,,Light Curve start ,2,,,,
+03:14.5,6/17/25,17:03:14,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:14.5,6/17/25,17:03:14,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:15.9,6/17/25,17:03:15,FO,204,83,237,0,0.65,0,0.65
+03:20.7,6/17/25,17:03:20,SLCE,,Light Curve end ,,,,,
+03:42.7,6/17/25,17:03:42,SLCS,,Light Curve start ,3,,,,
+03:42.7,6/17/25,17:03:42,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:42.7,6/17/25,17:03:42,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:44.1,6/17/25,17:03:44,FO,205,80,156,0,0.487,0,0.487
+03:48.5,6/17/25,17:03:48,SLCE,,Light Curve end ,,,,,
+04:07.4,6/17/25,17:04:07,SLCS,,Light Curve start ,3,,,,
+04:07.4,6/17/25,17:04:07,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:07.4,6/17/25,17:04:07,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:08.8,6/17/25,17:04:08,FO,206,85,234,0,0.637,0,0.637
+04:14.1,6/17/25,17:04:14,SLCE,,Light Curve end ,,,,,
+04:23.8,6/17/25,17:04:23,SLCS,,Light Curve start ,3,,,,
+04:23.8,6/17/25,17:04:23,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:23.8,6/17/25,17:04:23,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:25.2,6/17/25,17:04:25,FO,207,150,253,0,0.407,0,0.407
+04:29.7,6/17/25,17:04:29,SLCE,,Light Curve end ,,,,,
+04:48.1,6/17/25,17:04:48,SLCS,,Light Curve start ,4,,,,
+04:48.1,6/17/25,17:04:48,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:48.1,6/17/25,17:04:48,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:49.6,6/17/25,17:04:49,FO,208,186,421,0,0.558,0,0.558
+04:53.3,6/17/25,17:04:53,SLCE,,Light Curve end ,,,,,
+05:19.0,6/17/25,17:05:19,SLCS,,Light Curve start ,4,,,,
+05:19.0,6/17/25,17:05:19,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:19.0,6/17/25,17:05:19,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:20.4,6/17/25,17:05:20,FO,209,62,202,0,0.693,0,0.693
+05:24.5,6/17/25,17:05:24,SLCE,,Light Curve end ,,,,,
+06:08.1,6/17/25,17:06:08,SLCS,,Light Curve start ,4,,,,
+06:08.1,6/17/25,17:06:08,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:08.1,6/17/25,17:06:08,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:09.4,6/17/25,17:06:09,FO,210,149,304,0,0.51,0,0.51
+06:14.9,6/17/25,17:06:14,SLCE,,Light Curve end ,,,,,
+09:33.8,6/17/25,17:09:33,SLCS,,Light Curve start ,5,,,,
+09:33.8,6/17/25,17:09:33,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:33.8,6/17/25,17:09:33,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:35.2,6/17/25,17:09:35,FO,211,128,240,0,0.467,0,0.467
+09:39.4,6/17/25,17:09:39,SLCE,,Light Curve end ,,,,,
+09:55.6,6/17/25,17:09:55,SLCS,,Light Curve start ,5,,,,
+09:55.6,6/17/25,17:09:55,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:55.6,6/17/25,17:09:55,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:57.0,6/17/25,17:09:57,FO,212,99,214,0,0.537,0,0.537
+10:01.0,6/17/25,17:10:01,SLCE,,Light Curve end ,,,,,
+10:14.2,6/17/25,17:10:14,SLCS,,Light Curve start ,5,,,,
+10:14.2,6/17/25,17:10:14,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:14.2,6/17/25,17:10:14,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:15.6,6/17/25,17:10:15,FO,213,182,321,0,0.433,0,0.433
+10:19.6,6/17/25,17:10:19,SLCE,,Light Curve end ,,,,,
+10:39.9,6/17/25,17:10:39,SLCS,,Light Curve start ,6,,,,
+10:39.9,6/17/25,17:10:39,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:39.9,6/17/25,17:10:39,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:41.3,6/17/25,17:10:41,FO,214,110,259,0,0.575,0,0.575
+10:47.8,6/17/25,17:10:47,SLCE,,Light Curve end ,,,,,
+10:54.9,6/17/25,17:10:54,SLCS,,Light Curve start ,6,,,,
+10:54.9,6/17/25,17:10:54,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:54.9,6/17/25,17:10:54,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:56.3,6/17/25,17:10:56,FO,215,242,555,0,0.564,0,0.564
+10:59.8,6/17/25,17:10:59,SLCE,,Light Curve end ,,,,,
+11:05.5,6/17/25,17:11:05,SLCS,,Light Curve start ,6,,,,
+11:05.5,6/17/25,17:11:05,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:05.5,6/17/25,17:11:05,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:06.8,6/17/25,17:11:06,FO,216,201,469,0,0.571,0,0.571
+11:10.8,6/17/25,17:11:10,SLCE,,Light Curve end ,,,,,
+11:23.9,6/17/25,17:11:23,SLCS,,Light Curve start ,7,,,,
+11:23.9,6/17/25,17:11:23,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:23.9,6/17/25,17:11:23,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:25.3,6/17/25,17:11:25,FO,217,84,253,0,0.668,0,0.668
+11:31.7,6/17/25,17:11:31,SLCE,,Light Curve end ,,,,,
+11:43.7,6/17/25,17:11:43,SLCS,,Light Curve start ,7,,,,
+11:43.7,6/17/25,17:11:43,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:43.7,6/17/25,17:11:43,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:45.1,6/17/25,17:11:45,FO,218,130,296,0,0.561,0,0.561
+11:50.2,6/17/25,17:11:50,SLCE,,Light Curve end ,,,,,
+12:07.7,6/17/25,17:12:07,SLCS,,Light Curve start ,7,,,,
+12:07.7,6/17/25,17:12:07,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:07.7,6/17/25,17:12:07,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:09.1,6/17/25,17:12:09,FO,219,57,209,0,0.727,0,0.727
+12:13.9,6/17/25,17:12:13,SLCE,,Light Curve end ,,,,,
+12:29.2,6/17/25,17:12:29,SLCS,,Light Curve start ,8,,,,
+12:29.2,6/17/25,17:12:29,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:29.2,6/17/25,17:12:29,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:30.6,6/17/25,17:12:30,FO,220,81,228,0,0.645,0,0.645
+12:37.5,6/17/25,17:12:37,SLCE,,Light Curve end ,,,,,
+14:02.1,6/17/25,17:14:02,SLCS,,Light Curve start ,8,,,,
+14:02.1,6/17/25,17:14:02,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:02.1,6/17/25,17:14:02,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:03.5,6/17/25,17:14:03,FO,221,73,156,0,0.532,0,0.532
+14:12.3,6/17/25,17:14:12,SLCE,,Light Curve end ,,,,,
+15:46.1,6/17/25,17:15:46,SLCS,,Light Curve start ,8,,,,
+15:46.1,6/17/25,17:15:46,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:46.1,6/17/25,17:15:46,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:47.5,6/17/25,17:15:47,FO,222,62,145,0,0.572,0,0.572
+15:53.7,6/17/25,17:15:53,SLCE,,Light Curve end ,,,,,
+04:02.7,6/17/25,18:04:02,SLCS,,Light Curve start ,1,,,,
+04:02.7,6/17/25,18:04:02,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:02.7,6/17/25,18:04:02,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:04.1,6/17/25,18:04:04,FO,224,67,218,0,0.693,0,0.693
+04:12.2,6/17/25,18:04:12,SLCE,,Light Curve end ,,,,,
+04:34.6,6/17/25,18:04:34,SLCS,,Light Curve start ,1,,,,
+04:34.6,6/17/25,18:04:34,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:34.6,6/17/25,18:04:34,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:36.0,6/17/25,18:04:36,FO,225,219,515,0,0.575,0,0.575
+04:43.3,6/17/25,18:04:43,SLCE,,Light Curve end ,,,,,
+04:50.5,6/17/25,18:04:50,SLCS,,Light Curve start ,1,,,,
+04:50.5,6/17/25,18:04:50,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:50.5,6/17/25,18:04:50,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:51.8,6/17/25,18:04:51,FO,226,230,390,0,0.41,0,0.41
+04:56.0,6/17/25,18:04:55,SLCE,,Light Curve end ,,,,,
+05:08.6,6/17/25,18:05:08,SLCS,,Light Curve start ,2,,,,
+05:08.6,6/17/25,18:05:08,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:08.6,6/17/25,18:05:08,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:10.0,6/17/25,18:05:10,FO,227,78,238,0,0.672,0,0.672
+05:16.7,6/17/25,18:05:16,SLCE,,Light Curve end ,,,,,
+05:44.5,6/17/25,18:05:44,SLCS,,Light Curve start ,2,,,,
+05:44.5,6/17/25,18:05:44,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:44.5,6/17/25,18:05:44,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:45.9,6/17/25,18:05:45,FO,228,118,395,0,0.701,0,0.701
+06:03.9,6/17/25,18:06:03,SLCE,,Light Curve end ,,,,,
+06:13.6,6/17/25,18:06:13,SLCS,,Light Curve start ,2,,,,
+06:13.6,6/17/25,18:06:13,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:13.6,6/17/25,18:06:13,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:15.0,6/17/25,18:06:14,FO,229,56,235,0,0.762,0,0.762
+06:39.6,6/17/25,18:06:39,SLCE,,Light Curve end ,,,,,
+07:12.9,6/17/25,18:07:12,SLCS,,Light Curve start ,3,,,,
+07:12.9,6/17/25,18:07:12,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:12.9,6/17/25,18:07:12,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:14.3,6/17/25,18:07:14,FO,230,84,185,0,0.546,0,0.546
+07:19.1,6/17/25,18:07:19,SLCE,,Light Curve end ,,,,,
+07:28.1,6/17/25,18:07:28,SLCS,,Light Curve start ,3,,,,
+07:28.1,6/17/25,18:07:28,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:28.1,6/17/25,18:07:28,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:29.5,6/17/25,18:07:29,FO,231,127,275,0,0.538,0,0.538
+07:37.3,6/17/25,18:07:37,SLCE,,Light Curve end ,,,,,
+07:56.3,6/17/25,18:07:56,SLCS,,Light Curve start ,3,,,,
+07:56.3,6/17/25,18:07:56,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:56.3,6/17/25,18:07:56,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+07:57.7,6/17/25,18:07:57,FO,232,69,248,0,0.722,0,0.722
+08:03.8,6/17/25,18:08:03,SLCE,,Light Curve end ,,,,,
+08:25.8,6/17/25,18:08:25,SLCS,,Light Curve start ,4,,,,
+08:25.8,6/17/25,18:08:25,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:25.8,6/17/25,18:08:25,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+08:27.2,6/17/25,18:08:27,FO,233,145,372,0,0.61,0,0.61
+08:33.0,6/17/25,18:08:32,SLCE,,Light Curve end ,,,,,
+09:02.0,6/17/25,18:09:02,SLCS,,Light Curve start ,4,,,,
+09:02.0,6/17/25,18:09:02,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:02.0,6/17/25,18:09:02,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:03.4,6/17/25,18:09:03,FO,234,77,268,0,0.713,0,0.713
+09:10.7,6/17/25,18:09:10,SLCE,,Light Curve end ,,,,,
+09:56.2,6/17/25,18:09:56,SLCS,,Light Curve start ,4,,,,
+09:56.2,6/17/25,18:09:56,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:56.2,6/17/25,18:09:56,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+09:57.6,6/17/25,18:09:57,FO,235,56,193,0,0.71,0,0.71
+10:05.1,6/17/25,18:10:05,SLCE,,Light Curve end ,,,,,
+13:10.9,6/17/25,18:13:10,SLCS,,Light Curve start ,5,,,,
+13:10.9,6/17/25,18:13:10,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:10.9,6/17/25,18:13:10,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:12.3,6/17/25,18:13:12,FO,236,60,141,0,0.574,0,0.574
+13:18.1,6/17/25,18:13:18,SLCE,,Light Curve end ,,,,,
+13:30.3,6/17/25,18:13:30,SLCS,,Light Curve start ,5,,,,
+13:30.3,6/17/25,18:13:30,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:30.3,6/17/25,18:13:30,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:31.7,6/17/25,18:13:31,FO,237,133,261,0,0.49,0,0.49
+13:35.7,6/17/25,18:13:35,SLCE,,Light Curve end ,,,,,
+13:48.2,6/17/25,18:13:48,SLCS,,Light Curve start ,5,,,,
+13:48.2,6/17/25,18:13:48,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:48.2,6/17/25,18:13:48,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:49.6,6/17/25,18:13:49,FO,238,224,461,0,0.514,0,0.514
+13:54.2,6/17/25,18:13:54,SLCE,,Light Curve end ,,,,,
+15:29.1,6/17/25,18:15:29,SLCS,,Light Curve start ,6,,,,
+15:29.1,6/17/25,18:15:29,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:29.1,6/17/25,18:15:29,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:30.5,6/17/25,18:15:30,FO,239,107,280,0,0.618,0,0.618
+15:34.8,6/17/25,18:15:34,SLCE,,Light Curve end ,,,,,
+15:42.8,6/17/25,18:15:42,SLCS,,Light Curve start ,6,,,,
+15:42.8,6/17/25,18:15:42,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:42.8,6/17/25,18:15:42,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:44.2,6/17/25,18:15:44,FO,240,210,541,0,0.612,0,0.612
+15:48.5,6/17/25,18:15:48,SLCE,,Light Curve end ,,,,,
+15:53.7,6/17/25,18:15:53,SLCS,,Light Curve start ,6,,,,
+15:53.7,6/17/25,18:15:53,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:53.7,6/17/25,18:15:53,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:55.1,6/17/25,18:15:55,FO,241,170,425,0,0.6,0,0.6
+15:59.8,6/17/25,18:15:59,SLCE,,Light Curve end ,,,,,
+16:46.9,6/17/25,18:16:46,SLCS,,Light Curve start ,7,,,,
+16:46.9,6/17/25,18:16:46,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:46.9,6/17/25,18:16:46,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+16:48.3,6/17/25,18:16:48,FO,242,136,293,0,0.536,0,0.536
+16:57.4,6/17/25,18:16:57,SLCE,,Light Curve end ,,,,,
+17:05.2,6/17/25,18:17:05,SLCS,,Light Curve start ,7,,,,
+17:05.2,6/17/25,18:17:05,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:05.2,6/17/25,18:17:05,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:06.6,6/17/25,18:17:06,FO,243,62,202,0,0.693,0,0.693
+17:14.2,6/17/25,18:17:14,SLCE,,Light Curve end ,,,,,
+17:34.9,6/17/25,18:17:34,SLCS,,Light Curve start ,7,,,,
+17:34.9,6/17/25,18:17:34,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:34.9,6/17/25,18:17:34,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+17:36.3,6/17/25,18:17:36,FO,244,93,244,0,0.619,0,0.619
+17:44.2,6/17/25,18:17:44,SLCE,,Light Curve end ,,,,,
+18:00.9,6/17/25,18:18:00,SLCS,,Light Curve start ,8,,,,
+18:00.9,6/17/25,18:18:00,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+18:00.9,6/17/25,18:18:00,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+18:02.3,6/17/25,18:18:02,FO,245,167,395,0,0.577,0,0.577
+18:06.8,6/17/25,18:18:06,SLCE,,Light Curve end ,,,,,
+18:12.6,6/17/25,18:18:12,SLCS,,Light Curve start ,8,,,,
+18:12.6,6/17/25,18:18:12,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+18:12.6,6/17/25,18:18:12,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+18:14.0,6/17/25,18:18:14,FO,246,161,346,0,0.535,0,0.535
+18:20.3,6/17/25,18:18:20,SLCE,,Light Curve end ,,,,,
+18:54.5,6/17/25,18:18:54,SLCS,,Light Curve start ,8,,,,
+18:54.5,6/17/25,18:18:54,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+18:54.5,6/17/25,18:18:54,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+18:55.9,6/17/25,18:18:55,FO,247,101,254,0,0.602,0,0.602
+19:02.0,6/17/25,18:19:02,SLCE,,Light Curve end ,,,,,
+00:14.6,6/17/25,19:00:14,SLCS,,Light Curve start ,1,,,,
+00:14.6,6/17/25,19:00:14,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:14.6,6/17/25,19:00:14,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:16.0,6/17/25,19:00:15,FO,248,194,436,0,0.555,0,0.555
+00:21.5,6/17/25,19:00:21,SLCE,,Light Curve end ,,,,,
+00:33.3,6/17/25,19:00:33,SLCS,,Light Curve start ,1,,,,
+00:33.3,6/17/25,19:00:33,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:33.3,6/17/25,19:00:33,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+00:34.6,6/17/25,19:00:34,FO,249,66,182,0,0.637,0,0.637
+00:39.6,6/17/25,19:00:39,SLCE,,Light Curve end ,,,,,
+01:02.0,6/17/25,19:01:01,SLCS,,Light Curve start ,1,,,,
+01:02.0,6/17/25,19:01:01,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:02.0,6/17/25,19:01:01,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:03.3,6/17/25,19:01:03,FO,250,80,186,0,0.57,0,0.57
+01:08.4,6/17/25,19:01:08,SLCE,,Light Curve end ,,,,,
+01:31.7,6/17/25,19:01:31,SLCS,,Light Curve start ,2,,,,
+01:31.7,6/17/25,19:01:31,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:31.7,6/17/25,19:01:31,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+01:33.1,6/17/25,19:01:33,FO,251,92,266,0,0.654,0,0.654
+01:46.7,6/17/25,19:01:46,SLCE,,Light Curve end ,,,,,
+02:15.4,6/17/25,19:02:15,SLCS,,Light Curve start ,2,,,,
+02:15.4,6/17/25,19:02:15,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:15.4,6/17/25,19:02:15,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:16.8,6/17/25,19:02:16,FO,252,145,383,0,0.621,0,0.621
+02:22.5,6/17/25,19:02:22,SLCE,,Light Curve end ,,,,,
+02:35.5,6/17/25,19:02:35,SLCS,,Light Curve start ,2,,,,
+02:35.5,6/17/25,19:02:35,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:35.5,6/17/25,19:02:35,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+02:36.9,6/17/25,19:02:36,FO,253,94,237,0,0.603,0,0.603
+02:43.3,6/17/25,19:02:43,SLCE,,Light Curve end ,,,,,
+03:07.6,6/17/25,19:03:07,SLCS,,Light Curve start ,3,,,,
+03:07.6,6/17/25,19:03:07,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:07.6,6/17/25,19:03:07,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:09.0,6/17/25,19:03:08,FO,254,62,242,0,0.744,0,0.744
+03:15.9,6/17/25,19:03:15,SLCE,,Light Curve end ,,,,,
+03:28.5,6/17/25,19:03:28,SLCS,,Light Curve start ,3,,,,
+03:28.5,6/17/25,19:03:28,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:28.5,6/17/25,19:03:28,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:29.9,6/17/25,19:03:29,FO,255,63,189,0,0.667,0,0.667
+03:35.2,6/17/25,19:03:35,SLCE,,Light Curve end ,,,,,
+03:49.3,6/17/25,19:03:49,SLCS,,Light Curve start ,3,,,,
+03:49.3,6/17/25,19:03:49,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:49.3,6/17/25,19:03:49,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+03:50.7,6/17/25,19:03:50,FO,256,79,165,0,0.521,0,0.521
+03:55.5,6/17/25,19:03:55,SLCE,,Light Curve end ,,,,,
+04:34.8,6/17/25,19:04:34,SLCS,,Light Curve start ,4,,,,
+04:34.8,6/17/25,19:04:34,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:34.8,6/17/25,19:04:34,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+04:36.2,6/17/25,19:04:36,FO,257,64,170,0,0.624,0,0.624
+04:41.6,6/17/25,19:04:41,SLCE,,Light Curve end ,,,,,
+05:07.6,6/17/25,19:05:07,SLCS,,Light Curve start ,4,,,,
+05:07.6,6/17/25,19:05:07,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:07.6,6/17/25,19:05:07,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:09.0,6/17/25,19:05:09,FO,258,89,128,0,0.305,0,0.305
+05:13.7,6/17/25,19:05:13,SLCE,,Light Curve end ,,,,,
+05:58.6,6/17/25,19:05:58,SLCS,,Light Curve start ,4,,,,
+05:58.6,6/17/25,19:05:58,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+05:58.6,6/17/25,19:05:58,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+06:00.0,6/17/25,19:06:00,FO,259,51,201,0,0.746,0,0.746
+06:05.5,6/17/25,19:06:05,SLCE,,Light Curve end ,,,,,
+10:23.1,6/17/25,19:10:23,SLCS,,Light Curve start ,5,,,,
+10:23.1,6/17/25,19:10:23,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:23.1,6/17/25,19:10:23,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:24.5,6/17/25,19:10:24,FO,260,116,187,0,0.38,0,0.38
+10:30.2,6/17/25,19:10:30,SLCE,,Light Curve end ,,,,,
+10:39.9,6/17/25,19:10:39,SLCS,,Light Curve start ,5,,,,
+10:39.9,6/17/25,19:10:39,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:39.9,6/17/25,19:10:39,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+10:41.3,6/17/25,19:10:41,FO,261,294,544,0,0.46,0,0.46
+10:46.0,6/17/25,19:10:45,SLCE,,Light Curve end ,,,,,
+11:11.8,6/17/25,19:11:11,SLCS,,Light Curve start ,5,,,,
+11:11.8,6/17/25,19:11:11,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:11.8,6/17/25,19:11:11,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:13.2,6/17/25,19:11:13,FO,262,136,325,0,0.582,0,0.582
+11:21.6,6/17/25,19:11:21,SLCE,,Light Curve end ,,,,,
+11:46.0,6/17/25,19:11:46,SLCS,,Light Curve start ,6,,,,
+11:46.0,6/17/25,19:11:46,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:46.0,6/17/25,19:11:46,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+11:47.4,6/17/25,19:11:47,FO,263,226,572,0,0.605,0,0.605
+11:53.2,6/17/25,19:11:53,SLCE,,Light Curve end ,,,,,
+12:09.4,6/17/25,19:12:09,SLCS,,Light Curve start ,6,,,,
+12:09.4,6/17/25,19:12:09,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:09.4,6/17/25,19:12:09,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:10.8,6/17/25,19:12:10,FO,264,204,535,0,0.619,0,0.619
+12:16.2,6/17/25,19:12:16,SLCE,,Light Curve end ,,,,,
+12:31.0,6/17/25,19:12:31,SLCS,,Light Curve start ,6,,,,
+12:31.0,6/17/25,19:12:31,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:31.0,6/17/25,19:12:31,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:32.4,6/17/25,19:12:32,FO,265,149,465,0,0.68,0,0.68
+12:38.7,6/17/25,19:12:38,SLCE,,Light Curve end ,,,,,
+12:55.1,6/17/25,19:12:55,SLCS,,Light Curve start ,7,,,,
+12:55.1,6/17/25,19:12:55,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:55.1,6/17/25,19:12:55,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+12:56.5,6/17/25,19:12:56,FO,266,112,277,0,0.596,0,0.596
+13:02.9,6/17/25,19:13:02,SLCE,,Light Curve end ,,,,,
+13:09.6,6/17/25,19:13:09,SLCS,,Light Curve start ,7,,,,
+13:09.6,6/17/25,19:13:09,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:09.6,6/17/25,19:13:09,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:11.0,6/17/25,19:13:10,FO,267,108,307,0,0.648,0,0.648
+13:16.5,6/17/25,19:13:16,SLCE,,Light Curve end ,,,,,
+13:34.4,6/17/25,19:13:34,SLCS,,Light Curve start ,7,,,,
+13:34.4,6/17/25,19:13:34,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:34.4,6/17/25,19:13:34,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+13:35.8,6/17/25,19:13:35,FO,268,108,261,0,0.586,0,0.586
+13:42.2,6/17/25,19:13:42,SLCE,,Light Curve end ,,,,,
+14:10.7,6/17/25,19:14:10,SLCS,,Light Curve start ,8,,,,
+14:10.7,6/17/25,19:14:10,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:10.7,6/17/25,19:14:10,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:12.1,6/17/25,19:14:12,FO,269,85,246,0,0.654,0,0.654
+14:16.3,6/17/25,19:14:16,SLCE,,Light Curve end ,,,,,
+14:37.1,6/17/25,19:14:37,SLCS,,Light Curve start ,8,,,,
+14:37.1,6/17/25,19:14:37,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:37.1,6/17/25,19:14:37,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+14:38.5,6/17/25,19:14:38,FO,270,75,249,0,0.699,0,0.699
+14:44.1,6/17/25,19:14:44,SLCE,,Light Curve end ,,,,,
+15:55.2,6/17/25,19:15:55,SLCS,,Light Curve start ,8,,,,
+15:55.2,6/17/25,19:15:55,REG1,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:55.2,6/17/25,19:15:55,REG2,,#1: Error: Not enough measures for calculating regression data ,,,,,
+15:56.6,6/17/25,19:15:56,FO,271,60,189,0,0.683,0,0.683
+16:03.3,6/17/25,19:16:03,SLCE,,Light Curve end ,,,,,
