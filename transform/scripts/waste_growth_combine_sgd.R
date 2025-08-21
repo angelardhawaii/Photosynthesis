@@ -33,7 +33,7 @@ all_growth <- read.csv("/Users/angela/src/Photosynthesis/data/hyp_ulv_old/all_ru
 all_2023 <- read.csv("/Users/angela/src/Photosynthesis/data/wastewater/input/growth_2025/hyp_ulv_2023_growth.csv")
 
 #Scrubby scrubby all datasets
-all_growth <- clean_names(all_growth) #clean up ugly names
+all_growth <- clean_names(all_growth) #clean up ugly names in 2021-2022 dataset
 all_2023 <- clean_names(all_2023)
 all_growth_waste <- clean_names(all_growth_waste)
 
