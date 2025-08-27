@@ -1,6 +1,6 @@
 # Photosynthesis script for combining 2023 SGD dataset with 2025 wastewater dataset
 # Both will be cleaned by pam_data_cleaner_tidy.R function
-# Will add some of the higher N values from 2021 dataset
+# Script may need to add some variables
 # By Angela Richards Dona
 # 8/20/25
 
@@ -255,21 +255,33 @@ ps_combo <- ps_combo %>%
 #Assign new run values to avoid issues of repeats and to get true chronology
 ps_combo <- ps_combo %>%
   mutate(run_combo = case_when(
-    date == as.Date("2023-03-17") ~ 11,
-    date == as.Date("2023-03-18") ~ 11,
-    date == as.Date("2023-03-28") ~ 12,
-    date == as.Date("2023-03-31") ~ 12,
-    date == as.Date("2023-04-11") ~ 13,
-    date == as.Date("2023-04-14") ~ 13,
-    date == as.Date("2025-01-31") ~ 14,
-    date == as.Date("2025-02-25") ~ 15,
-    date == as.Date("2025-03-14") ~ 16,
-    date == as.Date("2025-03-18") ~ 16,
-    date == as.Date("2025-03-25") ~ 17,
-    date == as.Date("2025-03-28") ~ 17
+    date >= as.Date("2023-03-09") & date <= as.Date("2023-03-18") ~ 11,
+    date >= as.Date("2023-03-20") & date <= as.Date("2023-03-31") ~ 12,
+    date >= as.Date("2023-04-03") & date <= as.Date("2023-04-14") ~ 13,
+    date >= as.Date("2025-01-23") & date <= as.Date("2025-01-31") ~ 14,
+    date >= as.Date("2025-02-17") & date <= as.Date("2025-02-25") ~ 15,
+    date >= as.Date("2025-03-06") & date <= as.Date("2025-03-18") ~ 16,
+    date >= as.Date("2025-03-17") & date <= as.Date("2025-03-28") ~ 17,
+    TRUE ~ NA_real_  # Optional: keep NA for unmatched dates
   ))
+ps_combo <- ps_combo %>%
+  mutate(time = as_hms(time)) 
 
-
+ps_combo <- ps_combo %>%
+  mutate(rlc_day = case_when(
+    date == as.Date("2025-03-10") & time < hms::as_hms("12:00:00") ~ 5,
+    date == as.Date("2025-03-10") & time >= hms::as_hms("12:00:00") ~ 1,
+    date == as.Date("2025-03-14") & time < hms::as_hms("12:00:00") ~ 9,
+    date == as.Date("2025-03-14") & time >= hms::as_hms("12:00:00") ~ 5,
+    date %in% as.Date(c("2023-03-09", "2023-03-10", "2023-03-20", "2023-03-23", "2023-04-03", 
+                        "2023-04-06", "2025-01-23", "2025-02-17", "2025-03-06", 
+                        "2025-03-17", "2025-03-20")) ~ 1,
+    date %in% as.Date(c("2023-03-13", "2023-03-14", "2023-03-24", "2023-03-27", "2023-04-07", 
+                        "2023-04-10", "2025-01-27", "2025-02-21", "2025-03-21", "2025-03-24")) ~ 5,
+    date %in% as.Date(c("2023-03-17", "2023-03-18", "2023-03-28", "2023-03-31", "2023-04-11",
+                        "2023-04-14", "2025-01-31", "2025-02-25", "2025-03-18",
+                        "2025-03-25", "2025-03-28")) ~ 9
+))
 #add lunar phase to the combined dataset
 library(lunar)
 library(suncalc)
