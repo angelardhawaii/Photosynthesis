@@ -34,8 +34,8 @@ ps_combo_pt <- ps_combo_pt %>%
     retr      = as.numeric(retr),
     npq       = as.numeric(npq),
     # If `time` is a time string, keep it as character or parse if you want ordering
-    # time    = hms::as_hms(time),
-    
+    time    = hms::as_hms(time),
+  
     # Effective quantum yield (numeric, not factor)
     quan_yield = round((fm - f) / fm, 3),
     
@@ -60,80 +60,110 @@ per_curve <- selected_df %>%
       vals <- npq[yield > 0.1]
       if (length(vals) == 0) NA_real_ else max(vals, na.rm = TRUE)
     },
-    rlc_end_time = max(time, na.rm = TRUE),
+    rlc_end_time = hms::as_hms(max(time, na.rm = TRUE)),
     .groups = "drop"
   )
 
 # 5) Fit Webb per light curve (vectorised by groups via list-columns)
 #    Assumes fitWebb(epar, yield, normalize=TRUE) returns a list with numeric vectors $alpha and $ek (length 4 each)
+# Helper function to extract elements from named vectors safely
+safe_extract <- function(x, name) {
+  if (!is.null(x) && name %in% names(x)) {
+    return(x[[name]])
+  } else {
+    return(NA_real_)
+  }
+}
+
 webb_params <- selected_df %>%
   group_by(unique_id) %>%
-  reframe(
-    fit = list(fitWebb(epar, yield, normalize = TRUE))
-  ) %>%
-  mutate(
-    alpha = list(fit[[1]]$alpha),
-    ek    = list(fit[[1]]$ek)
-  ) %>%
-  select(-fit) %>%
-  tidyr::unnest_wider(alpha, names_sep = "_") %>%  # alpha_1 ... alpha_4
-  tidyr::unnest_wider(ek,    names_sep = "_")      # ek_1 ... ek_4
+  group_modify(~ {
+    fit <- tryCatch(
+      fitWebb(.x$epar, .x$yield, normalize = TRUE),
+      error = function(e) NULL
+    )
+    
+    if (is.null(fit)) {
+      return(tibble(
+        alpha_est = NA_real_,
+        alpha_se = NA_real_,
+        alpha_t = NA_real_,
+        alpha_pvalue = NA_real_,
+        ek_est = NA_real_,
+        ek_se = NA_real_,
+        ek_t = NA_real_,
+        ek_pvalue = NA_real_
+      ))
+    }
+    
+    tibble(
+      alpha_est    = safe_extract(fit$alpha, "Estimate"),
+      alpha_se     = safe_extract(fit$alpha, "Std.Error"),
+      alpha_t      = safe_extract(fit$alpha, "t value"),
+      alpha_pvalue = safe_extract(fit$alpha, "Pr(>|t|)"),
+      ek_est       = safe_extract(fit$ek, "Estimate"),
+      ek_se        = safe_extract(fit$ek, "Std.Error"),
+      ek_t         = safe_extract(fit$ek, "t value"),
+      ek_pvalue    = safe_extract(fit$ek, "Pr(>|t|)")
+    )
+  }) %>%
+  ungroup()
 
 per_curve_with_webb <- per_curve %>%
   left_join(webb_params, by = "unique_id") %>%
   mutate(
     # Pmax from the first alpha/ek values
-    pmax = round(alpha_1 * ek_1, 2)
+    pmax = round(alpha_est * ek_est, 2)
   )
 # 6) Join summaries back to rows (row-level dataset with curve-level columns filled)
 selected_df_aug <- selected_df %>%
   left_join(per_curve, by = "unique_id")
 
-# 7) (Optional) a per-curve table with both summaries and Webb params
-per_curve_with_webb <- per_curve %>%
-  left_join(webb_params, by = "unique_id")
+first_row_of_rlc <- ps_combo_pt %>%
+  filter(epar == 0 & is.na(npq))
+last_row_rlc <- subset(ps_combo_pt, delta_npq > 0)
+# Join the per-curve summaries into first-row-only subset
+first_row_joined <- first_row_of_rlc %>%
+  left_join(per_curve_with_webb, by = "unique_id")  # Adjust join key if needed
 
-
-#rlc_day_assign <- read.csv("/Users/Angela/src/work/limu/phytotools_alpha_ek/data_input/date_day_assignment.csv")
-
-#rlc_days_by_date = array(dim = length(dates))
-#hash_of_rlc_days_by_date <- hash(rlc_day_assign$Date, rlc_day_assign$RLC.Day)
-#for (i in 1: length(dates)) {
-#        rlc_days_by_date[i] = hash_of_rlc_days_by_date[[dates[i]]]
-#}
-
-#lanai_side_by_date = array(dim = length(dates))
-#hash_of_lanai_side_by_date <- hash(rlc_day_assign$Date, tolower(rlc_day_assign$Lanai.side))
-#for (i in 1:length(dates)) {
-#        lanai_side_by_date[i] = as.character(hash_of_lanai_side_by_date[[dates[i]]])
-#}
-
-first_row_of_rlc <- subset(ps_combo_pt, Epar == 0 & NPQ == "-")
-last_row_rlc <- subset(ps_combo_pt, deltaNPQ > 0)
-
-# build the final data frame
-final_df <- data.frame("Date" = first_row_of_rlc$posix_date, 
-                       "rlc_end_time" = rlc_end_times,
-                       "Specimen ID" = first_row_of_rlc$ID,
-                       #"Plant ID" = first_row_of_rlc$plant.ID,
-                       "deltaNPQ" = last_row_rlc$deltaNPQ,
-                       "Species" = first_row_of_rlc$species,
-                       "Treatment" = first_row_of_rlc$treatment,
-                       "Temp (°C)" = first_row_of_rlc$temp,
-                       "RLC Time" = first_row_of_rlc$Time,
-                       "RLC Day" = first_row_of_rlc$rlc_day,
-                       "Run" = first_row_of_rlc$run,
-                       "pmax" = pmax,
-                       "rETRmax" = rETRMaxes,
-                       "rETRmaxYpoint1" = rETRmaxYpoint1,
-                       "NPQmax" = NPQmax,
-                       "alpha" = round(alpha, digits = 3),
-                       "ek" = round(ek, digits = 1)
+# Now safely build your final df
+pmax_ek_alpha <- data.frame(
+  id               = first_row_joined$id,
+  date             = first_row_joined$date,
+  species          = first_row_joined$species,
+  rlc_time         = first_row_joined$time,
+  treatment        = first_row_joined$treatment,
+  temp             = first_row_joined$temp,
+  nitrate          = first_row_joined$nitrate,
+  salinity         = first_row_joined$salinity,
+  n_g_m3_2d        = first_row_joined$n_g_m3_2d,
+  p_g_m3_2d        = first_row_joined$p_g_m3_2d,
+  treat_letter     = first_row_joined$treat_letter,
+  run_combo        = first_row_joined$run_combo,
+  rlc_end_time     = first_row_joined$rlc_end_time,
+  rlc_day          = first_row_joined$rlc_day,
+  f0               = first_row_joined$f0,
+  fm               = first_row_joined$fm,
+  f                = first_row_joined$f,
+  fm_prime         = first_row_joined$fm_prime,
+  fv_fm            = first_row_joined$fv_fm,
+  delta_npq        = first_row_joined$delta_npq,
+  pmax             = first_row_joined$pmax,
+  retr_max         = first_row_joined$retr_max,
+  retr_max_ypoint1 = first_row_joined$retr_max_ypoint1,
+  npq_max          = first_row_joined$npq_max,
+  alpha_est       = round(first_row_joined$alpha_est, 3),
+  alpha_se        = round(first_row_joined$alpha_se, 3),
+  alpha_t         = round(first_row_joined$alpha_t, 2),
+  alpha_pvalue    = round(first_row_joined$alpha_pvalue, 3),
+  ek_est          = round(first_row_joined$ek_est, 1),
+  ek_se           = round(first_row_joined$ek_se, 1),
+  ek_t            = round(first_row_joined$ek_t, 2),
+  ek_pvalue       = round(first_row_joined$ek_pvalue, 3),
+  lunar_phase      = first_row_joined$lunar_phase,
+  illumination     = first_row_joined$illumination
 )
-
-
+  
 # save to file
-write.csv(final_df, "data_output/wastewater/hyp_ulv_wastewater_ek_alpha_normalized.csv")
-write.csv (final_df, "../irradiance_ek/data_ek/wastewater/hyp_ulv_wastewater_ek_alpha_normalized.csv")
-write.csv(final_df, "../algal_growth_photosynthesis/data_input/wastewater/hyp_ulv_wastewater_ek_alpha_normalized.csv")
+write.csv(pmax_ek_alpha, "/Users/angela/src/Photosynthesis/data/wastewater/transformed/hyp_ulv_combo_ek_alpha_normalized.csv")
 
