@@ -254,6 +254,9 @@ pam_data_cleaner_tidy <- function(data_glob, output_file) {
 
 #copy this next line into R script to run the function
 #source("/Users/angela/src/Photosynthesis/transform/scripts/pam_data_cleaner_tidy.R")
+rlc_2021 <- pam_data_cleaner_tidy(
+  data_glob = "/Users/angela/src/old_limu/hyp_ulv_2022/data/input/pam/*.csv",
+  output_file = "/Users/angela/src/old_limu/hyp_ulv_2022/data/transformed/pam_2021data_clean_tidy.csv")
 
 rlc_2025 <- pam_data_cleaner_tidy(
   data_glob = "/Users/angela/src/Photosynthesis/data/wastewater/input/pam_2025/*.csv",

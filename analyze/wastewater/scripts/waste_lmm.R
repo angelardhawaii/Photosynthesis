@@ -1,8 +1,11 @@
 #Script to run model for photosynthesis data for Hypnea and Ulva wastewater data
+# This script pulls in the combined dataset for both the 2023 SGD and wastewater data
 #By Angela Richards Donà
 #Date: 1/16/25
 #Modified with revamped functions to run all basic variables 11/25/24
+#Modified for combined data 08/26/25
 
+#load libraries for analysis and wrangling
 library(lme4)
 library(lmerTest)
 library(afex)
@@ -15,6 +18,7 @@ library(DHARMa)
 library(performance)
 library(patchwork)
 library(rstatix)
+
 #for plots and tables
 library(ggplot2)
 library(ggpubr)
@@ -23,7 +27,6 @@ library(RColorBrewer)
 library(tidyverse)
 library(sjPlot)
 library(sjmisc)
-#library(mmtable2)
 library(gt)
 library(purrr)
 library(stringr)
@@ -34,62 +37,70 @@ library(ggeffects)
 
 
 #load this file for normalized to quantum efficiency of photosynthesis per Silsbe and Kromkamp
-waste_p1_ps <- read.csv("../data/wastewater/transformed/waste_p1_ek_alpha_normalized_2025.csv")
-glimpse(waste_p1_ps)
+ps_combo <- read.csv("/Users/angela/src/Photosynthesis/data/wastewater/transformed/2021_2025_combo_ek_alpha_normalized.csv")
 
-waste_p1_ps$Date <- ymd(waste_p1_ps$Date)
+
+ps_combo <- ps_combo %>%
+  mutate(date = ymd(date))
+
+#unique_id looking funky, redo
+ps_combo <- ps_combo %>%
+  mutate(unique_id = paste(date, tolower(id), sep = "-"))
 
 # make sure time is hms
-waste_p1_ps$rlc_end_time <- as_hms(waste_p1_ps$rlc_end_time)
+ps_combo$rlc_end_time <- as_hms(ps_combo$rlc_end_time)
+ps_combo$rlc_time <- as_hms(ps_combo$rlc_time)
 
-# assign run as a factor
-#waste_p1_ps$run <- as.factor(waste_p1_ps$run)
+# assign list of variables as factor
+factor_vars <- c("treat_letter", "treatment", "salinity", "temp", "rlc_day", "nitrate")
 
-#assign temperature as a factor
-#waste_p1_ps$salinity <- as.factor(waste_p1_ps$salinity)
-
-#assigns treatment as characters from integers then to factors
-waste_p1_ps$treatment <- as.factor(as.character(waste_p1_ps$treatment))
-
-# assign deltaNPQ as a numeric
-waste_p1_ps$deltaNPQ <- as.numeric(waste_p1_ps$deltaNPQ)
+ps_combo <- ps_combo %>%
+  mutate(across(all_of(factor_vars), as.factor))
 
 #assign new column for chronological ranking of individuals in each day_group
-waste_p1_ps <- waste_p1_ps %>%
-  group_by(Date) %>%
-  mutate(rank = rank(rlc_end_time))
-
-
 #use ranking to make smaller groups of ~15 minutes for rlc_order
-waste_p1_ps <- waste_p1_ps %>%
-  group_by(Date) %>%
-  mutate(rlc_order = floor((rank -1)/2) +1)
+ps_combo <- ps_combo %>%
+  group_by(date) %>%
+  arrange(rlc_end_time, .by_group = TRUE) %>%
+  mutate(
+    rank = dplyr::row_number(),                 # stable rank by time
+    rlc_order1 = floor((rank - 1) / 3) + 1      # 3 steps ≈ 15 minutes
+  ) %>%
+  ungroup()
 
-#waste_p1_ps_d9 <- subset(waste_p1_ps, rlc_day == 9) #only d9 is included in dataset
+#Treatment Graph is set up to have predictors in order of my choosing
+ps_combo <- ps_combo %>%
+  mutate(treatment_graph = case_when(
+    treat_letter == "a" ~ "1) 0.5 μmol",
+    treat_letter == "b" ~ "2) 14 μmol",
+    treat_letter == "c" ~ "3) 27 μmol",
+    treat_letter == "d" ~ "4) 53 μmol",
+    treat_letter == "e" ~ "5) 53 μmol",
+    treat_letter == "f" ~ "6) 80 μmol",
+    treat_letter == "k" ~ "7) 80 μmol",
+    treat_letter == "l" ~ "8) 245 μmol",
+    treat_letter == "m" ~ "9) 748 μmol",
+    treat_letter == "n" ~ "10) 2287 μmol"
+  ))
 
-#toggle between the species for output.
-ulva_ps <- subset(waste_p1_ps, species == "u")
-ulva_ps$treatment_graph[ulva_ps$treatment == 1] <- "1) 80 μmol"
-ulva_ps$treatment_graph[ulva_ps$treatment == 2] <- "2) 140 μmol"
-ulva_ps$treatment_graph[ulva_ps$treatment == 3] <- "3) 245 μmol" 
-ulva_ps$treatment_graph[ulva_ps$treatment == 4] <- "4) 428 μmol"
-ulva_ps$treatment_graph[ulva_ps$treatment == 5] <- "5) 748 μmol"
-ulva_ps$treatment_graph[ulva_ps$treatment == 6] <- "6) 1308 μmol"
-ulva_ps$treatment_graph[ulva_ps$treatment == 7] <- "7) 2287 μmol"
-ulva_ps$treatment_graph[ulva_ps$treatment == 8] <- "8) 4000 μmol"
-glimpse(ulva_ps)
 
-hypnea_ps <- subset(waste_p1_ps, species == "h")
-hypnea_ps$treatment_graph[hypnea_ps$treatment == 1] <- "1) 80 μmol"
-hypnea_ps$treatment_graph[hypnea_ps$treatment == 2] <- "2) 140 μmol"
-hypnea_ps$treatment_graph[hypnea_ps$treatment == 3] <- "3) 245 μmol" 
-hypnea_ps$treatment_graph[hypnea_ps$treatment == 4] <- "4) 428 μmol"
-hypnea_ps$treatment_graph[hypnea_ps$treatment == 5] <- "5) 748 μmol"
-hypnea_ps$treatment_graph[hypnea_ps$treatment == 6] <- "6) 1308 μmol"
-hypnea_ps$treatment_graph[hypnea_ps$treatment == 7] <- "7) 2287 μmol"
-hypnea_ps$treatment_graph[hypnea_ps$treatment == 8] <- "8) 4000 μmol"
+#subset the nitrate levels needed removing those used for 2023 paper irrelevant to wastewater
+# and keep only day 9 for analysis
+# now that i have spent an eternity combining the two datasets, I will filter out the 2021 
+#data because it is giving major problems of singularity and rank deficiency
+ps_combo <- ps_combo %>%
+  mutate(year = lubridate::year(date))
+ps_combo_d9 <- ps_combo %>%
+  filter(!year %in% c(2021, 2022)) %>%
+  filter(rlc_day == 9) #only d9 is included in dataset
+  
+# subset the species
+ulva_ps <- subset(ps_combo_d9, species == "u")
 
-#SKIP models for phase I
+hypnea_ps <- subset(ps_combo_d9, species == "h")
+
+
+
 #Datasets are ready, now let's run models
 
 check_model_fit <- function(model, terms) {
@@ -108,201 +119,199 @@ check_model_fit <- function(model, terms) {
 
 #get predictor means
 get_data_means <- function(data, predictors_list, response){
+  group_vars <- c("nitrate", setdiff(predictors_list, "nitrate"))
   data %>% 
-    group_by(across(all_of(c("nitrate", setdiff(predictors_list, "nitrate"))))) %>%
-    summarise_at(all_of(response), list(mean = mean), .groups = "drop")
+    group_by(across(all_of(group_vars))) %>%
+    summarise(!!paste0(response, "_mean") := mean(.data[[response]], na.rm = TRUE),
+              .groups = "drop")
 }
-
 
 #Make a function to run the the models for likelihood ratio tests where REML must be FALSE
 #construct null model to perform likelihood ratio test REML must be FALSE
+
 compare_lmer_models <- function(data, response, predictors_list, random_effects) {
-  # Ensure response is a string
-  response <- as.character(response)
+    # Keep only rows usable by all models
+    needed <- c(response, predictors_list, random_effects)
+    data_clean <- tidyr::drop_na(data, all_of(unique(c(response, predictors_list))))
+    data_clean <- droplevels(data_clean)  # drop unused factor levels 
+  # Build random-effects string
+    re_str <- paste0("(1 | ", random_effects, ")", collapse = " + ")
   
-  # Create a list to store the models
-  models <- list()
+  # Full model
+    fixed_all <- paste(predictors_list, collapse = " + ")
+    f_full <- as.formula(paste(response, "~", fixed_all, "+", re_str))
+    model_all <- lme4::lmer(f_full, data = data_clean, REML = FALSE)
   
-  #initialize anova
-  anova_result <- list()
-  
-  
-  #random effects used for all
-  random_effects_part <- paste0("(1 | ", random_effects, ")", collapse = " + ")
-  
-  #make a formula for all predictors
-  fixed_effects_all <- paste(predictors_list, collapse = " + ")
-  formula <- as.formula(paste(response, "~", fixed_effects_all, "+", random_effects_part))
-  
-  model_all <- lmer(formula = formula, data = data, REML = FALSE)
-  
-  
-  # Loop through predictors_list to create and fit models
-  for (i in seq_along(predictors_list)) {
-    fixed_effects <- paste(predictors_list[[i]], collapse = " + ")
-    formula <- as.formula(paste(response, "~", fixed_effects, "+", random_effects_part))
+  # Drop-one models + LRTs
+    models <- list()
+    anova_result <- list()
     
-    # Fit the lmer model and store in the list
-    models[[i]] <- lmer(formula = formula, data = data, REML = FALSE)
-    
-    anova_result[[i]] <- anova(models[[i]], model_all)
-  }
+    for (dropped in predictors_list) {
+      fixed_reduced <- paste(setdiff(predictors_list, dropped), collapse = " + ")
+      f_reduced <- as.formula(paste(response, "~", fixed_reduced, "+", re_str))
+      models[[dropped]] <- lme4::lmer(f_reduced, data = data_clean, REML = FALSE)
+      anova_result[[dropped]] <- anova(models[[dropped]], model_all, test = "Chisq")
+    }
   
-  data_means <- get_data_means(data, predictors_list, response)
+    data_means <- get_data_means(data_clean, predictors_list, response)
   
-  # Return results as a list
-  return(list(
-    models = models,
+  list(
+    models = models,          # named by the predictor that was dropped
     model_all = model_all,
     anova_result = anova_result,
-    data_means = data_means
-  ))
+    data_means = data_means,
+    used_data = data_clean
+  )
 }
 
 predictors_list <- c("salinity", "nitrate")
 
-
 #Pmax_____________________________________
-#Inputs for Canopy/Pmax
-canopy_pmax_results <- compare_lmer_models(
-  data = canopy,
+#Inputs for ulva_ps/Pmax
+ulva_ps_pmax_results <- compare_lmer_models(
+  data = ulva_ps,
   response = "pmax",
   predictors_list,
-  random_effects = c("plantID", "rlc_order")
+  random_effects = c("plant_id", "rlc_order1")
 )
 
 # Access results
-summary(canopy_pmax_results$models[[1]]) # Model 1 summary (salinity)
-summary(canopy_pmax_results$models[[2]]) # Model 2 summary (nitrate)
-summary(canopy_pmax_results$model_all) # Model 3 summary (salinity and nitrate)
-canopy_pmax_results$anova_result[[1]]        # ANOVA did nitrate have an effect on Pmax?
-canopy_pmax_results$anova_result[[2]]         # ANOVA did salinity have an effect on Pmax?
-check_model_fit(canopy_pmax_results$model_all, terms = predictors_list)
-canopy_pmax_results$data_means
+# Full model
+summary(ulva_ps_pmax_results$model_all)
 
+# Drop-one summaries (if you want to inspect them)
+summary(ulva_ps_pmax_results$models[["salinity"]])
+summary(ulva_ps_pmax_results$models[["nitrate"]])
 
-#inputs for Understory/Pmax
+# Does salinity effect Ulva Pmax?
+ulva_ps_pmax_results$anova_result[["salinity"]]
+# Does nitrate effect Ulva Pmax?
+ulva_ps_pmax_results$anova_result[["nitrate"]]
+check_model_fit(ulva_ps_pmax_results$model_all, terms = predictors_list)
+ulva_ps_pmax_results$data_means
+
+#inputs for hypnea_ps/Pmax
 hypnea_ps_pmax_results <- compare_lmer_models(
   data = hypnea_ps,
   response = "pmax",
   predictors_list,
-  random_effects = c("mean_mins28", "rlc_order")
+  random_effects = c("plant_id", "rlc_order1")
 )
 
 # Access results
-summary(under_pmax_results$models[[1]]) # Model 1 summary
-summary(under_pmax_results$models[[2]]) # Model 2 summary
-summary(under_pmax_results$model_all) # Model 3 summary
-under_pmax_results$anova_result[[1]]        # ANOVA did nitrate have an effect on Pmax?
-under_pmax_results$anova_result[[2]]         # ANOVA did salinity have an effect on Pmax?
-check_model_fit(under_pmax_results$model_all, terms = predictors_list)
-under_pmax_results$data_means
+summary(hypnea_ps_pmax_results$models[[1]]) # Model 1 summary
+summary(hypnea_ps_pmax_results$models[[2]]) # Model 2 summary
+summary(hypnea_ps_pmax_results$model_all) # Model 3 summary
+hypnea_ps_pmax_results$anova_result[[1]]        # ANOVA did nitrate have an effect on Pmax?
+hypnea_ps_pmax_results$anova_result[[2]]         # ANOVA did salinity have an effect on Pmax?
+check_model_fit(hypnea_ps_pmax_results$model_all, terms = predictors_list)
+hypnea_ps_pmax_results$data_means
 
 #NPQmax______________________________
-#inputs for Canopy/NPQmax
-canopy_npqmax_results <- compare_lmer_models(
-  data = canopy,
-  response = "maxNPQ_Ypoint1",
+#inputs for ulva_ps/NPQmax
+ulva_ps_npqmax_results <- compare_lmer_models(
+  data = ulva_ps,
+  response = "npq_max",
   predictors_list,
-  random_effects = c("plantID", "mean_mins28", "rlc_order")
+  random_effects = c("plant_id", "rlc_order", "illumination", "run_combo")
 )
 
 # Access results
-summary(canopy_npqmax_results$models[[1]]) # Model 1 summary
-summary(canopy_npqmax_results$models[[2]]) # Model 2 summary
-summary(canopy_npqmax_results$model_all) # Model 3 summary
-canopy_npqmax_results$anova[[1]]        # ANOVA did nitrate have an effect on NPQmax?
-canopy_npqmax_results$anova[[2]]        # ANOVA did salinity have an effect on NPQmax?
-check_model_fit(canopy_npqmax_results$model_all, terms = predictors_list)
-canopy_npqmax_results$data_means
+summary(ulva_ps_npqmax_results$models[[1]]) # Model 1 summary
+summary(ulva_ps_npqmax_results$models[[2]]) # Model 2 summary
+summary(ulva_ps_npqmax_results$model_all) # Model 3 summary
+ulva_ps_npqmax_results$anova[[1]]        # ANOVA did nitrate have an effect on NPQmax?
+ulva_ps_npqmax_results$anova[[2]]        # ANOVA did salinity have an effect on NPQmax?
+check_model_fit(ulva_ps_npqmax_results$model_all, terms = predictors_list)
+ulva_ps_npqmax_results$data_means
 
-#inputs for Understory/NPQmax
-under_npqmax_results <- compare_lmer_models(
-  data = under,
-  response = "maxNPQ_Ypoint1",
+#inputs for hypnea_ps/NPQmax
+hypnea_ps_npqmax_results <- compare_lmer_models(
+  data = hypnea_ps,
+  response = "npq_max",
   predictors_list,
-  random_effects = c("plantID")
+  random_effects = c("plant_id", "rlc_order", "illumination", "run_combo")
 )
 
 # Access results
-summary(under_npqmax_results$models[[1]]) # Model 1 summary
-summary(under_npqmax_results$models[[2]]) # Model 2 summary
-summary(under_npqmax_results$model_all) # Model 3 summary
-under_npqmax_results$anova[[1]]         # ANOVA did nitrate have an effect on NPQmax?
-under_npqmax_results$anova[[2]]         # ANOVA did salinity have an effect on NPQmax?
-check_model_fit(under_npqmax_results$model_all, terms = predictors_list)
-under_npqmax_results$data_means
+summary(hypnea_ps_npqmax_results$models[[1]]) # Model 1 summary
+summary(hypnea_ps_npqmax_results$models[[2]]) # Model 2 summary
+summary(hypnea_ps_npqmax_results$model_all) # Model 3 summary
+hypnea_ps_npqmax_results$anova[[1]]         # ANOVA did nitrate have an effect on NPQmax?
+hypnea_ps_npqmax_results$anova[[2]]         # ANOVA did salinity have an effect on NPQmax?
+check_model_fit(hypnea_ps_npqmax_results$model_all, terms = predictors_list)
+hypnea_ps_npqmax_results$data_means
 
 #deltaNPQ____________________________
 
-#Inputs for Canopy/deltaNPQ
-canopy_delta_npq_results <- compare_lmer_models(
-  data = canopy,
+#Inputs for ulva_ps/deltaNPQ
+ulva_ps_delta_npq_results <- compare_lmer_models(
+  data = ulva_ps,
   response = "deltaNPQ",
   predictors_list,
   random_effects = c("plantID")
 )
 
 # Access results
-summary(canopy_delta_npq_results$models[[1]]) # Model 1 summary
-summary(canopy_delta_npq_results$models[[2]]) # Model 2 summary
-summary(canopy_delta_npq_results$model_all) # Model 3 summary
-canopy_delta_npq_results$anova[[1]]         # ANOVA did nitrate have an effect on deltaNPQ?
-canopy_delta_npq_results$anova[[2]]         # ANOVA did salinity have an effect on deltaNPQ?
-check_model_fit(canopy_delta_npq_results$model_all, terms = predictors_list)
-canopy_delta_npq_results$data_means
+summary(ulva_ps_delta_npq_results$models[[1]]) # Model 1 summary
+summary(ulva_ps_delta_npq_results$models[[2]]) # Model 2 summary
+summary(ulva_ps_delta_npq_results$model_all) # Model 3 summary
+ulva_ps_delta_npq_results$anova[[1]]         # ANOVA did nitrate have an effect on deltaNPQ?
+ulva_ps_delta_npq_results$anova[[2]]         # ANOVA did salinity have an effect on deltaNPQ?
+check_model_fit(ulva_ps_delta_npq_results$model_all, terms = predictors_list)
+ulva_ps_delta_npq_results$data_means
 
-#Inputs for Understory/deltaNPQ
-under_delta_npq_results <- compare_lmer_models(
-  data = under,
+#Inputs for hypnea_ps/deltaNPQ
+hypnea_ps_delta_npq_results <- compare_lmer_models(
+  data = hypnea_ps,
   response = "deltaNPQ",
   predictors_list,
   random_effects = c("plantID")
 )
 
 # Access results
-summary(under_delta_npq_results$models[[1]]) # Model 1 summary
-summary(under_delta_npq_results$models[[2]]) # Model 2 summary
-summary(under_delta_npq_results$model_all) # Model 3 summary
-under_delta_npq_results$anova[[1]]         # ANOVA did nitrate have an effect on deltaNPQ?
-under_delta_npq_results$anova[[2]]         # ANOVA did salinity have an effect on deltaNPQ?
-check_model_fit(under_delta_npq_results$model_all, terms = predictors_list)
-under_delta_npq_results$data_means
+summary(hypnea_ps_delta_npq_results$models[[1]]) # Model 1 summary
+summary(hypnea_ps_delta_npq_results$models[[2]]) # Model 2 summary
+summary(hypnea_ps_delta_npq_results$model_all) # Model 3 summary
+hypnea_ps_delta_npq_results$anova[[1]]         # ANOVA did nitrate have an effect on deltaNPQ?
+hypnea_ps_delta_npq_results$anova[[2]]         # ANOVA did salinity have an effect on deltaNPQ?
+check_model_fit(hypnea_ps_delta_npq_results$model_all, terms = predictors_list)
+hypnea_ps_delta_npq_results$data_means
 
 #Ek____________________________________________
-#Inputs for Canopy/Ek
-canopy_ek_results <- compare_lmer_models(
-  data = canopy,
+#Inputs for ulva_ps/Ek
+ulva_ps_ek_results <- compare_lmer_models(
+  data = ulva_ps,
   response = "ek.est",
   predictors_list,
   random_effects = c("plantID", "mean_mins28", "rlc_order")
 )
 
 # Access results
-summary(canopy_ek_results$models[[1]]) # Model 1 summary
-summary(canopy_ek_results$models[[2]]) # Model 2 summary
-summary(canopy_ek_results$model_all) # Model 3 summary
-canopy_ek_results$anova[[1]]         # ANOVA did nitrate have an effect on Ek?
-canopy_ek_results$anova[[2]]         # ANOVA did salinity have an effect on Ek?
-check_model_fit(canopy_ek_results$model_all, terms = predictors_list)
-canopy_ek_results$data_means
+summary(ulva_ps_ek_results$models[[1]]) # Model 1 summary
+summary(ulva_ps_ek_results$models[[2]]) # Model 2 summary
+summary(ulva_ps_ek_results$model_all) # Model 3 summary
+ulva_ps_ek_results$anova[[1]]         # ANOVA did nitrate have an effect on Ek?
+ulva_ps_ek_results$anova[[2]]         # ANOVA did salinity have an effect on Ek?
+check_model_fit(ulva_ps_ek_results$model_all, terms = predictors_list)
+ulva_ps_ek_results$data_means
 
-#Inputs for Understory/Ek
-under_ek_results <- compare_lmer_models(
-  data = under,
+#Inputs for hypnea_ps/Ek
+hypnea_ps_ek_results <- compare_lmer_models(
+  data = hypnea_ps,
   response = "ek.est",
   predictors_list,
   random_effects = c("mean_mins28", "rlc_order")
 )
 
 # Access results
-summary(under_ek_results$models[[1]]) # Model 1 summary
-summary(under_ek_results$models[[2]]) # Model 2 summary
-summary(under_ek_results$model_all) # Model 3 summary
-under_ek_results$anova[[1]]         # ANOVA did nitrate have an effect on Ek?
-under_ek_results$anova[[2]]         # ANOVA did salinity have an effect on Ek?
-check_model_fit(under_ek_results$model_all, terms = predictors_list)
-under_ek_results$data_means
+summary(hypnea_ps_ek_results$models[[1]]) # Model 1 summary
+summary(hypnea_ps_ek_results$models[[2]]) # Model 2 summary
+summary(hypnea_ps_ek_results$model_all) # Model 3 summary
+hypnea_ps_ek_results$anova[[1]]         # ANOVA did nitrate have an effect on Ek?
+hypnea_ps_ek_results$anova[[2]]         # ANOVA did salinity have an effect on Ek?
+check_model_fit(hypnea_ps_ek_results$model_all, terms = predictors_list)
+hypnea_ps_ek_results$data_means
 
 #ALL OF THE ABOVE RANDOM EFFECTS MuST BE CHECKED AND MAXIMIZED FOR FIT
 
@@ -417,15 +426,15 @@ pmax_hypnea <- raw_plots(
               "748 μmol", "1308 μmol",
               "2287 μmol", "4000 μmol")
 )
-plot(pmax_under$histo)
-plot(pmax_hypnea$plot)
-plot(pmax_under$lin_regr)
+plot(pmax_hypnea_ps$histo)
+plot(pmax_hypnea_ps$plot)
+plot(pmax_hypnea_ps$lin_regr)
 ggsave("pmax_hypnea_n6.png", path = "wastewater/plots/") 
        #width = 7, height = 6, units = "in", dpi = 300, scale = 1)
 
 #NPQmax----------------
 
-#inputs for canopy/NPQmax
+#inputs for ulva_ps/NPQmax
 npqmax_ulva <- raw_plots(
   data = ulva_ps,
   response = maxNPQ_Ypoint1,
@@ -454,15 +463,15 @@ npqmax_ulva <- raw_plots(
               "748 μmol", "1308 μmol",
               "2287 μmol", "4000 μmol")
 )
-plot(npqmax_canopy$histo)
+plot(npqmax_ulva_ps$histo)
 plot(npqmax_ulva$plot)
-plot(npqmax_canopy$lin_regr)
+plot(npqmax_ulva_ps$lin_regr)
 ggsave("npqmax_ulva_n6.png", path = "wastewater/plots/") 
        #width = 7, height = 6, units = "in", dpi = 300, scale = 1)
 
 
 
-#inputs for under/NPQmax
+#inputs for hypnea_ps/NPQmax
 npqmax_hypnea <- raw_plots(
   data = hypnea_ps,
   response = maxNPQ_Ypoint1,
@@ -491,16 +500,16 @@ npqmax_hypnea <- raw_plots(
               "748 μmol", "1308 μmol",
               "2287 μmol", "4000 μmol")
 )
-plot(npqmax_under$histo)
-plot(npqmax_hypnea$plot)
-plot(npqmax_under$lin_regr)
+plot(npqmax_hypnea_ps$histo)
+plot(npqmax_hypnea_ps$plot)
+plot(npqmax_hypnea_ps$lin_regr)
 ggsave("npqmax_hypnea_n6.png", path = "wastewater/plots/") 
        #width = 7, height = 6, units = "in", dpi = 300, scale = 1)
 
 
 #deltaNPQ----------------
 
-#inputs for canopy/deltaNPQ
+#inputs for ulva_ps/deltaNPQ
 delta_npq_ulva <- raw_plots(
   data = ulva_ps,
   response = deltaNPQ,
@@ -512,8 +521,8 @@ delta_npq_ulva <- raw_plots(
   x2 = "ΔNPQ",
   y = "Day 9 ΔNPQ",
   y2 = "9-Day Growth (%)",
-  title = "E - Canopy",
-  title2 = "Chondria tumulosa Canopy --- ΔNPQ vs 9-Day Growth (%)",
+  title = "E - ulva_ps",
+  title2 = "Chondria tumulosa ulva_ps --- ΔNPQ vs 9-Day Growth (%)",
   subtitle = "Chondria tumulosa",
   ylim1 = 0, 
   ylim2 = 2,
@@ -529,27 +538,27 @@ delta_npq_ulva <- raw_plots(
               "4 μmol", "4 μmol",
               "8 μmol", "8 μmol")
 )
-plot(delta_npq_canopy$histo)
-plot(delta_npq_canopy$plot)
-plot(delta_npq_canopy$lin_regr)
-ggsave("delta_npq_canopy.png", path = "wastewater/plots/", 
+plot(delta_npq_ulva_ps$histo)
+plot(delta_npq_ulva_ps$plot)
+plot(delta_npq_ulva_ps$lin_regr)
+ggsave("delta_npq_ulva_ps.png", path = "wastewater/plots/", 
        width = 7, height = 6, units = "in", dpi = 300, scale = 1)
 
 
-#inputs for under/deltaNPQ
-delta_npq_under <- raw_plots(
-  data = under,
+#inputs for hypnea_ps/deltaNPQ
+delta_npq_hypnea_ps <- raw_plots(
+  data = hypnea_ps,
   response = deltaNPQ,
   response2 = d9_growth_percent,
-  label = "Understory",
+  label = "hypnea_psstory",
   pretty_color = "maroon3",
   aescolor = salinity,
   x = "Nitrate",
   x2 = "ΔNPQ",
   y = "Day 9 ΔNPQ",
   y2 = "9-Day Growth (%)",
-  title = "F - Understory",
-  title2 = "Chondria tumulosa Understory --- ΔNPQ vs 9-Day Growth (%)",
+  title = "F - hypnea_psstory",
+  title2 = "Chondria tumulosa hypnea_psstory --- ΔNPQ vs 9-Day Growth (%)",
   subtitle = "Chondria tumulosa",
   ylim1 = 0, 
   ylim2 = 2,
@@ -565,16 +574,16 @@ delta_npq_under <- raw_plots(
               "4 μmol", "4 μmol",
               "8 μmol", "8 μmol")
 )
-plot(delta_npq_under$histo)
-plot(delta_npq_under$plot)
-plot(delta_npq_under$lin_regr)
-ggsave("delta_npq_under.png", path = "wastewater/plots/", 
+plot(delta_npq_hypnea_ps$histo)
+plot(delta_npq_hypnea_ps$plot)
+plot(delta_npq_hypnea_ps$lin_regr)
+ggsave("delta_npq_hypnea_ps.png", path = "wastewater/plots/", 
        width = 7, height = 6, units = "in", dpi = 300, scale = 1)
 
 
 #Ek----------------
 
-#inputs for canopy/Ek
+#inputs for ulva_ps/Ek
 ek_ulva <- raw_plots(
   data = ulva_ps,
   response = ek.est,
@@ -603,13 +612,13 @@ ek_ulva <- raw_plots(
               "748 μmol", "1308 μmol",
               "2287 μmol", "4000 μmol")
 )
-plot(ek_canopy$histo)
+plot(ek_ulva_ps$histo)
 plot(ek_ulva$plot)
-plot(ek_canopy$lin_regr)
+plot(ek_ulva_ps$lin_regr)
 ggsave("ek_ulva_n6.png", path = "wastewater/plots/") 
        #width = 7, height = 6, units = "in", dpi = 300, scale = 1)
 
-#inputs for under/Ek
+#inputs for hypnea_ps/Ek
 ek_hypnea <- raw_plots(
   data = hypnea_ps,
   response = ek.est,
@@ -638,9 +647,9 @@ ek_hypnea <- raw_plots(
               "748 μmol", "1308 μmol",
               "2287 μmol", "4000 μmol")
 )
-plot(ek_under$histo)
+plot(ek_hypnea_ps$histo)
 plot(ek_hypnea$plot)
-plot(ek_under$lin_regr)
+plot(ek_hypnea_ps$lin_regr)
 ggsave("ek_hypnea_n6.png", path = "wastewater/plots/") 
       # width = 7, height = 6, units = "in", dpi = 300, scale = 1)
 
@@ -651,17 +660,17 @@ ggsave("ek_hypnea_n6.png", path = "wastewater/plots/")
 #plot a regression between the photosynthetic independent variables of interest and growth rate
 
 
-under_growth_pmax_plot <- under %>%
+hypnea_ps_growth_pmax_plot <- hypnea_ps %>%
   ggplot(aes(x=pmax, 
              y=d9_growth_percent)) + 
   geom_point(alpha = 0.5, size = 3, show.legend = TRUE, aes(color = treatment)) + 
   geom_smooth(method = "lm", col = "black") + 
   theme_bw() + 
-  labs(title = "Chondria tumulosa Understory --- Pmax vs 9-Day Growth (%)", 
+  labs(title = "Chondria tumulosa hypnea_psstory --- Pmax vs 9-Day Growth (%)", 
        x = "Pmax (μmols electrons m-2 s-1)", 
        y = "9-Day Growth (%)") + 
   stat_regline_equation(label.x = 10, label.y = 65) + stat_cor(label.x = 10, label.y = 60)
-under_growth_pmax_plot
+hypnea_ps_growth_pmax_plot
 
 
 #--------------------NPQmax--------------------------
@@ -672,18 +681,18 @@ under_growth_pmax_plot
 
 
 #summarize the means for NPQmax
-canopy %>% group_by(nitrate, salinity) %>% summarise_at(vars(maxNPQ_Ypoint1), list(mean = mean))
-under %>% group_by(nitrate, salinity) %>% summarise_at(vars(maxNPQ_Ypoint1), list(mean = mean))
+ulva_ps %>% group_by(nitrate, salinity) %>% summarise_at(vars(maxNPQ_Ypoint1), list(mean = mean))
+hypnea_ps %>% group_by(nitrate, salinity) %>% summarise_at(vars(maxNPQ_Ypoint1), list(mean = mean))
 
 
 #Linear regression NPQ vs Growth and Apices
 #plot a regression between the photosynthetic independent variables of interest and growth rate
-#canopy_growth_NPQmax_graph <- ggplot(canopy_sub, aes(x=maxNPQ_Ypoint1, y=growth_rate_percent)) + 
+#ulva_ps_growth_NPQmax_graph <- ggplot(ulva_ps_sub, aes(x=maxNPQ_Ypoint1, y=growth_rate_percent)) + 
 geom_point(alpha = 0.5, size = 3, show.legend = TRUE, aes(color = treatment)) + 
   geom_smooth(method = "lm", col = "black") + theme_bw() + 
   labs(title = "Chondria tumulosa NPQmax vs 9-Day Growth (%)", x = " NPQmax (rel. units)", 
        y = "9-Day Growth (%)") + stat_regline_equation(label.x = 0.25, label.y = 38) + stat_cor(label.x = 0.25, label.y = 40)
-#canopy_growth_NPQmax_graph
+#ulva_ps_growth_NPQmax_graph
 
 
 
@@ -691,18 +700,18 @@ geom_point(alpha = 0.5, size = 3, show.legend = TRUE, aes(color = treatment)) +
 
 
 #summarize the means for deltaNPQ
-canopy %>% group_by(treatment) %>% summarise_at(vars(deltaNPQ), list(mean = mean))
-canopy %>% group_by(temp) %>% summarise_at(vars(deltaNPQ), list(mean = mean))
-#canopy %>% group_by(treatment, rlc_day) %>% summarise_at(vars(pmax), list(mean = mean))
+ulva_ps %>% group_by(treatment) %>% summarise_at(vars(deltaNPQ), list(mean = mean))
+ulva_ps %>% group_by(temp) %>% summarise_at(vars(deltaNPQ), list(mean = mean))
+#ulva_ps %>% group_by(treatment, rlc_day) %>% summarise_at(vars(pmax), list(mean = mean))
 
 #Linear regression deltaNPQ vs Growth and Apices
 
 #plot a regression between the photosynthetic independent variables of interest and growth rate
-canopy_growth_deltaNPQ_graph <- ggplot(canopy_sub, aes(x=deltaNPQ, y=growth_rate_percent)) + 
+ulva_ps_growth_deltaNPQ_graph <- ggplot(ulva_ps_sub, aes(x=deltaNPQ, y=growth_rate_percent)) + 
   geom_point(alpha = 0.5, size = 3, show.legend = TRUE, aes(color = treatment)) + 
   geom_smooth(method = "lm", col = "black") + theme_bw() + 
   labs(title = "Chondria tumulosa Delta NPQ vs 9-Day Growth (%)", x = " Delta NPQ (rel. units)", 
        y = "9-Day Growth (%)") + stat_regline_equation(label.x = 0.25, label.y = 38) + stat_cor(label.x = 0.25, label.y = 40)
-canopy_growth_deltaNPQ_graph
+ulva_ps_growth_deltaNPQ_graph
 
 
