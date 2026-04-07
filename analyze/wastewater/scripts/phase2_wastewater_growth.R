@@ -22,7 +22,7 @@ library(RColorBrewer)
 library(tidyverse)
 library(sjPlot)
 library(sjmisc)
-library(strengejacke)
+#library(strengejacke)
 #library(mmtable2)
 library(gt)
 library(purrr)
@@ -34,7 +34,7 @@ library(magrittr)
 
 
 #open weight dataset and make columns for growth rate from initial and final weights
-waste_p2_growth <- read.csv("../data/wastewater/input/growth_2025/waste_p2_growth.csv")
+waste_p2_growth <- read.csv("/Users/angela/src/Photosynthesis/data/wastewater/input/growth_2025/waste_p2_growth.csv")
 
 #assigns treatment as characters from integers then to factors
 waste_p2_growth$treatment <- as.factor(as.character(waste_p2_growth$treatment))
@@ -87,7 +87,7 @@ ulva_treatment_null <- lmer(formula = growth_d9 ~ salinity +
                               (1 | plant_id) + (1 | run) + (1 | lunar_phase), data = ulva_g, REML = FALSE)
 ulva_with_treatment <- lmer(formula = growth_d9 ~ treatment + salinity +
                         (1 | plant_id) + (1 | run) + (1 | lunar_phase), data = ulva_g, REML = FALSE)
-anova(ulva_nitrate_null, ulva_with_treatment)
+anova(ulva_treatment_null, ulva_with_treatment)
 ulva_salinity_null <- lmer(formula = growth_d9 ~ treatment + (1 | plant_id) + (1 | run) + (1 | lunar_phase), data = ulva_g, REML = FALSE)
 ulva_with_salinity <- lmer(formula = growth_d9 ~ treatment + salinity + (1 | plant_id) + (1 | run) + (1 | lunar_phase), data = ulva_g, REML = FALSE)
 anova(ulva_salinity_null, ulva_with_salinity)

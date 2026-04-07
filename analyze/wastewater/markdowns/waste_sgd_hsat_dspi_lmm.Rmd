@@ -1,0 +1,713 @@
+---
+title: "LMM for Wastewater and SGD combined datasets Pmax, Ek, NPQ"
+author: "Angela Richards Donà"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: journal
+    toc: yes
+    toc_float:
+      collapsed: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+### This script has been re-written using tidyverse and its ilk. New functions and structure written to run model on photosynthesis data for Hypnea and Ulva wastewater data PLUS some of the overlapping treatments from the SGD runs in 2021-2023
+### This script pulls in the combined dataset for the 2021, 2023 SGD and 2025 wastewater data and keeps all of 2025, and only the 53 and 80 nitrate treatments from 2021-2023, which are the only ones that overlap with 2025.
+### It also removes the 30 degree temp treatment from 2021-2023, which is not present in 2025.
+### sal_bin predictor (35 ppt = 1, 28, 27 ppt = 2, 18-22 ppt = 3, 11-15 ppt = 4)
+
+#______________________________________
+### load libraries
+
+```{r}
+# data wrangling
+library(tidyverse) #includes ggplot2, readr, forcats, tibble, purrr, tidyr, dplyr, stringr
+library(hms)
+library(lubridate)
+# mixed models
+library(lme4)
+library(lmerTest)
+library(MuMIn)
+library(emmeans)
+library(multcomp)
+library(ggeffects)
+library(performance)
+library(ggpubr)
+library(sjPlot)
+# optional for plots
+library(RColorBrewer)
+```
+
+### Load this file for normalized to quantum efficiency of photosynthesis per Silsbe and Kromkamp
+
+```{r}
+ww_hsat_lmm <- read_csv("/Users/angela/src/Photosynthesis/data/wastewater/transformed/ww_combo_hsat_dspi.csv")
+```
+
+### Remove individual that died during experiment
+
+```{r}
+ww_hsat_lmm <- ww_hsat_lmm %>%
+  filter(id != "ul09")
+```
+
+### Format date and time correctly
+```{r}
+TZ <- "Pacific/Honolulu"
+ww_hsat_lmm <- ww_hsat_lmm %>%
+  mutate(
+    start_date = as.Date(start_date),
+    start_time = hms::as_hms(start_time),
+    end_time   = hms::as_hms(end_time)
+  )
+```
+
+# Make unique_id column for troubleshooting individuals
+
+```{r}
+ww_hsat_lmm <- ww_hsat_lmm %>%
+  mutate(unique_id = paste(start_date, id, sep = "_"))
+```
+
+```{r}
+# assign list of variables as factor
+factor_vars <- c("sal_bin", "temp", "nitrate", "run_combo", "salinity")
+ww_hsat_lmm <- ww_hsat_lmm %>%
+  mutate(across(all_of(factor_vars), as.factor))
+```
+
+### Assign new column for chronological ranking of individuals in each day_group
+### Use ranking to make smaller groups of ~15 minutes for rlc_order
+```{r}
+ww_hsat_lmm <- ww_hsat_lmm %>%
+  group_by(start_date, rlc_day) %>%
+  arrange(end_time, .by_group = TRUE) %>%
+  mutate(
+    rank = dplyr::row_number(),                 # stable rank by time
+    rlc_order1 = floor((rank - 1) / 3) + 1      # 3 steps ≈ 15 minutes
+  ) %>%
+  ungroup()
+```
+
+### Add a year column for subsetting later
+```{r}
+ww_hsat_lmm <- ww_hsat_lmm %>%
+  mutate(year = lubridate::year(start_date))
+```
+
+### Get a mean daily Hsat and convert DSPI from micromols to mols m-2
+```{r}
+ww_hsat_lmm <- ww_hsat_lmm %>%
+  mutate(
+    dspi_mol = round(dspi_total / 1e6, 2),
+    dspi_day_mean = round(dspi_mol / 8, 2)
+  )
+ww_hsat_lmm <- ww_hsat_lmm %>%
+  mutate(
+    start_dt = lubridate::as_datetime(start_date, tz = TZ) + start_time,
+    end_dt   = lubridate::as_datetime(start_date + days(8), tz = TZ) + end_time,
+    run_hours = as.numeric(difftime(end_dt, start_dt, units = "hours")),
+    run_days  = run_hours / 24
+  ) %>%
+  mutate(
+    # mean per day + round to 2 decimals
+    hsat_day_mean = round(hsat_total / run_days, 2),
+    relhsat_day_mean = round(relhsat_total / run_days, 2),
+    dspi_day_mean = round(dspi_mol / run_days, 2)
+  )
+```
+
+### Check data before moving on
+```{r}
+ww_hsat_lmm %>%
+  summarise(
+    min_days = min(run_days, na.rm = TRUE),
+    max_days = max(run_days, na.rm = TRUE),
+    n_bad = sum(is.na(run_days) | run_days <= 0, na.rm = TRUE)
+  )
+```
+
+### New dataset with overlaps from 2021, 2022 and all of 2025
+### This keeps all of 2025, and only the 80 nitrate treatments from 2021-2022.
+### It also removes the 30 degree temp treatment from 2021, which is not present in 2025.
+
+```{r}
+sgd_ww_hsat <- ww_hsat_lmm %>%
+  filter(
+    # keep:
+    (
+      year %in% c(2021, 2022) & 
+        nitrate == "80" & 
+        temp != 30
+    ) |
+      year == 2025
+  )  
+```
+
+### Subset the species
+```{r}
+ulva_ww_hsat <- subset(sgd_ww_hsat, species == "u")
+
+hypnea_ww_hsat <- subset(sgd_ww_hsat, species == "h")
+```
+
+# MODEL FUNCTION__________________________________________________________________
+
+```{r}
+check_model_fit <- function(model, terms) {
+  hist(resid(model))
+  plot(resid(model) ~ fitted(model))
+  qqnorm(resid(model))
+  qqline(resid(model))
+  print(performance::check_model(model))
+  print(MuMIn::r.squaredGLMM(model))
+}
+```
+
+### Get predictor means
+```{r}
+get_data_means <- function(data, predictors_list, response){
+  group_vars <- c("nitrate", setdiff(predictors_list, "nitrate"))
+  data %>% 
+    group_by(across(all_of(group_vars))) %>%
+    summarise(!!paste0(response, "_mean") := mean(.data[[response]], na.rm = TRUE),
+              .groups = "drop")
+}
+
+```
+
+### Make a function to run the the models for likelihood ratio tests where REML must be FALSE
+### Construct null model to perform likelihood ratio test REML must be FALSE
+
+```{r}
+compare_lmer_models <- function(data, response, predictors_list, random_effects) {
+  # --- NEW CLEANING: remove NA/NaN/Inf ONLY for the response variable ---
+  data_clean <- data %>%
+    filter(is.finite(.data[[response]])) %>%              # drop NA / NaN / Inf in response
+    tidyr::drop_na(all_of(predictors_list)) %>%           # drop rows missing predictor values
+    droplevels()
+  
+  # Build random-effects string
+  re_str <- paste(paste0("(1 | ", random_effects, ")"), collapse = " + ")
+  
+  # Full model
+  fixed_all <- paste(predictors_list, collapse = " + ")
+  f_full <- as.formula(paste(response, "~", fixed_all, "+", re_str))
+  model_all <- lme4::lmer(f_full, data = data_clean, REML = FALSE)
+  
+  # Drop-one models + LRTs
+  models <- list()
+  anova_result <- list()
+  
+  for (dropped in predictors_list) {
+    fixed_reduced <- paste(setdiff(predictors_list, dropped), collapse = " + ")
+    f_reduced <- as.formula(paste(response, "~", fixed_reduced, "+", re_str))
+    models[[dropped]] <- lme4::lmer(f_reduced, data = data_clean, REML = FALSE)
+    anova_result[[dropped]] <- anova(models[[dropped]], model_all, test = "Chisq")
+  }
+  
+  data_means <- get_data_means(data_clean, predictors_list, response)
+  
+  list(
+    models = models,          # named by the predictor that was dropped
+    model_all = model_all,
+    anova_result = anova_result,
+    data_means = data_means,
+    used_data = data_clean
+  )
+}
+
+predictors_list <- c("salinity", "nitrate")
+predictors_list_species <- c("salinity", "nitrate", "species")
+
+
+```
+
+# Hsat_____________________________________
+### Inputs for ulva_ps/Hsat
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+ulva_ww_hsat_results <- compare_lmer_models(
+  data = ulva_ww_hsat,
+  response = "hsat_day_mean",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+```
+
+### Access results
+### Full model
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+summary(ulva_ww_hsat_results$model_all)
+```
+
+### Run ANOVA
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+# Does salinity affect Ulva hsat?
+ulva_ww_hsat_results$anova_result[["salinity"]]
+# Does nitrate affect Ulva hsat?
+ulva_ww_hsat_results$anova_result[["nitrate"]]
+#Does temp affect Ulva hsat?
+ulva_ww_hsat_results$anova_result[["temp"]]
+```
+
+### Check model fit and get means table
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+check_model_fit(ulva_ww_hsat_results$model_all, terms = predictors_list)
+ulva_ww_hsat_results$data_means
+```
+
+### Inputs for Hypnea_ww/hsat
+```{r}
+hypnea_ww_hsat_results <- compare_lmer_models(
+  data = hypnea_ww_hsat,
+  response = "hsat_day_mean",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+```
+
+### Access results
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+summary(hypnea_ww_hsat_results$model_all)
+```
+
+### Run ANOVAs
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+# Does salinity affect Hypnea hsat?
+hypnea_ww_hsat_results$anova_result[["salinity"]]
+# Does nitrate affect Hypnea hsat?
+hypnea_ww_hsat_results$anova_result[["nitrate"]]
+#Does temp affect Hypnea hsat?
+hypnea_ww_hsat_results$anova_result[["temp"]]
+```
+
+### Check model fit and get table means
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+check_model_fit(hypnea_ww_hsat_results$model_all, terms = predictors_list)
+hypnea_ww_hsat_results$data_means
+```
+
+## Compare species
+### Inputs for Hsat species comparison
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+ww_hsat_species_results <- compare_lmer_models(
+  data = sgd_ww_hsat,
+  response = "hsat_day_mean",
+  predictors_list_species,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+```
+
+### Access results
+### Full model
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+summary(ww_hsat_species_results$model_all)
+```
+### Run ANOVAs
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+# Does species affect hsat?
+ww_hsat_species_results$anova_result[["species"]]
+```
+
+### Check model fit and get means table
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+check_model_fit(ww_hsat_species_results$model_all, terms = predictors_list_species2)
+ww_hsat_species_results$data_means
+```
+
+### relHsat____________________________________
+
+### Inputs for Ulva relHsat
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+ulva_ww_relhsat_results <- compare_lmer_models(
+  data = ulva_ww_hsat,
+  response = "relhsat_day_mean",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+```
+
+### Access results
+### Full model
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+summary(ulva_ww_relhsat_results$model_all)
+```
+
+### Run ANOVAs
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+# Does salinity affect Ulva relhsat?
+ulva_ww_relhsat_results$anova_result[["salinity"]]
+# Does nitrate affect Ulva relhsat?
+ulva_ww_relhsat_results$anova_result[["nitrate"]]
+#Does temp affect Ulva relhsat?
+ulva_ww_relhsat_results$anova_result[["temp"]]
+```
+
+### Check model fit and get means table
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+check_model_fit(ulva_ww_relhsat_results$model_all, terms = predictors_list)
+ulva_ww_relhsat_results$data_means
+```
+
+### Inputs for Hypnea_relHsat
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+hypnea_ww_relhsat_results <- compare_lmer_models(
+  data = hypnea_ww_hsat,
+  response = "relhsat_day_mean",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+```
+
+### Access results
+### Full model
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+summary(hypnea_ww_relhsat_results$model_all)
+```
+### Run ANOVAs
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+# Does salinity affect Hypnea relhsat?
+hypnea_ww_relhsat_results$anova_result[["salinity"]]
+# Does nitrate affect Hypnea relhsat?
+hypnea_ww_relhsat_results$anova_result[["nitrate"]]
+#Does temp affect Hypnea relhsat?
+hypnea_ww_relhsat_results$anova_result[["temp"]]
+```
+### Check model fit and get means table
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+check_model_fit(hypnea_ww_relhsat_results$model_all, terms = predictors_list)
+hypnea_ww_relhsat_results$data_means
+```
+
+### Inputs for relHsat species comparison
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+ww_relhsat_species_results <- compare_lmer_models(
+  data = sgd_ww_hsat,
+  response = "relhsat_day_mean",
+  predictors_list_species,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+```
+
+### Access results
+### Full model
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+summary(ww_relhsat_species_results$model_all)
+```
+
+### Run ANOVAs
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+# Does species affect relhsat?
+ww_relhsat_species_results$anova_result[["species"]]
+```
+
+### Check model fit and get means table
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+check_model_fit(ww_relhsat_species_results$model_all, terms = predictors_list_species)
+ww_relhsat_species_results$data_means
+```
+
+### DSPI_____________________________________
+### Inputs for Ulva DSPI
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+ulva_ww_dspi_results <- compare_lmer_models(
+  data = ulva_ww_hsat,
+  response = "dspi_day_mean",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+```
+
+### Access results
+### Full model
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+summary(ulva_ww_dspi_results$model_all)
+```
+
+### Run ANOVAs
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+# Does salinity affect Ulva dspi?
+ulva_ww_dspi_results$anova_result[["salinity"]]
+# Does nitrate affect Ulva dspi?
+ulva_ww_dspi_results$anova_result[["nitrate"]]
+#Does temp affect Ulva dspi?
+ulva_ww_dspi_results$anova_result[["temp"]]
+```
+
+### Check model fit and get means table
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+check_model_fit(ulva_ww_dspi_results$model_all, terms = predictors_list)
+ulva_ww_dspi_results$data_means
+```
+
+### Inputs for Hypnea_ww/dspi
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+hypnea_ww_dspi_results <- compare_lmer_models(
+  data = hypnea_ww_hsat,
+  response = "dspi_day_mean",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+```
+
+### Access results
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+summary(hypnea_ww_dspi_results$model_all)
+```
+
+### Run ANOVAs
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+# Does salinity affect Hypnea dspi?
+hypnea_ww_dspi_results$anova_result[["salinity"]]
+# Does nitrate affect Hypnea dspi?
+hypnea_ww_dspi_results$anova_result[["nitrate"]]
+#Does temp affect Hypnea dspi?
+hypnea_ww_dspi_results$anova_result[["temp"]]
+```
+
+### Check model fit and get means table
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+check_model_fit(hypnea_ww_dspi_results$model_all, terms = predictors_list)
+hypnea_ww_dspi_results$data_means
+```
+
+### Inputs for dspi species comparison
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+ww_dspi_species_results <- compare_lmer_models(
+  data = sgd_ww_hsat,
+  response = "dspi_day_mean",
+  predictors_list_species,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+```
+
+### Access results
+### Full model
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+summary(ww_dspi_species_results$model_all)
+```
+
+### Run ANOVA
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+# Does species affect dspi?
+ww_dspi_species_results$anova_result[["species"]]
+```
+
+### Check model fit and get means table
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+check_model_fit(ww_dspi_species_results$model_all, terms = predictors_list_species2)
+ww_dspi_species_results$data_means
+```
+
+## Model Summary Tables_____________________________________________________
+
+### This produces individual outputs for each model
+```{r}
+print_model <- function(model, species, response) {
+  sjPlot::tab_model(
+    model,
+    title = paste(species, "-", response),
+    show.intercept = TRUE,
+    show.se = TRUE,
+    show.stat = TRUE,
+    show.df = TRUE
+  )
+}
+print_model(ulva_ww_hsat_results$model_all, "Ulva", "Hsat day mean")
+print_model(hypnea_ww_hsat_results$model_all, "Hypnea", "Hsat day mean")
+print_model(ww_hsat_species_results$model_all, "Species Comparison", "Hsat day mean")
+
+print_model(ulva_ww_relhsat_results$model_all, "Ulva", "Relative Hsat")
+print_model(hypnea_ww_relhsat_results$model_all, "Hypnea", "Relative Hsat")
+print_model(ww_relhsat_species_results$model_all, "Species Comparison", "relHsat day mean")
+
+print_model(ulva_ww_dspi_results$model_all, "Ulva", "DSPI day mean")
+print_model(hypnea_ww_dspi_results$model_all, "Hypnea", "DSPI day mean")
+print_model(ww_dspi_species_results$model_all, "Species Comparison", "DSPI day mean")
+```
+
+## HISTOGRAMS and PLOTS_____________________________________
+### Function for raw data plots
+```{r}
+raw_plots <- function(data, response, response2, label, pretty_color, aescolor, x, x2, y, y2, title, title2, subtitle, ylim1, ylim2, 
+                      color1, color2, color3, yint, vjust_t, hjust_t, vjust_s, hjust_s, labels1) {
+  histo <- data %>%
+    ggplot(aes(x = {{response}})) +
+    geom_histogram(fill = pretty_color, color = "black", linewidth = 0.25, alpha = 0.85) +
+    labs(title = label) +
+    theme_bw()
+  
+  plot <- data %>% 
+    ggplot(aes(x = nitrate, y = {{response}})) + 
+    geom_boxplot(size=0.5) + 
+    geom_point(alpha = 0.75, size = 3, aes(color = {{aescolor}}), position = "jitter", show.legend = TRUE) + 
+    labs(x = x, y = y, title = title, subtitle = subtitle) + 
+    #scale_x_discrete(labels = c("0.5μmolN", "2μmolN", "4μmolN", "8μmolN")) + 
+    ylim(ylim1, ylim2) + stat_mean() + 
+    scale_color_manual(values = c(color1, color2, color3)) +
+    scale_x_discrete(labels = labels1) +
+    geom_hline(yintercept=yint, color = "red", linewidth = 0.5, alpha = 0.5) +
+    theme_bw() +
+    theme(legend.position = c(0.90,0.80), plot.title = element_text(face = "italic", vjust = vjust_t, hjust = hjust_t), 
+          plot.subtitle = element_text(face = "bold", size = 14, vjust = vjust_s, hjust = hjust_s))
+  
+   return(list(
+    histo = histo,
+    plot = plot)) 
+}
+```
+
+
+## INPUTS for histo and plots________________________
+
+### Hsat ------------------------
+
+### Inputs for Ulva/Hsat
+```{r}
+hsat_ulva <- raw_plots(
+  data = ulva_ww_hsat,
+  response = hsat_day_mean,
+  response2 = growth,
+  label = "Ulva lactuca",
+  pretty_color = "goldenrod1",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "Hsat (min/day)",
+  y = "Day 9 Hsat (min/day)",
+  y2 = "9-Day Growth (%)",
+  title = "A - Ulva lactuca",
+  title2 = "Ulva lactuca --- Hsat (min/day) vs 9-Day Growth (%)",
+  subtitle = "Hsat",
+  ylim1 = 100, 
+  ylim2 = 1000,
+  color1 = "forestgreen",
+  color2 = "darkolivegreen3",
+  color3 = "olivedrab4",
+  yint = 400,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("53 μmol", 
+              "80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(hsat_ulva$histo)
+plot(hsat_ulva$plot)
+```
+
+### Inputs for hypnea/hsat
+```{r}
+hsat_hypnea <- raw_plots(
+  data = hypnea_ww_hsat,
+  response = hsat_day_mean,
+  response2 = growth,
+  label = "Hypnea musciformis",
+  pretty_color = "maroon4",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "Hsat (min/day)",
+  y = "Day 9 Hsat (min/day)",
+  y2 = "9-Day Growth (%)",
+  title = "B - Hypnea musciformis",
+  title2 = "Hypnea musciformis --- Hsat vs 9-Day Growth (%)",
+  subtitle = "Hsat",
+  ylim1 = 100, 
+  ylim2 = 1000,
+  color1 = "deeppink4",
+  color2 = "deeppink3",
+  color3 = "hotpink",
+  yint = 20,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("53 μmol", 
+              "80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(hsat_hypnea$histo)
+plot(hsat_hypnea$plot)
+```
+
+### Hsat ------------------------
+
+### Inputs for Ulva/Hsat
+```{r}
+dspi_ulva <- raw_plots(
+  data = ulva_ww_hsat,
+  response = dspi_day_mean,
+  response2 = growth,
+  label = "Ulva lactuca",
+  pretty_color = "goldenrod1",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "DSPI (mol/day)",
+  y = "Day 9 DSPI (mol/day)",
+  y2 = "9-Day Growth (%)",
+  title = "A - Ulva lactuca",
+  title2 = "Ulva lactuca --- DSPI (mol/day) vs 9-Day Growth (%)",
+  subtitle = "DSPI",
+  ylim1 = 0, 
+  ylim2 = 5,
+  color1 = "forestgreen",
+  color2 = "darkolivegreen3",
+  color3 = "olivedrab4",
+  yint = 2,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("53 μmol", 
+              "80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(dspi_ulva$histo)
+plot(dspi_ulva$plot)
+```
+
+### Inputs for Hypnea/Hsat
+```{r}
+dspi_hypnea <- raw_plots(
+  data = hypnea_ww_hsat,
+  response = dspi_day_mean,
+  response2 = growth,
+  label = "Hypnea musciformis",
+  pretty_color = "maroon4",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "DSPI (mol/day)",
+  y = "Day 9 DSPI (mol/day)",
+  y2 = "9-Day Growth (%)",
+  title = "B - Hypnea musciformis",
+  title2 = "Hypnea musciformis --- DSPI vs 9-Day Growth (%)",
+  subtitle = "DSPI",
+  ylim1 = 0, 
+  ylim2 = 5,
+  color1 = "deeppink4",
+  color2 = "deeppink3",
+  color3 = "hotpink",
+  yint = 2,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("53 μmol", 
+              "80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(dspi_hypnea$histo)
+plot(dspi_hypnea$plot)
+```
+

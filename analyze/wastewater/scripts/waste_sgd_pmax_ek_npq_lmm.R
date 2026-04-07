@@ -1,0 +1,972 @@
+#Script to run model for photosynthesis data for Hypnea and Ulva wastewater data
+# This script pulls in the combined dataset for the 2021, 2023 SGD and 2025 wastewater data
+# sal_bin predictor (35 ppt = 1, 28, 27 ppt = 2, 18-22 ppt = 3, 11-15 ppt = 4)
+#By Angela Richards Donà
+#Date: 1/16/25
+#Modified with revamped functions to run all basic variables 11/25/24
+#Modified for combined data 08/26/25 and 12/03/2025
+
+#load libraries
+# data wrangling
+library(tidyverse) #includes ggplot2, readr, forcats, tibble, purrr, tidyr, dplyr, stringr
+library(hms)
+library(lubridate)
+# mixed models
+library(lme4)
+library(lmerTest)
+library(MuMIn)
+library(emmeans)
+library(multcomp)
+library(ggeffects)
+library(performance)
+library(ggpubr)
+library(sjPlot)
+# optional for plots
+library(RColorBrewer)
+
+#load this file for normalized to quantum efficiency of photosynthesis per Silsbe and Kromkamp
+ww_lmm <- read.csv("/Users/angela/src/Photosynthesis/data/wastewater/transformed/ww_combo_ek_alpha_norm.csv")
+
+glimpse(ww_lmm)
+
+ww_lmm <- ww_lmm %>%
+  mutate(
+    date = as.Date(date),
+    rlc_time = as_hms(rlc_time),
+    rlc_end_time = as_hms(rlc_end_time)
+  )
+
+# assign list of variables as factor
+factor_vars <- c("treat_letter", "treatment", "salinity",
+                 "sal_bin", "temp", "rlc_day", "nitrate", "run_combo")
+
+ww_lmm <- ww_lmm %>%
+  mutate(across(all_of(factor_vars), as.factor))
+
+#assign new column for chronological ranking of individuals in each day_group
+#use ranking to make smaller groups of ~15 minutes for rlc_order
+ww_lmm <- ww_lmm %>%
+  group_by(date, rlc_day) %>%
+  arrange(rlc_end_time, .by_group = TRUE) %>%
+  mutate(
+    rank = dplyr::row_number(),                 # stable rank by time
+    rlc_order1 = floor((rank - 1) / 3) + 1      # 3 steps ≈ 15 minutes
+  ) %>%
+  ungroup()
+
+#Treatment Graph is set up to have predictors in order of my choosing
+ww_lmm <- ww_lmm %>%
+  mutate(treatment_graph = case_when(
+    treat_letter == "f" ~ "1) 80 μmol",
+    treat_letter == "k" ~ "2) 80 μmol",
+    treat_letter == "l" ~ "3) 245 μmol",
+    treat_letter == "m" ~ "4) 748 μmol",
+    treat_letter == "n" ~ "5) 2287 μmol"
+  ))
+
+
+ww_lmm <- ww_lmm %>%
+  mutate(year = lubridate::year(date))
+
+# new dataset with overlaps from 2021, 2022, 2023 and all of 2025
+# this keeps all of 2025, and only the 53 and 80 nitrate treatments from 2021-2023, which are the only ones that overlap with 2025.
+# It also removes the 30 degree temp treatment from 2021-2023, which is not present in 2025.
+sgd_ww <- ww_lmm %>%
+  filter(
+    # keep:
+    (
+      year %in% c(2021, 2022) & 
+        nitrate == "80" & 
+        temp != 30
+    ) |
+      year == 2025
+  )
+
+# subset for day 9 only
+ww_lmm_d9 <- sgd_ww %>%
+  filter(rlc_day == 9) #only d9 is included in dataset
+# subset the species
+ulva_ww <- subset(ww_lmm_d9, species == "u")
+
+hypnea_ww <- subset(ww_lmm_d9, species == "h")
+
+#Datasets are ready, now let's run models
+
+check_model_fit <- function(model, terms) {
+  hist(resid(model))
+  plot(resid(model) ~ fitted(model))
+  qqnorm(resid(model))
+  qqline(resid(model))
+  print(performance::check_model(model))
+  print(r.squaredGLMM(model))
+  #print(tab_model(model, show.intercept = TRUE, show.se = TRUE, show.stat = TRUE, 
+  #  show.df = TRUE, show.zeroinf = TRUE))
+  #print(model.frame(model))
+  # Save ggpredict output to object p
+  p <- ggeffects::ggpredict(model, terms = terms)
+  print(plot(p) + ggplot2::scale_color_discrete())
+}
+
+#get predictor means
+get_data_means <- function(data, predictors_list, response){
+  group_vars <- c("nitrate", setdiff(predictors_list, "nitrate"))
+  data %>% 
+    group_by(across(all_of(group_vars))) %>%
+    summarise(!!paste0(response, "_mean") := mean(.data[[response]], na.rm = TRUE),
+              .groups = "drop")
+}
+
+#Make a function to run the the models for likelihood ratio tests where REML must be FALSE
+#construct null model to perform likelihood ratio test REML must be FALSE
+
+compare_lmer_models <- function(data, response, predictors_list, random_effects) {
+  # --- NEW CLEANING: remove NA/NaN/Inf ONLY for the response variable ---
+  data_clean <- data %>%
+    filter(is.finite(.data[[response]])) %>%              # drop NA / NaN / Inf in response
+    tidyr::drop_na(all_of(predictors_list)) %>%           # drop rows missing predictor values
+    droplevels()
+  
+  # Build random-effects string
+  re_str <- paste(paste0("(1 | ", random_effects, ")"), collapse = " + ")
+  
+  # Full model
+    fixed_all <- paste(predictors_list, collapse = " + ")
+    f_full <- as.formula(paste(response, "~", fixed_all, "+", re_str))
+    model_all <- lme4::lmer(f_full, data = data_clean, REML = FALSE)
+  
+  # Drop-one models + LRTs
+    models <- list()
+    anova_result <- list()
+    
+    for (dropped in predictors_list) {
+      fixed_reduced <- paste(setdiff(predictors_list, dropped), collapse = " + ")
+      f_reduced <- as.formula(paste(response, "~", fixed_reduced, "+", re_str))
+      models[[dropped]] <- lme4::lmer(f_reduced, data = data_clean, REML = FALSE)
+      anova_result[[dropped]] <- anova(models[[dropped]], model_all, test = "Chisq")
+    }
+  
+    data_means <- get_data_means(data_clean, predictors_list, response)
+  
+  list(
+    models = models,          # named by the predictor that was dropped
+    model_all = model_all,
+    anova_result = anova_result,
+    data_means = data_means,
+    used_data = data_clean
+  )
+}
+
+predictors_list <- c("salinity", "nitrate", "temp")
+predictors_list_species <- c("salinity", "nitrate", "temp", "species")
+
+#Fv/Fm________________________________________________________________
+#Inputs for Ulva Fv/Fm
+ulva_ww_fvfm_results <- compare_lmer_models(
+  data = ulva_ww,
+  response = "fv_fm",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+
+# Access results
+# Full model
+summary(ulva_ww_fvfm_results$model_all)
+
+# Does salinity effect Ulva FvFm?
+ulva_ww_fvfm_results$anova_result[["salinity"]]
+# Does nitrate effect Ulva FvFm?
+ulva_ww_fvfm_results$anova_result[["nitrate"]]
+#Does temp effect Ulva FvFm?
+ulva_ww_fvfm_results$anova_result[["temp"]]
+check_model_fit(ulva_ww_fvfm_results$model_all, terms = predictors_list)
+ulva_ww_fvfm_results$data_means
+
+#Inputs for Hypnea Fv/Fm
+hypnea_ww_fvfm_results <- compare_lmer_models(
+  data = hypnea_ww,
+  response = "fv_fm",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+
+# Access results
+# Full model
+summary(hypnea_ww_fvfm_results$model_all)
+
+# Does salinity effect hypnea FvFm?
+hypnea_ww_fvfm_results$anova_result[["salinity"]]
+# Does nitrate effect hypnea FvFm?
+hypnea_ww_fvfm_results$anova_result[["nitrate"]]
+#Does temp effect hypnea FvFm?
+hypnea_ww_fvfm_results$anova_result[["temp"]]
+check_model_fit(hypnea_ww_fvfm_results$model_all, terms = predictors_list)
+hypnea_ww_fvfm_results$data_means
+
+#Pmax_____________________________________
+#Inputs for ulva_ps/Pmax
+ulva_ww_pmax_results <- compare_lmer_models(
+  data = ulva_ww,
+  response = "pmax",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+
+# Access results
+# Full model
+summary(ulva_ww_pmax_results$model_all)
+
+# Drop-one summaries (if you want to inspect them)
+summary(ulva_ww_pmax_results$models[["salinity"]])
+summary(ulva_ww_pmax_results$models[["nitrate"]])
+summary(ulva_ww_pmax_results$models[["temp"]])
+
+# Does salinity effect Ulva Pmax?
+ulva_ww_pmax_results$anova_result[["salinity"]]
+# Does nitrate effect Ulva Pmax?
+ulva_ww_pmax_results$anova_result[["nitrate"]]
+#Does temp effect Ulva Pmax?
+ulva_ww_pmax_results$anova_result[["temp"]]
+check_model_fit(ulva_ww_pmax_results$model_all, terms = predictors_list)
+ ulva_ww_pmax_results$data_means
+
+#inputs for hypnea_ww/Pmax
+hypnea_ww_pmax_results <- compare_lmer_models(
+  data = hypnea_ww,
+  response = "pmax",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+
+# Access results
+summary(hypnea_ww_pmax_results$model_all)
+# Drop-one summaries (if you want to inspect them)
+summary(hypnea_ww_pmax_results$models[["salinity"]])
+summary(hypnea_ww_pmax_results$models[["nitrate"]])
+summary(hypnea_ww_pmax_results$models[["temp"]])
+# Does salinity effect Hypnea Pmax?
+hypnea_ww_pmax_results$anova_result[["salinity"]]
+# Does nitrate effect Hypnea Pmax?
+hypnea_ww_pmax_results$anova_result[["nitrate"]]
+#Does temp effect Hypnea Pmax?
+hypnea_ww_pmax_results$anova_result[["temp"]]
+
+check_model_fit(hypnea_ww_pmax_results$model_all, terms = predictors_list)
+hypnea_ww_pmax_results$data_means
+
+#Inputs for Pmax (compare both species)
+ww_pmax_results <- compare_lmer_models(
+  data = ww_lmm_d9,
+  response = "pmax",
+  predictors_list_species,
+  random_effects = c("plant_id", "rlc_order1")
+)
+
+# Access results
+# Full model
+summary(ww_pmax_results$model_all)
+
+# Drop-one summaries (if you want to inspect them)
+summary(ww_pmax_results$models[["species"]])
+
+# Does species effect Pmax?
+ww_pmax_results$anova_result[["species"]]
+
+check_model_fit(ww_pmax_results$model_all, terms = predictors_list_species)
+ww_pmax_results$data_means
+
+#NPQmax______________________________
+#inputs for ulva_ww/NPQmax
+ulva_ww_npqmax_results <- compare_lmer_models(
+  data = ulva_ww,
+  response = "npq_max",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+
+# Access results
+summary(ulva_ww_npqmax_results$model_all)
+# Drop-one summaries (if you want to inspect them)
+summary(ulva_ww_npqmax_results$models[["salinity"]])
+summary(ulva_ww_npqmax_results$models[["nitrate"]])
+summary(ulva_ww_npqmax_results$models[["temp"]])
+
+# Does salinity effect Ulva NPQmax?
+ulva_ww_npqmax_results$anova_result[["salinity"]]
+# Does nitrate effect Ulva NPQmax?
+ulva_ww_npqmax_results$anova_result[["nitrate"]]
+# Does temperature effect Ulva NPQmax?
+ulva_ww_npqmax_results$anova_result[["temp"]]
+
+check_model_fit(ulva_ww_npqmax_results$model_all, terms = predictors_list)
+ulva_ww_npqmax_results$data_means
+
+#inputs for hypnea_ww/NPQmax
+hypnea_ww_npqmax_results <- compare_lmer_models(
+  data = hypnea_ww,
+  response = "npq_max",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+
+# Access results
+summary(hypnea_ww_npqmax_results$model_all)
+summary(hypnea_ww_npqmax_results$models[["salinity"]])
+summary(hypnea_ww_npqmax_results$models[["nitrate"]])
+summary(hypnea_ww_npqmax_results$models[["temp"]])
+# Does salinity effect Hypnea NPQmax?
+hypnea_ww_npqmax_results$anova_result[["salinity"]]
+# Does nitrate effect Hypnea NPQmax?
+hypnea_ww_npqmax_results$anova_result[["nitrate"]]
+#Does temp effect Hypnea NPQmax?
+hypnea_ww_npqmax_results$anova_result[["temp"]]
+
+check_model_fit(hypnea_ww_npqmax_results$model_all, terms = predictors_list)
+hypnea_ww_npqmax_results$data_means
+
+#Inputs for NPQmax (compare both species)
+ww_npq_max_results <- compare_lmer_models(
+  data = ww_lmm_d9,
+  response = "npq_max",
+  predictors_list_species,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+
+# Access results
+# Full model
+summary(ww_npq_max_results$model_all)
+
+# Drop-one summaries (if you want to inspect them)
+summary(ww_npq_max_results$models[["species"]])
+
+# Does species effect NPQmax?
+ww_npq_max_results$anova_result[["species"]]
+
+check_model_fit(ww_npq_max_results$model_all, terms = predictors_list_species)
+ww_npq_max_results$data_means
+
+#deltaNPQ____________________________
+
+#Inputs for ulva_ww/deltaNPQ
+ulva_ww_delta_npq_results <- compare_lmer_models(
+  data = ulva_ww,
+  response = "delta_npq",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+
+# Access results
+summary(ulva_ww_delta_npq_results$model_all)
+summary(ulva_ww_delta_npq_results$models[["nitrate"]])
+summary(ulva_ww_delta_npq_results$models[["salinity"]]) 
+summary(ulva_ww_delta_npq_results$models[["temp"]])
+
+# Does salinity effect Ulva deltaNPQ?
+ulva_ww_delta_npq_results$anova_result[["salinity"]]
+# Does nitrate effect Ulva deltaNPQ?
+ulva_ww_delta_npq_results$anova_result[["nitrate"]]
+# Does temperature effect Ulva deltaNPQ?
+ulva_ww_delta_npq_results$anova_result[["temp"]]
+
+check_model_fit(ulva_ww_delta_npq_results$model_all, terms = predictors_list)
+ulva_ww_delta_npq_results$data_means
+
+#Inputs for hypnea_ww/deltaNPQ
+hypnea_ww_delta_npq_results <- compare_lmer_models(
+  data = hypnea_ww,
+  response = "delta_npq",
+  predictors_list,
+  random_effects = c("run_combo") # plant_id and rlc_order have zero effect
+)
+
+# Access results
+summary(hypnea_ww_delta_npq_results$model_all)
+summary(hypnea_ww_delta_npq_results$models[["nitrate"]])
+summary(hypnea_ww_delta_npq_results$models[["salinity"]]) 
+summary(hypnea_ww_delta_npq_results$models[["temp"]])
+
+# Does salinity effect Hypnea deltaNPQ?
+hypnea_ww_delta_npq_results$anova_result[["salinity"]]
+# Does nitrate effect Hypnea deltaNPQ?
+hypnea_ww_delta_npq_results$anova_result[["nitrate"]]
+# Does temperature effect Hypnea deltaNPQ?
+hypnea_ww_delta_npq_results$anova_result[["temp"]]
+
+check_model_fit(hypnea_ww_delta_npq_results$model_all, terms = predictors_list)
+hypnea_ww_delta_npq_results$data_means
+
+#Ek____________________________________________
+#Inputs for ulva_ww/Ek
+ulva_ww_ek_results <- compare_lmer_models(
+  data = ulva_ww,
+  response = "ek_est",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+
+# Access results
+summary(ulva_ww_ek_results$model_all)
+summary(ulva_ww_ek_results$models[["nitrate"]])
+summary(ulva_ww_ek_results$models[["salinity"]])
+summary(ulva_ww_ek_results$models[["temp"]])
+# Does salinity effect Ulva Ek?
+ulva_ww_ek_results$anova_result[["salinity"]]
+# Does nitrate effect Ulva Ek?
+ulva_ww_ek_results$anova_result[["nitrate"]]
+# Does temp effect Ulva Ek?
+ulva_ww_ek_results$anova_result[["temp"]]
+
+check_model_fit(ulva_ww_ek_results$model_all, terms = predictors_list)
+ulva_ww_ek_results$data_means
+
+#Inputs for hypnea_ww/Ek
+hypnea_ww_ek_results <- compare_lmer_models(
+  data = hypnea_ww,
+  response = "ek_est",
+  predictors_list,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+
+# Access results
+summary(hypnea_ww_ek_results$model_all)
+summary(hypnea_ww_ek_results$models[["nitrate"]])
+summary(hypnea_ww_ek_results$models[["salinity"]])
+summary(hypnea_ww_ek_results$models[["temp"]])
+# Does salinity effect Ulva Ek?
+hypnea_ww_ek_results$anova_result[["salinity"]]
+# Does nitrate effect Ulva Ek?
+hypnea_ww_ek_results$anova_result[["nitrate"]]
+# Does temp effect Ulva Ek?
+hypnea_ww_ek_results$anova_result[["temp"]]
+
+check_model_fit(hypnea_ww_ek_results$model_all, terms = predictors_list)
+hypnea_ww_ek_results$data_means
+
+#Inputs for Ek (compare both species)
+ww_ek_results <- compare_lmer_models(
+  data = ww_lmm_d9,
+  response = "ek_est",
+  predictors_list_species,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+
+# Access results
+# Full model
+summary(ww_ek_results$model_all)
+
+# Drop-one summaries (if you want to inspect them)
+summary(ww_ek_results$models[["species"]])
+
+# Does species effect Ek?
+ww_ek_results$anova_result[["species"]]
+
+check_model_fit(ww_ek_results$model_all, terms = predictors_list_species)
+ww_ek_results$data_means
+
+#ALL OF THE ABOVE RANDOM EFFECTS MuST BE CHECKED AND MAXIMIZED FOR FIT
+
+
+# Tables________________________________________________________________
+# This one is like the old printouts
+print_model <- function(model, species, response) {
+  sjPlot::tab_model(
+    model,
+    title = paste(species, "-", response),
+    show.intercept = TRUE,
+    show.se = TRUE,
+    show.stat = TRUE,
+    show.df = TRUE
+  )
+}
+print_model(ulva_ww_fvfm_results$model_all, "Ulva", "FvFm")
+print_model(hypnea_ww_fvfm_results$model_all, "Hypnea", "FvFm")
+
+print_model(ulva_ww_pmax_results$model_all, "Ulva", "Pmax")
+print_model(hypnea_ww_pmax_results$model_all, "Hypnea", "Pmax")
+
+print_model(ulva_ww_npqmax_results$model_all, "Ulva", "NPQmax")
+print_model(hypnea_ww_npqmax_results$model_all, "Hypnea", "NPQmax")
+
+print_model(ulva_ww_delta_npq_results$model_all, "Ulva", "delta NPQ")
+print_model(hypnea_ww_delta_npq_results$model_all, "Hypnea", "delta NPQ")
+
+print_model(ulva_ww_ek_results$model_all, "Ulva", "Ek")
+print_model(hypnea_ww_ek_results$model_all, "Hypnea", "Ek")
+
+#HISTOGRAMS and PLOTS_____________________________________
+#function for raw data plots
+raw_plots <- function(data, response, response2, label, pretty_color, aescolor, x, x2, y, y2, title, title2, subtitle, ylim1, ylim2, 
+                      color1, color2, color3, yint, vjust_t, hjust_t, vjust_s, hjust_s, labels1) {
+  histo <- data %>%
+    ggplot(aes(x = {{response}})) +
+    geom_histogram(fill = pretty_color, color = "black", linewidth = 0.25, alpha = 0.85) +
+    labs(title = label) +
+    theme_bw()
+  
+  plot <- data %>% 
+    ggplot(aes(x = nitrate, y = {{response}})) + 
+    geom_boxplot(size=0.5) + 
+    geom_point(alpha = 0.75, size = 3, aes(color = {{aescolor}}), position = "jitter", show.legend = TRUE) + 
+    labs(x = x, y = y, title = title, subtitle = subtitle) + 
+    #scale_x_discrete(labels = c("0.5μmolN", "2μmolN", "4μmolN", "8μmolN")) + 
+    ylim(ylim1, ylim2) + stat_mean() + 
+    scale_color_manual(values = c(color1, color2, color3)) +
+    scale_x_discrete(labels = labels1) +
+    geom_hline(yintercept=yint, color = "red", linewidth = 0.5, alpha = 0.5) +
+    theme_bw() +
+    theme(legend.position = c(0.90,0.80), plot.title = element_text(face = "italic", vjust = vjust_t, hjust = hjust_t), 
+          plot.subtitle = element_text(face = "bold", size = 14, vjust = vjust_s, hjust = hjust_s))
+  
+ # lin_regr <- data %>%
+  #  ggplot(aes(x = {{response}}, 
+   #            y = {{response2}})) + 
+  #  geom_point(alpha = 0.5, size = 3, show.legend = TRUE, aes(color = treatment)) + 
+  #  geom_smooth(method = "lm", col = "black") + 
+  #  theme_bw() + 
+  #  labs(title = title2, 
+   #      x = x2, 
+    #     y = y2) + 
+  #  stat_regline_equation(label.x = 1, label.y = max(data$response2) * 1.1) + 
+  #  stat_cor(label.x = 1, label.y = max(data$response2) * 1.05)
+  
+  return(list(
+    histo = histo,
+    plot = plot)) 
+}
+
+
+#INPUTS for histo and plots-----------------
+### FvFm
+
+#Inputs for Ulva/fvfm
+pmax_fvfm <- raw_plots(
+  data = ulva_ww,
+  response = fv_fm,
+  response2 = growth,
+  label = "Ulva lactuca",
+  pretty_color = "goldenrod1",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "Fv/Fm (AU)",
+  y = "Day 9 Fv/Fm (AU)",
+  y2 = "9-Day Growth (%)",
+  title = "A - Ulva lactuca",
+  title2 = "Ulva lactuca --- FvFm (AU) vs 9-Day Growth (%)",
+  subtitle = "Fv/Fm",
+  ylim1 = 0, 
+  ylim2 = 1,
+  color1 = "forestgreen",
+  color2 = "darkolivegreen3",
+  color3 = "olivedrab4",
+  yint = .5,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(fvfm_ulva$histo)
+plot(fvfm_ulva$plot)
+#ggsave("pmax_ulva_sgdww.png", path = "wastewater/plots/", 
+#      width = 7, height = 6, units = "in", dpi = 300, scale = 1)
+
+#inputs for hypnea/pmax
+fvfm_hypnea_ww <- raw_plots(
+  data = hypnea_ww,
+  response = fv_fm,
+  response2 = growth,
+  label = "Hypnea musciformis",
+  pretty_color = "maroon4",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "Fv/Fm (AU)",
+  y = "Day 9 Fv/Fm (AU)",
+  y2 = "9-Day Growth (%)",
+  title = "B - Hypnea musciformis",
+  title2 = "Hypnea musciformis --- Fv/Fm vs 9-Day Growth (%)",
+  subtitle = "Fv/Fm",
+  ylim1 = 0, 
+  ylim2 = 1,
+  color1 = "deeppink4",
+  color2 = "deeppink3",
+  color3 = "hotpink",
+  yint = 0.5,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(fvfm_hypnea_ww$histo)
+plot(fvfm_hypnea_ww$plot)
+
+#Pmax ------------------------
+
+#Inputs for Ulva/pmax
+pmax_ulva <- raw_plots(
+  data = ulva_ww,
+  response = pmax,
+  response2 = growth,
+  label = "Ulva lactuca",
+  pretty_color = "goldenrod1",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "Pmax (μmols electrons m-2 s-1)",
+  y = "Day 9 Pmax (μmols electrons m-2 s-1)",
+  y2 = "9-Day Growth (%)",
+  title = "A - Ulva lactuca",
+  title2 = "Ulva lactuca --- Pmax vs 9-Day Growth (%)",
+  subtitle = "Pmax",
+  ylim1 = 0, 
+  ylim2 = 135,
+  color1 = "forestgreen",
+  color2 = "darkolivegreen3",
+  color3 = "olivedrab4",
+  yint = 20,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("53 μmol", 
+              "80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(pmax_ulva$histo)
+plot(pmax_ulva$plot)
+#ggsave("pmax_ulva_sgdww.png", path = "wastewater/plots/", 
+ #      width = 7, height = 6, units = "in", dpi = 300, scale = 1)
+
+#inputs for hypnea/pmax
+pmax_hypnea_ww <- raw_plots(
+  data = hypnea_ww,
+  response = pmax,
+  response2 = growth,
+  label = "Hypnea musciformis",
+  pretty_color = "maroon4",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "Pmax (μmols electrons m-2 s-1)",
+  y = "Day 9 Pmax (μmols electrons m-2 s-1)",
+  y2 = "9-Day Growth (%)",
+  title = "B - Hypnea musciformis",
+  title2 = "Hypnea musciformis --- Pmax vs 9-Day Growth (%)",
+  subtitle = "Pmax",
+  ylim1 = 0, 
+  ylim2 = 135,
+  color1 = "deeppink4",
+  color2 = "deeppink3",
+  color3 = "hotpink",
+  yint = 20,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("53 μmol", 
+              "80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(pmax_hypnea_ww$histo)
+plot(pmax_hypnea_ww$plot)
+#ggsave("pmax_hypnea_sgdww.png", path = "wastewater/plots/",
+ #      width = 7, height = 6, units = "in", dpi = 300, scale = 1)
+
+#NPQmax----------------
+
+#inputs for ulva_ww/NPQmax
+npqmax_ulva_ww <- raw_plots(
+  data = ulva_ww,
+  response = npq_max,
+  response2 = growth,
+  label = "Ulva lactuca",
+  pretty_color = "darkolivegreen2",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "NPQmax",
+  y = "Day 9 NPQmax",
+  y2 = "9-Day Growth (%)",
+  title = "C - Ulva lactuca",
+  title2 = "Ulva lactuca --- NPQmax vs 9-Day Growth (%)",
+  subtitle = "NPQmax",
+  ylim1 = -0.5, 
+  ylim2 = 2,
+  color1 = "forestgreen",
+  color2 = "darkolivegreen3",
+  color3 = "olivedrab4",
+  yint = 0.5,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("53 μmol", 
+              "80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(npqmax_ulva_ww$histo)
+plot(npqmax_ulva_ww$plot)
+#ggsave("npqmax_ulva_sgdww.png", path = "wastewater/plots/", 
+ #      width = 7, height = 6, units = "in", dpi = 300, scale = 1)
+
+#inputs for hypnea_ww/NPQmax
+npqmax_hypnea_ww <- raw_plots(
+  data = hypnea_ww,
+  response = npq_max,
+  response2 = growth,
+  label = "Hypnea musciformis",
+  pretty_color = "maroon1",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "NPQmax",
+  y = "Day 9 NPQmax",
+  y2 = "9-Day Growth (%)",
+  title = "D - Hypnea musciformis",
+  title2 = "Hypnea musciformis --- NPQmax vs 9-Day Growth (%)",
+  subtitle = "NPQmax",
+  ylim1 = -0.5, 
+  ylim2 = 2,
+  color1 = "deeppink4",
+  color2 = "deeppink3",
+  color3 = "hotpink",
+  yint = 0.5,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("53 μmol", 
+              "80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(npqmax_hypnea_ww$histo)
+plot(npqmax_hypnea_ww$plot)
+#ggsave("npqmax_hypnea_sgdww.png", path = "wastewater/plots/", 
+ #      width = 7, height = 6, units = "in", dpi = 300, scale = 1)
+
+
+#deltaNPQ----------------
+
+#inputs for ulva_ww/deltaNPQ
+delta_npq_ulva_ww <- raw_plots(
+  data = ulva_ww,
+  response = delta_npq,
+  response2 = growth,
+  label = "Ulva lactuca",
+  pretty_color = "darkolivegreen2",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "ΔNPQ",
+  y = "Day 9 ΔNPQ",
+  y2 = "9-Day Growth (%)",
+  title = "E - Ulva lactuca",
+  title2 = "Ulva lactuca --- ΔNPQ vs 9-Day Growth (%)",
+  subtitle = "ΔNPQ",
+  ylim1 = 0, 
+  ylim2 = 2,
+  color1 = "forestgreen",
+  color2 = "darkolivegreen3",
+  color3 = "olivedrab4",
+  yint = 0.5,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("53 μmol", 
+              "80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(delta_npq_ulva_ww$histo)
+plot(delta_npq_ulva_ww$plot)
+#ggsave("delta_npq_ulva_ww.png", path = "wastewater/plots/", 
+ #      width = 7, height = 6, units = "in", dpi = 300, scale = 1)
+
+
+#inputs for hypnea_ww/deltaNPQ
+delta_npq_hypnea_ww <- raw_plots(
+  data = hypnea_ww,
+  response = delta_npq,
+  response2 = d9_growth_percent,
+  label = "Hypnea musciformis",
+  pretty_color = "maroon3",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "ΔNPQ",
+  y = "Day 9 ΔNPQ",
+  y2 = "9-Day Growth (%)",
+  title = "F - Hypnea musciformis",
+  title2 = "Hypnea musciformis --- ΔNPQ vs 9-Day Growth (%)",
+  subtitle = "ΔNPQ",
+  ylim1 = 0, 
+  ylim2 = 2,
+  color1 = "deeppink4",
+  color2 = "deeppink3",
+  color3 = "hotpink",
+  yint = 0.5,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("53 μmol", 
+              "80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(delta_npq_hypnea_ww$histo)
+plot(delta_npq_hypnea_ww$plot)
+#ggsave("delta_npq_hypnea_ww.png", path = "wastewater/plots/", 
+ #      width = 7, height = 6, units = "in", dpi = 300, scale = 1)
+
+
+#Ek----------------
+
+#inputs for ulva_ww/Ek
+ek_ulva_ww <- raw_plots(
+  data = ulva_ww,
+  response = ek_est,
+  response2 = growth,
+  label = "Ulva lactuca",
+  pretty_color = "goldenrod4",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "Ek (μmols photons m-2 s-1)",
+  y = "Day 9 Ek (μmols photons m-2 s-1)",
+  y2 = "9-Day Growth (%)",
+  title = "G - Ulva lactuca",
+  title2 = "Ulva lactuca --- Ek vs 9-Day Growth (%)",
+  subtitle = "Ek",
+  ylim1 = 0, 
+  ylim2 = 225,
+  color1 = "forestgreen",
+  color2 = "darkolivegreen3",
+  color3 = "olivedrab4",
+  yint = 50,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("53 μmol", 
+              "80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(ek_ulva_ww$histo)
+plot(ek_ulva_ww$plot)
+#ggsave("ek_ulva_sgdww.png", path = "wastewater/plots/", 
+ #      width = 7, height = 6, units = "in", dpi = 300, scale = 1)
+
+#inputs for hypnea_ww/Ek
+ek_hypnea_ww <- raw_plots(
+  data = hypnea_ww,
+  response = ek_est,
+  response2 = growth,
+  label = "Hypnea musciformis",
+  pretty_color = "maroon3",
+  aescolor = salinity,
+  x = "Nitrate",
+  x2 = "Ek (μmols photons m-2 s-1)",
+  y = "Day 9 Ek (μmols photons m-2 s-1)",
+  y2 = "9-Day Growth (%)",
+  title = "H - Hypnea musciformis",
+  title2 = "Hypnea musciformis --- Ek vs 9-Day Growth (%)",
+  subtitle = "Ek",
+  ylim1 = 0, 
+  ylim2 = 225,
+  color1 = "deeppink4",
+  color2 = "deeppink3",
+  color3 = "hotpink",
+  yint = 50,
+  vjust_t = -15,
+  hjust_t = 0.05,
+  vjust_s = -10,
+  hjust_s = 0.95,
+  labels1 = c("53 μmol", 
+              "80 μmol", 
+              "245 μmol",
+              "748 μmol",
+              "2287 μmol")
+)
+plot(ek_hypnea_ww$histo)
+plot(ek_hypnea_ww$plot)
+#plot(ek_hypnea_ww$lin_regr)
+#ggsave("ek_hypnea_sgdww.png", path = "wastewater/plots/", 
+ #     width = 7, height = 6, units = "in", dpi = 300, scale = 1)
+
+
+
+
+
+# Currently NOT in use__________________________________________________________
+#Linear regression Pmax vs Growth-----------------------------------------------
+
+#plot a regression between the photosynthetic independent variables of interest and growth rate
+
+
+hypnea_ww_growth_pmax_plot <- hypnea_ww %>%
+  ggplot(aes(x=pmax, 
+             y=d9_growth_percent)) + 
+  geom_point(alpha = 0.5, size = 3, show.legend = TRUE, aes(color = treatment)) + 
+  geom_smooth(method = "lm", col = "black") + 
+  theme_bw() + 
+  labs(title = "Chondria tumulosa hypnea_wwstory --- Pmax vs 9-Day Growth (%)", 
+       x = "Pmax (μmols electrons m-2 s-1)", 
+       y = "9-Day Growth (%)") + 
+  stat_regline_equation(label.x = 10, label.y = 65) + stat_cor(label.x = 10, label.y = 60)
+hypnea_ww_growth_pmax_plot
+
+
+#--------------------NPQmax--------------------------
+
+
+
+
+
+
+#summarize the means for NPQmax
+ulva_ww %>% group_by(nitrate, salinity) %>% summarise_at(vars(maxNPQ_Ypoint1), list(mean = mean))
+hypnea_ww %>% group_by(nitrate, salinity) %>% summarise_at(vars(maxNPQ_Ypoint1), list(mean = mean))
+
+
+#Linear regression NPQ vs Growth and Apices
+#plot a regression between the photosynthetic independent variables of interest and growth rate
+#ulva_ww_growth_NPQmax_graph <- ggplot(ulva_ww_sub, aes(x=maxNPQ_Ypoint1, y=growth_rate_percent)) + 
+geom_point(alpha = 0.5, size = 3, show.legend = TRUE, aes(color = treatment)) + 
+  geom_smooth(method = "lm", col = "black") + theme_bw() + 
+  labs(title = "Chondria tumulosa NPQmax vs 9-Day Growth (%)", x = " NPQmax (rel. units)", 
+       y = "9-Day Growth (%)") + stat_regline_equation(label.x = 0.25, label.y = 38) + stat_cor(label.x = 0.25, label.y = 40)
+#ulva_ww_growth_NPQmax_graph
+
+
+
+#-----------------delta NPQ------------------
+
+
+#summarize the means for deltaNPQ
+ulva_ww %>% group_by(treatment) %>% summarise_at(vars(deltaNPQ), list(mean = mean))
+ulva_ww %>% group_by(temp) %>% summarise_at(vars(deltaNPQ), list(mean = mean))
+#ulva_ww %>% group_by(treatment, rlc_day) %>% summarise_at(vars(pmax), list(mean = mean))
+
+#Linear regression deltaNPQ vs Growth and Apices
+
+#plot a regression between the photosynthetic independent variables of interest and growth rate
+ulva_ww_growth_deltaNPQ_graph <- ggplot(ulva_ww_sub, aes(x=deltaNPQ, y=growth_rate_percent)) + 
+  geom_point(alpha = 0.5, size = 3, show.legend = TRUE, aes(color = treatment)) + 
+  geom_smooth(method = "lm", col = "black") + theme_bw() + 
+  labs(title = "Chondria tumulosa Delta NPQ vs 9-Day Growth (%)", x = " Delta NPQ (rel. units)", 
+       y = "9-Day Growth (%)") + stat_regline_equation(label.x = 0.25, label.y = 38) + stat_cor(label.x = 0.25, label.y = 40)
+ulva_ww_growth_deltaNPQ_graph
+
+

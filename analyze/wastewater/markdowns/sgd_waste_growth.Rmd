@@ -1,0 +1,251 @@
+---
+title: "SGD and Wastewater Growth of Ulva and Hypnea"
+author: "Angela Richards Donà"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    toc: yes
+    toc_float:
+      collapsed: true
+---
+# Run analysis on the combined dataset using 2021 and 2025 data 
+### 2021 = SGD, 2025 = Wastewater Scenarios
+### Subsetted for analysis of the individual species
+
+```{r, include= FALSE}
+#load libraries
+#libraries for tidying up
+library(gt)
+library(purrr)
+library(stringr)
+library(tidyr)
+library(hms)
+library(lubridate)
+library(ggeffects)
+
+# libraries for analysis
+library(lme4)
+library(lmerTest)
+library(afex)
+library(effects)
+library(car)
+library(MuMIn)
+library (dplyr)
+library(emmeans)
+library(DHARMa)
+library(performance)
+library(patchwork)
+library(rstatix)
+
+#libraries for plots and tables
+library(ggplot2)
+library(ggpubr)
+library(forcats)
+library(RColorBrewer)
+library(tidyverse)
+library(sjPlot)
+library(sjmisc)
+library(lubridate)
+library(paletteer)
+```
+
+
+# Data Wrangling
+##Read in combined dataset
+```{r}
+combined_growth_all <- read.csv("/Users/angela/src/Photosynthesis/data/wastewater/transformed/combined_data_all.csv")
+```
+
+### change variables to factors
+```{r}
+combined_growth_all <- combined_growth_all %>%
+  mutate(date = ymd(date)) %>%
+  mutate(year = as.factor(year)) %>%
+  mutate(salinity = as.factor(salinity)) %>%
+  mutate(temp = as.factor(temp)) %>%
+  mutate(nitrate = as.factor(nitrate)) %>%
+  mutate(run_combo = as.factor(run_combo)) %>%
+  mutate(plant_id = as.factor(plant_id))
+
+```
+
+### Filter data before proceeding -- remove 30 degrees, keep 80 nitrate from SGD 2021 
+### Keep all of 2025
+```{r}
+combined_growth_all <- combined_growth_all %>%
+  filter(
+    # keep:
+    (
+      year %in% c(2021, 2022) & 
+        nitrate == "80" & 
+        temp != 30
+    ) |
+      year == 2025
+  )  
+```
+
+### Make a list to be used for plots that orders chronologically first then by nitrate value low to high
+```{r}
+combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "f"] <- "i) 80 μmol"
+combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "k"] <- "k) 80 μmol"
+combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "l"] <- "l) 245 μmol"
+combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "m"] <- "m) 748 μmol"
+combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "n"] <- "n) 2287 μmol"
+```
+
+### Subset by species and run table checks
+```{r}
+combined_growth_u <- combined_growth_all %>%
+  filter(species == "u")
+
+combined_growth_h <- combined_growth_all %>%
+  filter(species == "h")
+
+xtabs(~ salinity + temp + year, data = combined_growth_u)
+xtabs(~ salinity + temp + year, data = combined_growth_h)
+```
+
+# Run lmm model for Ulva______________________________________________________
+#### Note: All other random effects had zero effect on Ulva growth
+```{r}
+growth_model_u <- lmer(formula = growth_d9 ~ nitrate + salinity + temp + 
+                         (1 | run_combo), data = combined_growth_all, REML = TRUE)
+```
+
+### Check the performance of the model for dataset: u
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+hist(resid(growth_model_u))
+performance::check_model(growth_model_u)
+check_collinearity(growth_model_u)
+r.squaredGLMM(growth_model_u)
+summary(growth_model_u)
+```
+
+### View model outcome and random effects levels
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+tab_model(growth_model_u, show.intercept = TRUE, show.se = TRUE, show.stat = TRUE, 
+          show.df = TRUE, show.zeroinf = TRUE)
+```
+
+## Construct null model to perform likelihood ratio test REML must be FALSE
+```{r}
+# Does nitrate affect Ulva growth?
+u_growth_nitrate_null <- lmer(formula = growth_d9 ~ temp + salinity +
+                              (1 | run_combo), 
+                              data = combined_growth_u, REML = FALSE)
+u_growth_model2 <- lmer(formula = growth_d9 ~ nitrate + temp + salinity +
+                          (1 | run_combo), 
+                        data = combined_growth_u, REML = FALSE)
+anova(u_growth_nitrate_null, u_growth_model2)
+
+```
+
+```{r}
+# Does temperature affect Ulva growth?
+u_growth_temp_null <- lmer(formula = growth_d9 ~ nitrate + salinity +
+                             (1 | run_combo), 
+                           data = combined_growth_u, REML = FALSE)
+u_growth_model4 <- lmer(formula = growth_d9 ~ nitrate + temp + salinity +
+                          (1 | run_combo), 
+                        data = combined_growth_u, REML = FALSE)
+anova(u_growth_temp_null, u_growth_model4)
+
+```
+
+```{r}
+# Does salinity affect Ulva growth?
+u_growth_salinity_null <- lmer(formula = growth_d9 ~ nitrate + temp +
+                             (1 | run_combo), 
+                           data = combined_growth_u, REML = FALSE)
+u_growth_model4 <- lmer(formula = growth_d9 ~ nitrate + temp + salinity +
+                          (1 | run_combo), 
+                        data = combined_growth_u, REML = FALSE)
+anova(u_growth_temp_null, u_growth_model4)
+```
+
+# Run lmm model for Hypnea____________________________________________________
+### These random effects have been tested and found relevant
+```{r}
+growth_model_h <- lmer(formula = growth_d9 ~ nitrate + temp + salinity +
+                         (1 | plant_id) + (1 | run_combo) + (1 | illumination), 
+                       data = combined_growth_h, REML = TRUE)
+```
+
+### Check the performance of the model for dataset: h
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+hist(resid(growth_model_h))
+performance::check_model(growth_model_h)
+r.squaredGLMM(growth_model_h)
+summary(growth_model_h)
+```
+
+### View random effects levels
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+tab_model(growth_model_h, show.intercept = TRUE, show.se = TRUE, show.stat = TRUE, 
+          show.df = TRUE, show.zeroinf = TRUE)
+```
+
+## Construct null model to perform likelihood ratio test REML must be FALSE
+```{r}
+# Does nitrate affect Hypnea growth?
+h_growth_nitrate_null <- lmer(formula = growth_d9 ~ salinity + temp + 
+                                (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
+                              data = combined_growth_h, REML = FALSE)
+h_growth_model2 <- lmer(formula = growth_d9 ~ nitrate + salinity + temp + 
+                          (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
+                        data = combined_growth_h, REML = FALSE)
+anova(h_growth_nitrate_null, h_growth_model2)
+```
+
+```{r}
+#Does salinity affect Hypnea growth?
+h_growth_salinity_null <- lmer(formula = growth_d9 ~ nitrate + temp + 
+                                 (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
+                               data = combined_growth_h, REML = FALSE)
+h_growth_model3 <- lmer(formula = growth_d9 ~ nitrate + salinity + temp + 
+                          (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
+                        data = combined_growth_h, REML = FALSE)
+anova(h_growth_salinity_null, h_growth_model3)
+
+```
+
+```{r}
+h_growth_temp_null <- lmer(formula = growth_d9 ~ nitrate + salinity + 
+                             (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
+                           data = combined_growth_h, REML = FALSE)
+h_growth_model4 <- lmer(formula = growth_d9 ~ nitrate + salinity + temp + 
+                          (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
+                        data = combined_growth_h, REML = FALSE)
+anova(h_growth_temp_null, h_growth_model4)
+```
+
+# MAKE PLOTS_____________________________________________________________________
+
+### All data included in this plot
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+combo_growth_species_plot <- combined_growth_all %>% 
+  ggplot(aes(treatment_graph, growth_d9, color = salinity, shape = temp)) + 
+  geom_boxplot(linewidth=0.25) + 
+  geom_point(alpha = 0.75,
+             size = 2,
+             position = position_jitter(width = 0.3), show.legend = TRUE) + 
+  labs(x="nitrate (μmols)", y= "9-Day Growth (%)", title = "By Species") + 
+  facet_wrap(~species, labeller = labeller(species = c("h" = "Hypnea", "u" = "Ulva"))) +
+  scale_x_discrete(labels = c("80", "80", "245", "748", "2287")) + 
+  ylim(-50, 380) + stat_mean() + 
+  geom_hline(yintercept=0, color = "red", size = 0.5, alpha = 0.5) +
+  theme_bw() +
+  scale_color_paletteer_d("MetBrewer::Cross") +
+  theme(plot.title = element_text(face = "bold", vjust = -25, hjust = 0.05), # By Species title
+        legend.position = c(0.40,0.82), #move it to center of plot
+        legend.box = "horizontal", #make the two legend boxes stay side-by-side
+        legend.text = element_text(size = 12), #increase size for legibility
+        strip.text = element_text(face = "italic", size = 12), #increase size of Hypnea and Ulva in facet headers
+        axis.title.x = element_text(size = 16),
+        axis.title.y = element_text(size = 16),
+        axis.text.x = element_text(size = 14),
+        axis.text.y = element_text(size = 14))
+combo_growth_species_plot
+```
+

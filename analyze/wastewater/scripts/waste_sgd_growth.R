@@ -53,30 +53,27 @@ combined_growth_all <- combined_growth_all %>%
   mutate(plant_id = as.factor(plant_id))
 
 glimpse(combined_growth_all)
-  
+# Filter data before proceeding
+combined_growth_all <- combined_growth_all %>%
+  filter(
+    # keep:
+    (
+      year %in% c(2021, 2022) & 
+        nitrate == "80" & 
+        temp != 30
+    ) |
+      year == 2025
+  )  
 #make a list to be used for plots that orders chronologically first then by nitrate value low to high
-combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "a"] <- "a) 0.5 μmol"
-combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "b"] <- "c) 14 μmol" 
-combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "c"] <- "d) 27 μmol" 
-combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "d"] <- "f) 53 μmol" 
-combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "e"] <- "g) 53 μmol"
 combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "f"] <- "i) 80 μmol"
-combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "g"] <- "b) 0.5 μmol"
-combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "h"] <- "e) 37 μmol"
-combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "i"] <- "h) 53 μmol"
-combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "j"] <- "j) 86 μmol"
 combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "k"] <- "k) 80 μmol"
 combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "l"] <- "l) 245 μmol"
 combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "m"] <- "m) 748 μmol"
 combined_growth_all$treatment_graph[combined_growth_all$treat_letter == "n"] <- "n) 2287 μmol"
 
-combined_growth_all$salinity_graph[combined_growth_all$salinity == "35"] <- "a) 35 ppt"
-combined_growth_all$salinity_graph[combined_growth_all$salinity == "28"] <- "b) 28 ppt"
 combined_growth_all$salinity_graph[combined_growth_all$salinity == "27"] <- "c) 27 ppt"
 combined_growth_all$salinity_graph[combined_growth_all$salinity == "22"] <- "d) 22 ppt" 
-combined_growth_all$salinity_graph[combined_growth_all$salinity == "21"] <- "e) 21 ppt" 
 combined_growth_all$salinity_graph[combined_growth_all$salinity == "18"] <- "f) 18 ppt"
-combined_growth_all$salinity_graph[combined_growth_all$salinity == "15"] <- "g) 15 ppt"
 combined_growth_all$salinity_graph[combined_growth_all$salinity == "11"] <- "h) 11 ppt"
 
 #Subset by species
@@ -86,10 +83,11 @@ combined_growth_u <- combined_growth_all %>%
 combined_growth_h <- combined_growth_all %>%
   filter(species == "h")
 
-xtabs(~ salinity + temp, data = combined_growth_u)
+xtabs(~ salinity + temp + year, data = combined_growth_u)
+xtabs(~ salinity + temp + year, data = combined_growth_h)
+
 #Run lmm model for Ulva_________________________________________________________
-growth_model_u <- lmer(formula = growth_d9 ~ nitrate + temp + (1 | plant_id) + 
-                         (1 | illumination) + (1 | run_combo), 
+growth_model_u <- lmer(formula = growth_d9 ~ nitrate + salinity + temp + (1 | run_combo), 
                        data = combined_growth_all, REML = TRUE)
 
 hist(resid(growth_model_u))
@@ -100,7 +98,7 @@ qqline(resid(growth_model_u))
 #check the performance of the model for dataset: u
 performance::check_model(growth_model_u)
 check_collinearity(growth_model_u)
-rsquared(growth_model_u)
+r.squaredGLMM(growth_model_u)
 summary(growth_model_u)
 
 #view random effects levels
@@ -109,26 +107,36 @@ tab_model(growth_model_u, show.intercept = TRUE, show.se = TRUE, show.stat = TRU
 plot(allEffects(growth_model_u))
 
 #construct null model to perform likelihood ratio test REML must be FALSE
-u_growth_nitrate_null <- lmer(formula = growth_d9 ~ temp + 
-                              (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
+# Does nitrate affect Ulva growth?
+u_growth_nitrate_null <- lmer(formula = growth_d9 ~ temp + salinity +
+                              (1 | run_combo), 
                               data = combined_growth_u, REML = FALSE)
-u_growth_model2 <- lmer(formula = growth_d9 ~ nitrate + temp + 
-                          (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
+u_growth_model2 <- lmer(formula = growth_d9 ~ nitrate + temp + salinity +
+                          (1 | run_combo), 
                         data = combined_growth_u, REML = FALSE)
 anova(u_growth_nitrate_null, u_growth_model2)
 
-
-u_growth_temp_null <- lmer(formula = growth_d9 ~ nitrate + 
-                             (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
+# Does temperature affect Ulva growth?
+u_growth_temp_null <- lmer(formula = growth_d9 ~ nitrate + salinity +
+                             (1 | run_combo), 
                            data = combined_growth_u, REML = FALSE)
-u_growth_model4 <- lmer(formula = growth_d9 ~ nitrate + temp + 
-                          (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
+u_growth_model4 <- lmer(formula = growth_d9 ~ nitrate + temp + salinity +
+                          (1 | run_combo), 
+                        data = combined_growth_u, REML = FALSE)
+anova(u_growth_temp_null, u_growth_model4)
+
+# Does salinity affect Ulva growth?
+u_growth_salinity_null <- lmer(formula = growth_d9 ~ nitrate + temp +
+                             (1 | run_combo), 
+                           data = combined_growth_u, REML = FALSE)
+u_growth_model4 <- lmer(formula = growth_d9 ~ nitrate + temp + salinity +
+                          (1 | run_combo), 
                         data = combined_growth_u, REML = FALSE)
 anova(u_growth_temp_null, u_growth_model4)
 
 
 #Run lmm model for Hypnea_________________________________________________________
-growth_model_h <- lmer(formula = growth_d9 ~ nitrate + temp +
+growth_model_h <- lmer(formula = growth_d9 ~ nitrate + temp + salinity +
                          (1 | plant_id) + (1 | run_combo) + (1 | illumination), 
                        data = combined_growth_h, REML = TRUE)
 
@@ -139,7 +147,7 @@ qqline(resid(growth_model_h))
 
 #check the performance of the model for dataset: u
 performance::check_model(growth_model_h)
-rsquared(growth_model_h)
+r.squaredGLMM(growth_model_h)
 summary(growth_model_h)
 
 #view random effects levels
@@ -148,29 +156,31 @@ tab_model(growth_model_h, show.intercept = TRUE, show.se = TRUE, show.stat = TRU
 plot(allEffects(growth_model_h))
 
 #construct null model to perform likelihood ratio test REML must be FALSE
-u_growth_nitrate_null <- lmer(formula = growth_d9 ~ salinity + temp + 
+# Does nitrate affect Hypnea growth?
+h_growth_nitrate_null <- lmer(formula = growth_d9 ~ salinity + temp + 
                                 (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
-                              data = combined_growth_u, REML = FALSE)
-u_growth_model2 <- lmer(formula = growth_d9 ~ nitrate + salinity + temp + 
+                              data = combined_growth_h, REML = FALSE)
+h_growth_model2 <- lmer(formula = growth_d9 ~ nitrate + salinity + temp + 
                           (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
-                        data = combined_growth_u, REML = FALSE)
-anova(u_growth_nitrate_null, u_growth_model2)
+                        data = combined_growth_h, REML = FALSE)
+anova(h_growth_nitrate_null, h_growth_model2)
 
-u_growth_salinity_null <- lmer(formula = growth_d9 ~ nitrate + temp + 
+#Does salinity affect Hypnea growth?
+h_growth_salinity_null <- lmer(formula = growth_d9 ~ nitrate + temp + 
                                  (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
-                               data = combined_growth_u, REML = FALSE)
-u_growth_model3 <- lmer(formula = growth_d9 ~ nitrate + salinity + temp + 
+                               data = combined_growth_h, REML = FALSE)
+h_growth_model3 <- lmer(formula = growth_d9 ~ nitrate + salinity + temp + 
                           (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
-                        data = combined_growth_u, REML = FALSE)
-anova(u_growth_salinity_null, u_growth_model3)
+                        data = combined_growth_h, REML = FALSE)
+anova(h_growth_salinity_null, h_growth_model3)
 
-u_growth_temp_null <- lmer(formula = growth_d9 ~ nitrate + salinity + 
+h_growth_temp_null <- lmer(formula = growth_d9 ~ nitrate + salinity + 
                              (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
-                           data = combined_growth_u, REML = FALSE)
-u_growth_model4 <- lmer(formula = growth_d9 ~ nitrate + salinity + temp + 
+                           data = combined_growth_h, REML = FALSE)
+h_growth_model4 <- lmer(formula = growth_d9 ~ nitrate + salinity + temp + 
                           (1 | run_combo) + (1 | plant_id) + (1 | illumination), 
-                        data = combined_growth_u, REML = FALSE)
-anova(u_growth_temp_null, u_growth_model4)
+                        data = combined_growth_h, REML = FALSE)
+anova(h_growth_temp_null, h_growth_model4)
 
 #MAKE PLOTS_______________________________________________________________________
 
@@ -184,8 +194,8 @@ combo_growth_species_plot <- combined_growth_all %>%
              position = position_jitter(width = 0.3), show.legend = TRUE) + 
   labs(x="nitrate (μmols)", y= "9-Day Growth (%)", title = "By Species") + 
   facet_wrap(~species, labeller = labeller(species = c("h" = "Hypnea", "u" = "Ulva"))) +
-  scale_x_discrete(labels = c("0.5", "0.5", "14", "27", "37", "53", "53", "53", "80", "86", "80", "245", "748", "2287")) + 
-  ylim(-90, 380) + stat_mean() + 
+  scale_x_discrete(labels = c("80", "80", "245", "748", "2287")) + 
+  ylim(-50, 380) + stat_mean() + 
   geom_hline(yintercept=0, color = "red", size = 0.5, alpha = 0.5) +
   theme_bw() +
   scale_color_paletteer_d("MetBrewer::Cross") +
@@ -212,7 +222,7 @@ combined_growth_all <- combined_growth_all %>%
     )
   )
 
-
+#_________________________________________________________________________________
 growth_species_salinity_group_plot <- combined_growth_all %>% 
   ggplot(aes(salinity_graph, growth_d9, color = nitrate, shape = temp)) + 
   geom_boxplot(linewidth=0.5, size = 0.5) + 

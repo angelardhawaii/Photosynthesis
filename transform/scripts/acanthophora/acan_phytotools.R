@@ -1,12 +1,21 @@
 #This script takes the cleaned data from PAM output and runs the Phytotools package to
-#produce a final dataset that can be used for analysis.
+#produce a dataset that can be used for analysis.
 #take cleaned data from Python script and run through phytotools package to get ek and alpha etc
 #open appropriate libraries
-library("phytotools")
-library("hash")
-library("dplyr")
+#By Angela Richards Dona
+#September 2025
 
-acan_phyto <- read.csv("../../../../data/limu/acan_2024/transformed/acanthophora_clean.csv", sep = ",")
+library(phytotools)
+library(hash)
+library(dplyr)
+library(lubridate)
+library(hms)
+library(stringr)
+library(tidyr)
+library(purrr)
+library(tidyverse)
+
+acan_phyto <- read.csv("/Users/angela/src/Photosynthesis/data/acan_2024/transformed/acan_2024_pamdata_clean_tidy.csv", sep = ",")
 
 # add a column that turns date format into POSIXct
 acan_phyto$posix_date <- as.POSIXct(acan_phyto$Date, format = "%m/%d/%y")

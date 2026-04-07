@@ -54,7 +54,7 @@ library(ggeffects)
 
 ### Load this file for normalized to quantum efficiency of photosynthesis per Silsbe and Kromkamp (2012)
 ```{r}
-mid_ps <- read.csv("../../../data/midway_2024/transformed/midway_ek_alpha_normalized_2024.csv")
+mid_ps <- read_csv("/Users/angela/src/Photosynthesis/data/midway/2024/transformed/midway_ek_alpha_normalized_2024.csv")
 
 ```
 
@@ -163,7 +163,7 @@ under$treatment_graph[under$treatment == 8] <- "8) 8μmol/28 ppt"
 
 ## Add new column to subsets from time over 28 summary dataset
 ```{r}
-time_over_28 <- read_csv("../../../data/midway_2024/transformed/mins_28_plant_part.csv") #load dataset
+time_over_28 <- read_csv("/Users/angela/src/Photosynthesis/data/midway/2024/transformed/mins_28_plant_part.csv") #load dataset
 
 mean_mins28 <- time_over_28 %>%
   select(plant_part, run, mean_mins28_plant_part) %>% #keep only relevant columns of data
@@ -186,7 +186,7 @@ under <- under %>%
 
 ### Add growth rate from growth dataset
 ```{r}
-growth_rate <- read.csv("../../../data/midway_2024/input/midway_growth.csv")
+growth_rate <- read.csv("/Users/angela/src/Photosynthesis/data/midway/2024/input/midway_growth.csv")
 growth_rate$treatment <- as.factor(growth_rate$treatment)
 
 ```

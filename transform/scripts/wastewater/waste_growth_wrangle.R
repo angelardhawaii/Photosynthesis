@@ -11,7 +11,7 @@ library(lunar)
 library(suncalc)
 
 #open weight dataset
-waste_p2_growth <- read.csv("../data/wastewater/input/growth_2025/p2_growth_all.csv")
+waste_p2_growth <- read.csv("/Users/angela/src/Photosynthesis/data/wastewater/input/growth_2025/p2_growth_all.csv")
 
 #clean those column titles
 clean_names(waste_p2_growth)
@@ -21,6 +21,9 @@ clean_names(waste_p2_growth)
 waste_p2_growth <- waste_p2_growth %>%
   mutate(date = mdy(date)) 
 
+waste_p2_growth <- waste_p2_growth %>%
+  rename(id = "ID")
+
 #assigns treatment as characters from integers then to factors
 waste_p2_growth$treatment <- as.factor(as.character(waste_p2_growth$treatment))
 waste_p2_growth$salinity <- as.factor(as.character(waste_p2_growth$salinity))
@@ -28,6 +31,14 @@ waste_p2_growth$salinity <- as.factor(as.character(waste_p2_growth$salinity))
 #add column for lunar phase to be used for Ulva only
 waste_p2_growth <- waste_p2_growth %>%
   mutate(lunar_phase = lunar.phase(date, name = TRUE))
+
+# Quantify loss from reproduction
+waste_p2_growth <- waste_p2_growth %>%
+  mutate(
+    net_change = f_weight - i_weight,
+    reproduced = net_change < 0,
+    loss_amt   = if_else(net_change < 0, abs(net_change), 0)
+  )
 
 #for more precision on lunar illumination
 moon_data <- getMoonIllumination(waste_p2_growth$date)
@@ -41,5 +52,17 @@ waste_p2_growth <- waste_p2_growth %>%
            illumination >= 0.6 & illumination < 0.9 ~ "gibbous",
            illumination >= 0.9 ~ "full"
          ))
-write.csv(waste_p2_growth, file = "../data/wastewater/input/growth_2025/waste_p2_growth.csv", 
+# Subset by species
+ulva_growth <- waste_p2_growth %>%
+  filter(species == "u")
+
+# Plot
+ggplot(ulva_growth, aes(i_weight, net_change, color = reproduced)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_point(size = 2) +
+  scale_color_manual(values = c("FALSE" = "darkgreen",
+                                "TRUE"  = "firebrick")) +
+  labs(y = "Net biomass change")
+
+write.csv(waste_p2_growth, file = "/Users/angela/src/Photosynthesis/data/wastewater/input/growth_2025/waste_p2_growth.csv", 
           row.names = FALSE)
