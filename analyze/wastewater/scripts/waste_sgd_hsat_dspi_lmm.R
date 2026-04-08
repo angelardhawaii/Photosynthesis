@@ -65,16 +65,15 @@ ww_hsat_lmm <- ww_hsat_lmm %>%
 ww_hsat_lmm <- ww_hsat_lmm %>%
   mutate(year = lubridate::year(start_date))
 
-# Get a mean daily Hsat and convert DSPI from micromols to mols m-2
+# Convert DSPI from micromols to mols m-2 (dspi_day_mean computed below after run_days is known)
 ww_hsat_lmm <- ww_hsat_lmm %>%
   mutate(
-    dspi_mol = round(dspi_total / 1e6, 2),
-    dspi_day_mean = round(dspi_mol / 8, 2)
+    dspi_mol = round(dspi_total / 1e6, 2)
   )
 ww_hsat_lmm <- ww_hsat_lmm %>%
   mutate(
     start_dt = lubridate::as_datetime(start_date, tz = TZ) + start_time,
-    end_dt   = lubridate::as_datetime(start_date + days(8), tz = TZ) + end_time,
+    end_dt   = lubridate::as_datetime(start_date + days(8), tz = TZ) + end_time,  # all experiments ran day 1–9, so 8 elapsed days
     run_hours = as.numeric(difftime(end_dt, start_dt, units = "hours")),
     run_days  = run_hours / 24
   ) %>%
@@ -122,8 +121,8 @@ sgd_ww_hsat <- ww_hsat_lmm %>%
     # keep:
     (
       year %in% c(2021, 2022) & 
-        nitrate == "80" & 
-        temp != 30
+        nitrate == "80" #& 
+        #temp != 30
     ) |
       year == 2025
   )
@@ -138,7 +137,7 @@ xtabs(~ salinity + temp + year, data = ulva_ww_hsat)
 xtabs(~ salinity + temp + year, data = hypnea_ww_hsat)
 #MODEL FUNCTION__________________________________________________________________
 
-check_model_fit <- function(model, terms) {
+check_model_fit <- function(model) {
   hist(resid(model))
   plot(resid(model) ~ fitted(model))
   qqnorm(resid(model))
@@ -149,47 +148,50 @@ check_model_fit <- function(model, terms) {
 
 #get predictor means
 get_data_means <- function(data, predictors_list, response){
-  group_vars <- c("nitrate", setdiff(predictors_list, "nitrate"))
-  data %>% 
-    group_by(across(all_of(group_vars))) %>%
+  data %>%
+    group_by(across(all_of(predictors_list))) %>%
     summarise(!!paste0(response, "_mean") := mean(.data[[response]], na.rm = TRUE),
               .groups = "drop")
 }
 
-#Make a function to run the the models for likelihood ratio tests where REML must be FALSE
+#Make a function to run the models for likelihood ratio tests where REML must be FALSE
 #construct null model to perform likelihood ratio test REML must be FALSE
 
 compare_lmer_models <- function(data, response, predictors_list, random_effects) {
-  # --- NEW CLEANING: remove NA/NaN/Inf ONLY for the response variable ---
+  # remove NA/NaN/Inf ONLY for the response variable
   data_clean <- data %>%
     filter(is.finite(.data[[response]])) %>%              # drop NA / NaN / Inf in response
     tidyr::drop_na(all_of(predictors_list)) %>%           # drop rows missing predictor values
     droplevels()
-  
+
   # Build random-effects string
   re_str <- paste(paste0("(1 | ", random_effects, ")"), collapse = " + ")
-  
-  # Full model
+
+  # Full model (REML = FALSE required for LRTs)
   fixed_all <- paste(predictors_list, collapse = " + ")
   f_full <- as.formula(paste(response, "~", fixed_all, "+", re_str))
   model_all <- lme4::lmer(f_full, data = data_clean, REML = FALSE)
-  
+
+  # Refit full model with REML = TRUE for reporting coefficients and diagnostics
+  model_all_reml <- lme4::lmer(f_full, data = data_clean, REML = TRUE)
+
   # Drop-one models + LRTs
   models <- list()
   anova_result <- list()
-  
+
   for (dropped in predictors_list) {
     fixed_reduced <- paste(setdiff(predictors_list, dropped), collapse = " + ")
     f_reduced <- as.formula(paste(response, "~", fixed_reduced, "+", re_str))
     models[[dropped]] <- lme4::lmer(f_reduced, data = data_clean, REML = FALSE)
     anova_result[[dropped]] <- anova(models[[dropped]], model_all, test = "Chisq")
   }
-  
+
   data_means <- get_data_means(data_clean, predictors_list, response)
-  
+
   list(
     models = models,          # named by the predictor that was dropped
-    model_all = model_all,
+    model_all = model_all,    # ML fit — use only for LRTs
+    model_all_reml = model_all_reml,  # REML fit — use for reporting and diagnostics
     anova_result = anova_result,
     data_means = data_means,
     used_data = data_clean
@@ -213,7 +215,7 @@ ulva_ww_hsat_results <- compare_lmer_models(
 
 # Access results
 # Full model
-summary(ulva_ww_hsat_results$model_all)
+summary(ulva_ww_hsat_results$model_all_reml)
 
 # Drop-one summaries (to inspect them)
 summary(ulva_ww_hsat_results$models[["salinity"]])
@@ -226,7 +228,7 @@ ulva_ww_hsat_results$anova_result[["salinity"]]
 ulva_ww_hsat_results$anova_result[["nitrate"]]
 #Does temp affect Ulva hsat?
 ulva_ww_hsat_results$anova_result[["temp"]]
-check_model_fit(ulva_ww_hsat_results$model_all, terms = predictors_list)
+check_model_fit(ulva_ww_hsat_results$model_all_reml)
 ulva_ww_hsat_results$data_means
 
 
@@ -239,7 +241,7 @@ hypnea_ww_hsat_results <- compare_lmer_models(
 )
 
 # Access results
-summary(hypnea_ww_hsat_results$model_all)
+summary(hypnea_ww_hsat_results$model_all_reml)
 # Drop-one summaries (if you want to inspect them)
 summary(hypnea_ww_hsat_results$models[["salinity"]])
 summary(hypnea_ww_hsat_results$models[["nitrate"]])
@@ -251,7 +253,7 @@ hypnea_ww_hsat_results$anova_result[["nitrate"]]
 #Does temp affect Hypnea hsat?
 hypnea_ww_hsat_results$anova_result[["temp"]]
 
-check_model_fit(hypnea_ww_hsat_results$model_all, terms = predictors_list)
+check_model_fit(hypnea_ww_hsat_results$model_all_reml)
 hypnea_ww_hsat_results$data_means
 
 #Inputs for Hsat species comparison
@@ -264,7 +266,7 @@ ww_hsat_species_results <- compare_lmer_models(
 
 # Access results
 # Full model
-summary(ww_hsat_species_results$model_all)
+summary(ww_hsat_species_results$model_all_reml)
 
 # Drop-one summaries (if you want to inspect them)
 summary(ww_hsat_species_results$models[["species"]])
@@ -272,7 +274,7 @@ summary(ww_hsat_species_results$models[["species"]])
 # Does species affect hsat?
 ww_hsat_species_results$anova_result[["species"]]
 
-check_model_fit(ww_hsat_species_results$model_all, terms = predictors_list_species2)
+check_model_fit(ww_hsat_species_results$model_all_reml)
 ww_hsat_species_results$data_means
 
 #relHsat____________________________________
@@ -287,7 +289,7 @@ ulva_ww_relhsat_results <- compare_lmer_models(
 
 # Access results
 # Full model
-summary(ulva_ww_relhsat_results$model_all)
+summary(ulva_ww_relhsat_results$model_all_reml)
 
 # Drop-one summaries (if you want to inspect them)
 summary(ulva_ww_relhsat_results$models[["salinity"]])
@@ -300,7 +302,7 @@ ulva_ww_relhsat_results$anova_result[["salinity"]]
 ulva_ww_relhsat_results$anova_result[["nitrate"]]
 #Does temp affect Ulva relhsat?
 ulva_ww_relhsat_results$anova_result[["temp"]]
-check_model_fit(ulva_ww_relhsat_results$model_all, terms = predictors_list)
+check_model_fit(ulva_ww_relhsat_results$model_all_reml)
 ulva_ww_relhsat_results$data_means
 
 # Inputs for Hypnea_relhsat
@@ -312,7 +314,7 @@ hypnea_ww_relhsat_results <- compare_lmer_models(
 )
 
 # Access results
-summary(hypnea_ww_relhsat_results$model_all)
+summary(hypnea_ww_relhsat_results$model_all_reml)
 # Drop-one summaries (if you want to inspect them)
 summary(hypnea_ww_relhsat_results$models[["salinity"]])
 summary(hypnea_ww_relhsat_results$models[["nitrate"]])
@@ -324,7 +326,7 @@ hypnea_ww_relhsat_results$anova_result[["nitrate"]]
 #Does temp affect Hypnea relhsat?
 hypnea_ww_relhsat_results$anova_result[["temp"]]
 
-check_model_fit(hypnea_ww_relhsat_results$model_all, terms = predictors_list)
+check_model_fit(hypnea_ww_relhsat_results$model_all_reml)
 hypnea_ww_relhsat_results$data_means
 
 # Inputs for relHsat species comparison
@@ -337,7 +339,7 @@ ww_relhsat_species_results <- compare_lmer_models(
 
 # Access results
 # Full model
-summary(ww_relhsat_species_results$model_all)
+summary(ww_relhsat_species_results$model_all_reml)
 
 # Drop-one summaries (if you want to inspect them)
 summary(ww_relhsat_species_results$models[["species"]])
@@ -345,7 +347,7 @@ summary(ww_relhsat_species_results$models[["species"]])
 # Does species affect relhsat?
 ww_relhsat_species_results$anova_result[["species"]]
 
-check_model_fit(ww_relhsat_species_results$model_all, terms = predictors_list_species)
+check_model_fit(ww_relhsat_species_results$model_all_reml)
 ww_relhsat_species_results$data_means
 
 #DSPI_____________________________________
@@ -359,7 +361,7 @@ ulva_ww_dspi_results <- compare_lmer_models(
 
 # Access results
 # Full model
-summary(ulva_ww_dspi_results$model_all)
+summary(ulva_ww_dspi_results$model_all_reml)
 
 # Drop-one summaries (if you want to inspect them)
 summary(ulva_ww_dspi_results$models[["salinity"]])
@@ -372,7 +374,7 @@ ulva_ww_dspi_results$anova_result[["salinity"]]
 ulva_ww_dspi_results$anova_result[["nitrate"]]
 #Does temp affect Ulva dspi?
 ulva_ww_dspi_results$anova_result[["temp"]]
-check_model_fit(ulva_ww_dspi_results$model_all, terms = predictors_list)
+check_model_fit(ulva_ww_dspi_results$model_all_reml)
 ulva_ww_dspi_results$data_means
 
 #inputs for hypnea_ww/dspi
@@ -384,7 +386,7 @@ hypnea_ww_dspi_results <- compare_lmer_models(
 )
 
 # Access results
-summary(hypnea_ww_dspi_results$model_all)
+summary(hypnea_ww_dspi_results$model_all_reml)
 # Drop-one summaries (if you want to inspect them)
 summary(hypnea_ww_dspi_results$models[["salinity"]])
 summary(hypnea_ww_dspi_results$models[["nitrate"]])
@@ -396,7 +398,7 @@ hypnea_ww_dspi_results$anova_result[["nitrate"]]
 #Does temp affect Hypnea dspi?
 hypnea_ww_dspi_results$anova_result[["temp"]]
 
-check_model_fit(hypnea_ww_dspi_results$model_all, terms = predictors_list)
+check_model_fit(hypnea_ww_dspi_results$model_all_reml)
 hypnea_ww_dspi_results$data_means
 
 #Inputs for dspi species comparison
@@ -409,7 +411,7 @@ ww_dspi_species_results <- compare_lmer_models(
 
 # Access results
 # Full model
-summary(ww_dspi_species_results$model_all)
+summary(ww_dspi_species_results$model_all_reml)
 
 # Drop-one summaries (if you want to inspect them)
 summary(ww_dspi_species_results$models[["species"]])
@@ -417,7 +419,7 @@ summary(ww_dspi_species_results$models[["species"]])
 # Does species affect dspi?
 ww_dspi_species_results$anova_result[["species"]]
 
-check_model_fit(ww_dspi_species_results$model_all, terms = predictors_list_species2)
+check_model_fit(ww_dspi_species_results$model_all_reml)
 ww_dspi_species_results$data_means
 
 # Model Summary Tables_____________________________________________________
@@ -433,14 +435,14 @@ print_model <- function(model, species, response) {
     show.df = TRUE
   )
 }
-print_model(ulva_ww_hsat_results$model_all, "Ulva", "Hsat day mean")
-print_model(hypnea_ww_hsat_results$model_all, "Hypnea", "Hsat day mean")
+print_model(ulva_ww_hsat_results$model_all_reml, "Ulva", "Hsat day mean")
+print_model(hypnea_ww_hsat_results$model_all_reml, "Hypnea", "Hsat day mean")
 
-print_model(ulva_ww_relhsat_results$model_all, "Ulva", "Relative Hsat")
-print_model(hypnea_ww_relhsat_results$model_all, "Hypnea", "Relative Hsat")
+print_model(ulva_ww_relhsat_results$model_all_reml, "Ulva", "Relative Hsat")
+print_model(hypnea_ww_relhsat_results$model_all_reml, "Hypnea", "Relative Hsat")
 
-print_model(ulva_ww_dspi_results$model_all, "Ulva", "DSPI day mean")
-print_model(hypnea_ww_dspi_results$model_all, "Hypnea", "DSPI day mean")
+print_model(ulva_ww_dspi_results$model_all_reml, "Ulva", "DSPI day mean")
+print_model(hypnea_ww_dspi_results$model_all_reml, "Hypnea", "DSPI day mean")
 
 #HISTOGRAMS and PLOTS_____________________________________
 #function for raw data plots
@@ -584,8 +586,7 @@ dspi_ulva <- raw_plots(
   hjust_t = 0.05,
   vjust_s = -10,
   hjust_s = 0.95,
-  labels1 = c("53 μmol", 
-              "80 μmol", 
+  labels1 = c("80 μmol", 
               "245 μmol",
               "748 μmol",
               "2287 μmol")
@@ -620,8 +621,7 @@ dspi_hypnea <- raw_plots(
   hjust_t = 0.05,
   vjust_s = -10,
   hjust_s = 0.95,
-  labels1 = c("53 μmol", 
-              "80 μmol", 
+  labels1 = c("80 μmol", 
               "245 μmol",
               "748 μmol",
               "2287 μmol")

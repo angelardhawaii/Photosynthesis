@@ -109,8 +109,8 @@ xtabs(~ salinity + temp + year, data = combined_growth_h)
 # Run lmm model for Ulva______________________________________________________
 #### Note: All other random effects had zero effect on Ulva growth
 ```{r}
-growth_model_u <- lmer(formula = growth_d9 ~ nitrate + salinity + temp + 
-                         (1 | run_combo), data = combined_growth_all, REML = TRUE)
+growth_model_u <- lmer(formula = growth_d9 ~ nitrate + salinity + temp +
+                         (1 | run_combo), data = combined_growth_u, REML = TRUE)
 ```
 
 ### Check the performance of the model for dataset: u
@@ -161,7 +161,7 @@ u_growth_salinity_null <- lmer(formula = growth_d9 ~ nitrate + temp +
 u_growth_model4 <- lmer(formula = growth_d9 ~ nitrate + temp + salinity +
                           (1 | run_combo), 
                         data = combined_growth_u, REML = FALSE)
-anova(u_growth_temp_null, u_growth_model4)
+anova(u_growth_salinity_null, u_growth_model4)
 ```
 
 # Run lmm model for Hypnea____________________________________________________

@@ -145,9 +145,8 @@ check_model_fit <- function(model, terms) {
 ## Get predictor means
 ```{r}
 get_data_means <- function(data, predictors_list, response){
-  group_vars <- c("nitrate", setdiff(predictors_list, "nitrate"))
-  data %>% 
-    group_by(across(all_of(group_vars))) %>%
+  data %>%
+    group_by(across(all_of(predictors_list))) %>%
     summarise(!!paste0(response, "_mean") := mean(.data[[response]], na.rm = TRUE),
               .groups = "drop")
 }
@@ -165,27 +164,31 @@ compare_lmer_models <- function(data, response, predictors_list, random_effects)
   # Build random-effects string
   re_str <- paste(paste0("(1 | ", random_effects, ")"), collapse = " + ")
   
-  # Full model
-    fixed_all <- paste(predictors_list, collapse = " + ")
-    f_full <- as.formula(paste(response, "~", fixed_all, "+", re_str))
-    model_all <- lme4::lmer(f_full, data = data_clean, REML = FALSE)
-  
+  # Full model (REML = FALSE required for LRTs)
+  fixed_all <- paste(predictors_list, collapse = " + ")
+  f_full <- as.formula(paste(response, "~", fixed_all, "+", re_str))
+  model_all <- lme4::lmer(f_full, data = data_clean, REML = FALSE)
+
+  # Refit full model with REML = TRUE for reporting coefficients and diagnostics
+  model_all_reml <- lme4::lmer(f_full, data = data_clean, REML = TRUE)
+
   # Drop-one models + LRTs
-    models <- list()
-    anova_result <- list()
-    
-    for (dropped in predictors_list) {
-      fixed_reduced <- paste(setdiff(predictors_list, dropped), collapse = " + ")
-      f_reduced <- as.formula(paste(response, "~", fixed_reduced, "+", re_str))
-      models[[dropped]] <- lme4::lmer(f_reduced, data = data_clean, REML = FALSE)
-      anova_result[[dropped]] <- anova(models[[dropped]], model_all, test = "Chisq")
-    }
-  
-    data_means <- get_data_means(data_clean, predictors_list, response)
-  
+  models <- list()
+  anova_result <- list()
+
+  for (dropped in predictors_list) {
+    fixed_reduced <- paste(setdiff(predictors_list, dropped), collapse = " + ")
+    f_reduced <- as.formula(paste(response, "~", fixed_reduced, "+", re_str))
+    models[[dropped]] <- lme4::lmer(f_reduced, data = data_clean, REML = FALSE)
+    anova_result[[dropped]] <- anova(models[[dropped]], model_all, test = "Chisq")
+  }
+
+  data_means <- get_data_means(data_clean, predictors_list, response)
+
   list(
     models = models,          # named by the predictor that was dropped
-    model_all = model_all,
+    model_all = model_all,    # ML fit — use only for LRTs
+    model_all_reml = model_all_reml,  # REML fit — use for reporting and diagnostics
     anova_result = anova_result,
     data_means = data_means,
     used_data = data_clean
@@ -209,7 +212,7 @@ ulva_ww_fvfm_results <- compare_lmer_models(
 ### Access results
 ### Full model
 ```{r}
-summary(ulva_ww_fvfm_results$model_all)
+summary(ulva_ww_fvfm_results$model_all_reml)
 ```
 
 ```{r}
@@ -223,7 +226,7 @@ ulva_ww_fvfm_results$anova_result[["temp"]]
 
 ### Check model fit and get table of means
 ```{r}
-check_model_fit(ulva_ww_fvfm_results$model_all, terms = predictors_list)
+check_model_fit(ulva_ww_fvfm_results$model_all_reml, terms = predictors_list)
 ulva_ww_fvfm_results$data_means
 ```
 
@@ -240,7 +243,7 @@ hypnea_ww_fvfm_results <- compare_lmer_models(
 ### Access results
 ### Full model
 ```{r}
-summary(hypnea_ww_fvfm_results$model_all)
+summary(hypnea_ww_fvfm_results$model_all_reml)
 ```
 
 ```{r}
@@ -255,7 +258,7 @@ hypnea_ww_fvfm_results$anova_result[["temp"]]
 
 ### Check model fit
 ```{r}
-check_model_fit(hypnea_ww_fvfm_results$model_all, terms = predictors_list)
+check_model_fit(hypnea_ww_fvfm_results$model_all_reml, terms = predictors_list)
 hypnea_ww_fvfm_results$data_means
 ```
 
@@ -272,7 +275,7 @@ ulva_ww_pmax_results <- compare_lmer_models(
 
 ### Access results Ulva Pmax
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
-summary(ulva_ww_pmax_results$model_all)
+summary(ulva_ww_pmax_results$model_all_reml)
 
 # Drop-one summaries to inspect each
 summary(ulva_ww_pmax_results$models[["salinity"]])
@@ -286,7 +289,7 @@ ulva_ww_pmax_results$anova_result[["nitrate"]]
 #Does temp effect Ulva Pmax?
 ulva_ww_pmax_results$anova_result[["temp"]]
 
-check_model_fit(ulva_ww_pmax_results$model_all, terms = predictors_list)
+check_model_fit(ulva_ww_pmax_results$model_all_reml, terms = predictors_list)
  ulva_ww_pmax_results$data_means
 ```
 
@@ -302,7 +305,7 @@ hypnea_ww_pmax_results <- compare_lmer_models(
 ```
 ### Access results Hypnea Pmax
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
-summary(hypnea_ww_pmax_results$model_all)
+summary(hypnea_ww_pmax_results$model_all_reml)
 # Does salinity effect Hypnea Pmax?
 hypnea_ww_pmax_results$anova_result[["salinity"]]
 # Does nitrate effect Hypnea Pmax?
@@ -310,7 +313,7 @@ hypnea_ww_pmax_results$anova_result[["nitrate"]]
 #Does temp effect Hypnea Pmax?
 hypnea_ww_pmax_results$anova_result[["temp"]]
 
-check_model_fit(hypnea_ww_pmax_results$model_all, terms = predictors_list)
+check_model_fit(hypnea_ww_pmax_results$model_all_reml, terms = predictors_list)
 hypnea_ww_pmax_results$data_means
 ```
 
@@ -326,7 +329,7 @@ ww_pmax_results <- compare_lmer_models(
 
 ### Access results Species Pmax
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
-summary(ww_pmax_results$model_all)
+summary(ww_pmax_results$model_all_reml)
 
 # Drop-one summaries (if you want to inspect them)
 summary(ww_pmax_results$models[["species"]])
@@ -334,7 +337,7 @@ summary(ww_pmax_results$models[["species"]])
 # Does species effect Pmax?
 ww_pmax_results$anova_result[["species"]]
 
-check_model_fit(ww_pmax_results$model_all, terms = predictors_list_species)
+check_model_fit(ww_pmax_results$model_all_reml, terms = predictors_list_species)
 ww_pmax_results$data_means
 ```
 
@@ -351,7 +354,7 @@ ulva_ww_npqmax_results <- compare_lmer_models(
 
 ### Access results Ulva NPQmax
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
-summary(ulva_ww_npqmax_results$model_all)
+summary(ulva_ww_npqmax_results$model_all_reml)
 # Drop-one summaries (to inspect them)
 summary(ulva_ww_npqmax_results$models[["salinity"]])
 summary(ulva_ww_npqmax_results$models[["nitrate"]])
@@ -364,7 +367,7 @@ ulva_ww_npqmax_results$anova_result[["nitrate"]]
 # Does temperature effect Ulva NPQmax?
 ulva_ww_npqmax_results$anova_result[["temp"]]
 
-check_model_fit(ulva_ww_npqmax_results$model_all, terms = predictors_list)
+check_model_fit(ulva_ww_npqmax_results$model_all_reml, terms = predictors_list)
 ulva_ww_npqmax_results$data_means
 ```
 
@@ -381,7 +384,7 @@ hypnea_ww_npqmax_results <- compare_lmer_models(
 
 ### Access results Hypnea NPQmax
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
-summary(hypnea_ww_npqmax_results$model_all)
+summary(hypnea_ww_npqmax_results$model_all_reml)
 # Does salinity effect Hypnea NPQmax?
 hypnea_ww_npqmax_results$anova_result[["salinity"]]
 # Does nitrate effect Hypnea NPQmax?
@@ -389,7 +392,7 @@ hypnea_ww_npqmax_results$anova_result[["nitrate"]]
 #Does temp effect Hypnea NPQmax?
 hypnea_ww_npqmax_results$anova_result[["temp"]]
 
-check_model_fit(hypnea_ww_npqmax_results$model_all, terms = predictors_list)
+check_model_fit(hypnea_ww_npqmax_results$model_all_reml, terms = predictors_list)
 hypnea_ww_npqmax_results$data_means
 ```
 
@@ -405,7 +408,7 @@ ww_npq_max_results <- compare_lmer_models(
 
 ### Access results Species NPQmax
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
-summary(ww_npq_max_results$model_all)
+summary(ww_npq_max_results$model_all_reml)
 
 # Drop-one summaries
 summary(ww_npq_max_results$models[["species"]])
@@ -413,7 +416,7 @@ summary(ww_npq_max_results$models[["species"]])
 # Does species effect NPQmax?
 ww_npq_max_results$anova_result[["species"]]
 
-check_model_fit(ww_npq_max_results$model_all, terms = predictors_list_species)
+check_model_fit(ww_npq_max_results$model_all_reml, terms = predictors_list_species)
 ww_npq_max_results$data_means
 ```
 
@@ -429,7 +432,7 @@ ulva_ww_delta_npq_results <- compare_lmer_models(
 ```
 ### Access results Ulva deltaNPQ
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
-summary(ulva_ww_delta_npq_results$model_all)
+summary(ulva_ww_delta_npq_results$model_all_reml)
 summary(ulva_ww_delta_npq_results$models[["nitrate"]])
 summary(ulva_ww_delta_npq_results$models[["salinity"]]) 
 summary(ulva_ww_delta_npq_results$models[["temp"]])
@@ -441,7 +444,7 @@ ulva_ww_delta_npq_results$anova_result[["nitrate"]]
 # Does temperature effect Ulva deltaNPQ?
 ulva_ww_delta_npq_results$anova_result[["temp"]]
 
-check_model_fit(ulva_ww_delta_npq_results$model_all, terms = predictors_list)
+check_model_fit(ulva_ww_delta_npq_results$model_all_reml, terms = predictors_list)
 ulva_ww_delta_npq_results$data_means
 ```
 
@@ -457,7 +460,7 @@ hypnea_ww_delta_npq_results <- compare_lmer_models(
 
 ### Access results Hypnea deltaNPQ
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
-summary(hypnea_ww_delta_npq_results$model_all)
+summary(hypnea_ww_delta_npq_results$model_all_reml)
 summary(hypnea_ww_delta_npq_results$models[["nitrate"]])
 summary(hypnea_ww_delta_npq_results$models[["salinity"]]) 
 summary(hypnea_ww_delta_npq_results$models[["temp"]])
@@ -469,7 +472,7 @@ hypnea_ww_delta_npq_results$anova_result[["nitrate"]]
 # Does temperature effect Hypnea deltaNPQ?
 hypnea_ww_delta_npq_results$anova_result[["temp"]]
 
-check_model_fit(hypnea_ww_delta_npq_results$model_all, terms = predictors_list)
+check_model_fit(hypnea_ww_delta_npq_results$model_all_reml, terms = predictors_list)
 hypnea_ww_delta_npq_results$data_means
 ```
 
@@ -486,7 +489,7 @@ ulva_ww_ek_results <- compare_lmer_models(
 
 ### Access results Ulva Ek
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
-summary(ulva_ww_ek_results$model_all)
+summary(ulva_ww_ek_results$model_all_reml)
 summary(ulva_ww_ek_results$models[["nitrate"]])
 summary(ulva_ww_ek_results$models[["salinity"]])
 summary(ulva_ww_ek_results$models[["temp"]])
@@ -497,7 +500,7 @@ ulva_ww_ek_results$anova_result[["nitrate"]]
 # Does temp effect Ulva Ek?
 ulva_ww_ek_results$anova_result[["temp"]]
 
-check_model_fit(ulva_ww_ek_results$model_all, terms = predictors_list)
+check_model_fit(ulva_ww_ek_results$model_all_reml, terms = predictors_list)
 ulva_ww_ek_results$data_means
 ```
 
@@ -513,7 +516,7 @@ hypnea_ww_ek_results <- compare_lmer_models(
 
 ### Access results Hypnea Ek
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
-summary(hypnea_ww_ek_results$model_all)
+summary(hypnea_ww_ek_results$model_all_reml)
 summary(hypnea_ww_ek_results$models[["nitrate"]])
 summary(hypnea_ww_ek_results$models[["salinity"]])
 summary(hypnea_ww_ek_results$models[["temp"]])
@@ -524,7 +527,7 @@ hypnea_ww_ek_results$anova_result[["nitrate"]]
 # Does temp effect Hypnea Ek?
 hypnea_ww_ek_results$anova_result[["temp"]]
 
-check_model_fit(hypnea_ww_ek_results$model_all, terms = predictors_list)
+check_model_fit(hypnea_ww_ek_results$model_all_reml, terms = predictors_list)
 hypnea_ww_ek_results$data_means
 ```
 
@@ -540,7 +543,7 @@ ww_ek_results <- compare_lmer_models(
 
 ### Access results Species Ek
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
-summary(ww_ek_results$model_all)
+summary(ww_ek_results$model_all_reml)
 
 # Drop-one summaries (if you want to inspect them)
 summary(ww_ek_results$models[["species"]])
@@ -548,7 +551,7 @@ summary(ww_ek_results$models[["species"]])
 # Does species effect Ek?
 ww_ek_results$anova_result[["species"]]
 
-check_model_fit(ww_ek_results$model_all, terms = predictors_list_species)
+check_model_fit(ww_ek_results$model_all_reml, terms = predictors_list_species)
 ww_ek_results$data_means
 ```
 
@@ -974,16 +977,16 @@ print_model <- function(model, species, response) {
     show.df = TRUE
   )
 }
-print_model(ulva_ww_pmax_results$model_all, "Ulva", "Pmax")
-print_model(hypnea_ww_pmax_results$model_all, "Hypnea", "Pmax")
+print_model(ulva_ww_pmax_results$model_all_reml, "Ulva", "Pmax")
+print_model(hypnea_ww_pmax_results$model_all_reml, "Hypnea", "Pmax")
 
-print_model(ulva_ww_npqmax_results$model_all, "Ulva", "NPQmax")
-print_model(hypnea_ww_npqmax_results$model_all, "Hypnea", "NPQmax")
+print_model(ulva_ww_npqmax_results$model_all_reml, "Ulva", "NPQmax")
+print_model(hypnea_ww_npqmax_results$model_all_reml, "Hypnea", "NPQmax")
 
-print_model(ulva_ww_delta_npq_results$model_all, "Ulva", "delta NPQ")
-print_model(hypnea_ww_delta_npq_results$model_all, "Hypnea", "delta NPQ")
+print_model(ulva_ww_delta_npq_results$model_all_reml, "Ulva", "delta NPQ")
+print_model(hypnea_ww_delta_npq_results$model_all_reml, "Hypnea", "delta NPQ")
 
-print_model(ulva_ww_ek_results$model_all, "Ulva", "Ek")
-print_model(hypnea_ww_ek_results$model_all, "Hypnea", "Ek")
+print_model(ulva_ww_ek_results$model_all_reml, "Ulva", "Ek")
+print_model(hypnea_ww_ek_results$model_all_reml, "Hypnea", "Ek")
 ```
 
