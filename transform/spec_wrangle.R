@@ -56,7 +56,7 @@ smooth_sg <- function(x, w = 11, p = 2, m = 0) {
 sm_mat <- t(apply(refl_mat,
                   1,
                   smooth_sg,
-                  w = w,    # window
+                  w = 11,   # window
                   p = 2,    # polynomial order
                   m = 0))   # derivative = 0 (pure smoothing)
 

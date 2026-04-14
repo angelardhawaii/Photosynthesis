@@ -25,7 +25,6 @@ library(RColorBrewer)
 #load this file for normalized to quantum efficiency of photosynthesis per Silsbe and Kromkamp
 ww_hsat_lmm <- read_csv("/Users/angela/src/Photosynthesis/data/wastewater/transformed/ww_combo_hsat_dspi.csv")
 
-
 # remove individual that died during experiment
 ww_hsat_lmm <- ww_hsat_lmm %>%
   filter(id != "ul09")
@@ -92,26 +91,21 @@ ww_hsat_lmm %>%
     n_bad = sum(is.na(run_days) | run_days <= 0, na.rm = TRUE)
   )
 
-#Treatment Graph is set up to have predictors in order of my choosing
+# Join growth rates (growth_d9) from combined_data_all.
+# run_combo numbering differs between the two files (different schemes), so
+# it cannot be used as a join key. id alone is not unique either (same IDs
+# reused across years and across multiple runs within the same year).
+# The only collision-free key is id + end_date, where end_date = start_date + 8 days
+# in ww_combo_hsat_dspi, which matches the 'date' column in combined_data_all.
+growth_key <- read.csv("/Users/angela/src/Photosynthesis/data/wastewater/transformed/combined_data_all.csv") %>%
+  dplyr::select(id, date, growth_d9) %>%
+  mutate(id      = tolower(trimws(id)),
+         end_date = as.Date(date))
+
 ww_hsat_lmm <- ww_hsat_lmm %>%
-  mutate(treatment_graph = case_when(
-    treat_letter == "a" ~ "1) 0.5 μmol",
-    treat_letter == "b" ~ "3) 14 μmol",
-    treat_letter == "c" ~ "4) 27 μmol",
-    treat_letter == "d" ~ "6) 53 μmol",
-    treat_letter == "e" ~ "7) 53 μmol",
-    treat_letter == "f" ~ "9) 80 μmol",
-    treat_letter == "g" ~ "2) 0.5 μmol",
-    treat_letter == "h" ~ "5) 37 μmol",
-    treat_letter == "i" ~ "8) 53 μmol",
-    treat_letter == "j" ~ "10) 86 μmol",
-    treat_letter == "k" ~ "11) 80 μmol",
-    treat_letter == "l" ~ "12) 245 μmol",
-    treat_letter == "m" ~ "13) 748 μmol",
-    treat_letter == "n" ~ "14) 2287 μmol"
-  ))
-
-
+  mutate(end_date = as.Date(start_date) + days(8)) %>%
+  left_join(growth_key, by = c("id", "end_date")) %>%
+  mutate(run_combo = as.factor(run_combo))
 
 # new dataset with overlaps from 2021, 2022, 2023 and all of 2025
 # this keeps all of 2025, and only the 53 and 80 nitrate treatments from 2021-2023, which are the only ones that overlap with 2025.
@@ -121,16 +115,22 @@ sgd_ww_hsat <- ww_hsat_lmm %>%
     # keep:
     (
       year %in% c(2021, 2022) & 
-        nitrate == "80" #& 
-        #temp != 30
+        nitrate == "80" & 
+        temp != 30
     ) |
       year == 2025
   )
 
-# subset the species
+# subset the species — combined 2021/2022 + 2025 dataset
 ulva_ww_hsat <- subset(sgd_ww_hsat, species == "u")
 
 hypnea_ww_hsat <- subset(sgd_ww_hsat, species == "h")
+
+# 2025-only subsets for comparison
+# Note: all 2025 data is at 22 degrees C, so temp cannot be used as a predictor;
+# models use nitrate + salinity only.
+ulva_2025   <- subset(ww_hsat_lmm, species == "u" & year == 2025)
+hypnea_2025 <- subset(ww_hsat_lmm, species == "h" & year == 2025)
 
 #Check the data
 xtabs(~ salinity + temp + year, data = ulva_ww_hsat)
@@ -167,13 +167,18 @@ compare_lmer_models <- function(data, response, predictors_list, random_effects)
   # Build random-effects string
   re_str <- paste(paste0("(1 | ", random_effects, ")"), collapse = " + ")
 
+  # Optimizer control: bobyqa with more iterations suppresses non-convergence
+  # warnings common with small numbers of random effect levels
+  lmer_ctrl <- lme4::lmerControl(optimizer = "bobyqa",
+                                 optCtrl   = list(maxfun = 2e5))
+
   # Full model (REML = FALSE required for LRTs)
   fixed_all <- paste(predictors_list, collapse = " + ")
   f_full <- as.formula(paste(response, "~", fixed_all, "+", re_str))
-  model_all <- lme4::lmer(f_full, data = data_clean, REML = FALSE)
+  model_all <- lme4::lmer(f_full, data = data_clean, REML = FALSE, control = lmer_ctrl)
 
   # Refit full model with REML = TRUE for reporting coefficients and diagnostics
-  model_all_reml <- lme4::lmer(f_full, data = data_clean, REML = TRUE)
+  model_all_reml <- lme4::lmer(f_full, data = data_clean, REML = TRUE, control = lmer_ctrl)
 
   # Drop-one models + LRTs
   models <- list()
@@ -182,7 +187,8 @@ compare_lmer_models <- function(data, response, predictors_list, random_effects)
   for (dropped in predictors_list) {
     fixed_reduced <- paste(setdiff(predictors_list, dropped), collapse = " + ")
     f_reduced <- as.formula(paste(response, "~", fixed_reduced, "+", re_str))
-    models[[dropped]] <- lme4::lmer(f_reduced, data = data_clean, REML = FALSE)
+    models[[dropped]] <- lme4::lmer(f_reduced, data = data_clean, REML = FALSE,
+                                    control = lmer_ctrl)
     anova_result[[dropped]] <- anova(models[[dropped]], model_all, test = "Chisq")
   }
 
@@ -198,11 +204,22 @@ compare_lmer_models <- function(data, response, predictors_list, random_effects)
   )
 }
 
-predictors_list <- c("salinity", "nitrate", "temp")
-predictors_list2 <- c("salinity", "temp")
-predictors_list3 <- c("nitrate", "temp")
-predictors_list_species <- c("salinity", "nitrate", "temp", "species")
-predictors_list_species2 <- c("salinity", "temp", "species")
+predictors_list <- c("nitrate", "temp")
+predictors_list_species <- c("nitrate", "temp", "species")
+
+# MODEL SELECTION NOTE — combined 2021+2022 and 2025 dataset:
+# Full fixed effects tested: salinity + nitrate + temp
+# Salinity was dropped from all combined-dataset models: including it caused rank
+# deficiency in the fixed-effect model matrix across every response variable and
+# both species (confirmed by "fixed-effect model matrix is rank deficient" warning).
+# Rank deficiency arises because salinity treatment structure is collinear with
+# temperature across the two datasets — certain salinity-temperature combinations
+# exist only in 2021 or only in 2025, making their effects inseparable.
+# For DSPI models, rlc_order1 was also dropped from random effects to resolve
+# singular fit (variance component collapsing to zero).
+# Final fixed effects retained: nitrate + temp
+# Salinity IS included as a predictor in the 2025-only models below, where it
+# varies independently of temperature.
 
 #Hsat_____________________________________
 #Inputs for ulva_ps/Hsat
@@ -217,13 +234,6 @@ ulva_ww_hsat_results <- compare_lmer_models(
 # Full model
 summary(ulva_ww_hsat_results$model_all_reml)
 
-# Drop-one summaries (to inspect them)
-summary(ulva_ww_hsat_results$models[["salinity"]])
-summary(ulva_ww_hsat_results$models[["nitrate"]])
-summary(ulva_ww_hsat_results$models[["temp"]])
-
-# Does salinity affect Ulva hsat?
-ulva_ww_hsat_results$anova_result[["salinity"]]
 # Does nitrate affect Ulva hsat?
 ulva_ww_hsat_results$anova_result[["nitrate"]]
 #Does temp affect Ulva hsat?
@@ -240,14 +250,9 @@ hypnea_ww_hsat_results <- compare_lmer_models(
   random_effects = c("plant_id", "run_combo", "rlc_order1")
 )
 
-# Access results
+# Access results ALL 3 PREDICTORS significant
 summary(hypnea_ww_hsat_results$model_all_reml)
-# Drop-one summaries (if you want to inspect them)
-summary(hypnea_ww_hsat_results$models[["salinity"]])
-summary(hypnea_ww_hsat_results$models[["nitrate"]])
-summary(hypnea_ww_hsat_results$models[["temp"]])
-# Does salinity affect Hypnea hsat?
-hypnea_ww_hsat_results$anova_result[["salinity"]]
+
 # Does nitrate affect Hypnea hsat?
 hypnea_ww_hsat_results$anova_result[["nitrate"]]
 #Does temp affect Hypnea hsat?
@@ -260,16 +265,13 @@ hypnea_ww_hsat_results$data_means
 ww_hsat_species_results <- compare_lmer_models(
   data = sgd_ww_hsat,
   response = "hsat_day_mean",
-  predictors_list_species2,
+  predictors_list_species,
   random_effects = c("plant_id", "run_combo", "rlc_order1")
 )
 
 # Access results
 # Full model
 summary(ww_hsat_species_results$model_all_reml)
-
-# Drop-one summaries (if you want to inspect them)
-summary(ww_hsat_species_results$models[["species"]])
 
 # Does species affect hsat?
 ww_hsat_species_results$anova_result[["species"]]
@@ -291,13 +293,6 @@ ulva_ww_relhsat_results <- compare_lmer_models(
 # Full model
 summary(ulva_ww_relhsat_results$model_all_reml)
 
-# Drop-one summaries (if you want to inspect them)
-summary(ulva_ww_relhsat_results$models[["salinity"]])
-summary(ulva_ww_relhsat_results$models[["nitrate"]])
-summary(ulva_ww_relhsat_results$models[["temp"]])
-
-# Does salinity affect Ulva relhsat?
-ulva_ww_relhsat_results$anova_result[["salinity"]]
 # Does nitrate affect Ulva relhsat?
 ulva_ww_relhsat_results$anova_result[["nitrate"]]
 #Does temp affect Ulva relhsat?
@@ -315,12 +310,7 @@ hypnea_ww_relhsat_results <- compare_lmer_models(
 
 # Access results
 summary(hypnea_ww_relhsat_results$model_all_reml)
-# Drop-one summaries (if you want to inspect them)
-summary(hypnea_ww_relhsat_results$models[["salinity"]])
-summary(hypnea_ww_relhsat_results$models[["nitrate"]])
-summary(hypnea_ww_relhsat_results$models[["temp"]])
-# Does salinity affect Hypnea relhsat?
-hypnea_ww_relhsat_results$anova_result[["salinity"]]
+
 # Does nitrate affect Hypnea relhsat?
 hypnea_ww_relhsat_results$anova_result[["nitrate"]]
 #Does temp affect Hypnea relhsat?
@@ -356,20 +346,12 @@ ulva_ww_dspi_results <- compare_lmer_models(
   data = ulva_ww_hsat,
   response = "dspi_day_mean",
   predictors_list,
-  random_effects = c("plant_id", "run_combo", "rlc_order1")
+  random_effects = c("plant_id", "run_combo")
 )
 
 # Access results
-# Full model
 summary(ulva_ww_dspi_results$model_all_reml)
 
-# Drop-one summaries (if you want to inspect them)
-summary(ulva_ww_dspi_results$models[["salinity"]])
-summary(ulva_ww_dspi_results$models[["nitrate"]])
-summary(ulva_ww_dspi_results$models[["temp"]])
-
-# Does salinity affect Ulva dspi?
-ulva_ww_dspi_results$anova_result[["salinity"]]
 # Does nitrate affect Ulva dspi?
 ulva_ww_dspi_results$anova_result[["nitrate"]]
 #Does temp affect Ulva dspi?
@@ -382,17 +364,12 @@ hypnea_ww_dspi_results <- compare_lmer_models(
   data = hypnea_ww_hsat,
   response = "dspi_day_mean",
   predictors_list,
-  random_effects = c("plant_id", "run_combo", "rlc_order1")
+  random_effects = c("plant_id", "run_combo")
 )
 
 # Access results
 summary(hypnea_ww_dspi_results$model_all_reml)
-# Drop-one summaries (if you want to inspect them)
-summary(hypnea_ww_dspi_results$models[["salinity"]])
-summary(hypnea_ww_dspi_results$models[["nitrate"]])
-summary(hypnea_ww_dspi_results$models[["temp"]])
-# Does salinity affect Hypnea dspi?
-hypnea_ww_dspi_results$anova_result[["salinity"]]
+
 # Does nitrate affect Hypnea dspi?
 hypnea_ww_dspi_results$anova_result[["nitrate"]]
 #Does temp affect Hypnea dspi?
@@ -406,7 +383,7 @@ ww_dspi_species_results <- compare_lmer_models(
   data = sgd_ww_hsat,
   response = "dspi_day_mean",
   predictors_list_species,
-  random_effects = c("plant_id", "run_combo", "rlc_order1")
+  random_effects = c("plant_id", "run_combo")
 )
 
 # Access results
@@ -467,18 +444,6 @@ raw_plots <- function(data, response, response2, label, pretty_color, aescolor, 
     theme_bw() +
     theme(legend.position = c(0.90,0.80), plot.title = element_text(face = "italic", vjust = vjust_t, hjust = hjust_t), 
           plot.subtitle = element_text(face = "bold", size = 14, vjust = vjust_s, hjust = hjust_s))
-  
-  # lin_regr <- data %>%
-  #  ggplot(aes(x = {{response}}, 
-  #            y = {{response2}})) + 
-  #  geom_point(alpha = 0.5, size = 3, show.legend = TRUE, aes(color = treatment)) + 
-  #  geom_smooth(method = "lm", col = "black") + 
-  #  theme_bw() + 
-  #  labs(title = title2, 
-  #      x = x2, 
-  #     y = y2) + 
-  #  stat_regline_equation(label.x = 1, label.y = max(data$response2) * 1.1) + 
-  #  stat_cor(label.x = 1, label.y = max(data$response2) * 1.05)
   
   return(list(
     histo = histo,
@@ -630,3 +595,175 @@ plot(dspi_hypnea$histo)
 plot(dspi_hypnea$plot)
 #ggsave("hsat_hypnea_sgdww.png", path = "wastewater/plots/",
 #      width = 7, height = 6, units = "in", dpi = 300, scale = 1)
+
+# 2025-ONLY COMPARISON MODELS ________________________________________________
+# Predictors: nitrate + salinity only (temp is constant at 22C in 2025)
+predictors_list_2025        <- c("nitrate", "salinity")
+predictors_list_2025_species <- c("nitrate", "salinity", "species")
+
+# Hsat
+ulva_2025_hsat_results <- compare_lmer_models(
+  data = ulva_2025,
+  response = "hsat_day_mean",
+  predictors_list_2025,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+summary(ulva_2025_hsat_results$model_all_reml)
+ulva_2025_hsat_results$anova_result[["nitrate"]]
+ulva_2025_hsat_results$anova_result[["salinity"]]
+check_model_fit(ulva_2025_hsat_results$model_all_reml)
+ulva_2025_hsat_results$data_means
+
+hypnea_2025_hsat_results <- compare_lmer_models(
+  data = hypnea_2025,
+  response = "hsat_day_mean",
+  predictors_list_2025,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+summary(hypnea_2025_hsat_results$model_all_reml)
+hypnea_2025_hsat_results$anova_result[["nitrate"]]
+hypnea_2025_hsat_results$anova_result[["salinity"]]
+check_model_fit(hypnea_2025_hsat_results$model_all_reml)
+hypnea_2025_hsat_results$data_means
+
+# relHsat
+ulva_2025_relhsat_results <- compare_lmer_models(
+  data = ulva_2025,
+  response = "relhsat_day_mean",
+  predictors_list_2025,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+summary(ulva_2025_relhsat_results$model_all_reml)
+ulva_2025_relhsat_results$anova_result[["nitrate"]]
+ulva_2025_relhsat_results$anova_result[["salinity"]]
+check_model_fit(ulva_2025_relhsat_results$model_all_reml)
+ulva_2025_relhsat_results$data_means
+
+hypnea_2025_relhsat_results <- compare_lmer_models(
+  data = hypnea_2025,
+  response = "relhsat_day_mean",
+  predictors_list_2025,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+summary(hypnea_2025_relhsat_results$model_all_reml)
+hypnea_2025_relhsat_results$anova_result[["nitrate"]]
+hypnea_2025_relhsat_results$anova_result[["salinity"]]
+check_model_fit(hypnea_2025_relhsat_results$model_all_reml)
+hypnea_2025_relhsat_results$data_means
+
+# DSPI
+ulva_2025_dspi_results <- compare_lmer_models(
+  data = ulva_2025,
+  response = "dspi_day_mean",
+  predictors_list_2025,
+  random_effects = c("run_combo")
+)
+summary(ulva_2025_dspi_results$model_all_reml)
+ulva_2025_dspi_results$anova_result[["nitrate"]]
+ulva_2025_dspi_results$anova_result[["salinity"]]
+check_model_fit(ulva_2025_dspi_results$model_all_reml)
+ulva_2025_dspi_results$data_means
+
+hypnea_2025_dspi_results <- compare_lmer_models(
+  data = hypnea_2025,
+  response = "dspi_day_mean",
+  predictors_list_2025,
+  random_effects = c("run_combo")
+)
+summary(hypnea_2025_dspi_results$model_all_reml)
+hypnea_2025_dspi_results$anova_result[["nitrate"]]
+hypnea_2025_dspi_results$anova_result[["salinity"]]
+check_model_fit(hypnea_2025_dspi_results$model_all_reml)
+hypnea_2025_dspi_results$data_means
+
+# Species comparison — 2025 only
+ww_2025_hsat_species_results <- compare_lmer_models(
+  data = subset(ww_hsat_lmm, year == 2025),
+  response = "hsat_day_mean",
+  predictors_list_2025_species,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+ww_2025_hsat_species_results$anova_result[["species"]]
+
+ww_2025_dspi_species_results <- compare_lmer_models(
+  data = subset(ww_hsat_lmm, year == 2025),
+  response = "dspi_day_mean",
+  predictors_list_2025_species,
+  random_effects = c("run_combo")
+)
+ww_2025_dspi_species_results$anova_result[["species"]]
+
+# Model summary tables — 2025 only
+print_model(ulva_2025_hsat_results$model_all_reml,   "Ulva 2025",   "Hsat day mean")
+print_model(hypnea_2025_hsat_results$model_all_reml, "Hypnea 2025", "Hsat day mean")
+print_model(ulva_2025_dspi_results$model_all_reml,   "Ulva 2025",   "DSPI day mean")
+print_model(hypnea_2025_dspi_results$model_all_reml, "Hypnea 2025", "DSPI day mean")
+
+# DSPI vs Growth linear regression ____________________________________________
+# DSPI (mean daily, mol O2 m-2 day-1) as predictor of 9-day growth (%)
+# Uses the full dataset (ww_hsat_lmm) — all years and all nitrate levels —
+# so the regression is not limited to the sgd_ww_hsat LMM subset.
+# Points coloured by nitrate treatment; single regression line across all treatments.
+# Annotation shows equation with slope, R2, and p-value.
+
+dspi_growth_ulva <- ulva_ww_hsat %>%
+  filter(!is.na(dspi_day_mean), !is.na(growth_d9)) %>%
+  ggplot(aes(x = dspi_day_mean, y = growth_d9)) +
+  geom_point(aes(color = nitrate), alpha = 0.75, size = 2.5) +
+  geom_smooth(method = "lm", color = "black", linewidth = 0.8, se = TRUE) +
+  stat_regline_equation(
+    aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~~")),
+    label.x.npc = "left", label.y.npc = 0.97, size = 3.8
+  ) +
+  stat_cor(
+    aes(label = ..p.label..),
+    label.x.npc = "left", label.y.npc = 0.90, size = 3.8
+  ) +
+  scale_color_viridis_d(option = "viridis", direction = -1) +
+  labs(
+    x     = "Mean daily DSPI (mol O2 m-2 day-1)",
+    y     = "9-day growth (%)",
+    title = "Ulva lactuca",
+    color = "Nitrate (μmol)"
+  ) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "italic", size = 13),
+        axis.title = element_text(size = 12))
+plot(dspi_growth_ulva)
+
+dspi_growth_hypnea <- hypnea_ww_hsat %>%
+  filter(!is.na(dspi_day_mean), !is.na(growth_d9)) %>%
+  ggplot(aes(x = dspi_day_mean, y = growth_d9)) +
+  geom_point(aes(color = nitrate), alpha = 0.75, size = 2.5) +
+  geom_smooth(method = "lm", color = "black", linewidth = 0.8, se = TRUE) +
+  stat_regline_equation(
+    aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~~")),
+    label.x.npc = "left", label.y.npc = 0.97, size = 3.8
+  ) +
+  stat_cor(
+    aes(label = ..p.label..),
+    label.x.npc = "left", label.y.npc = 0.90, size = 3.8
+  ) +
+  scale_color_viridis_d(option = "magma", direction = -1) +
+  labs(
+    x     = "Mean daily DSPI (mol O2 m-2 day-1)",
+    y     = "9-day growth (%)",
+    title = "Hypnea musciformis",
+    color = "Nitrate (\u00b5mol)"
+  ) +
+  theme_bw() +
+  theme(plot.title = element_text(face = "italic", size = 13),
+        axis.title = element_text(size = 12))
+plot(dspi_growth_hypnea)
+
+# Both species side by side
+dspi_growth_both <- ggarrange(
+  dspi_growth_ulva, dspi_growth_hypnea,
+  ncol = 2, nrow = 1,
+  labels = c("A", "B")
+)
+plot(dspi_growth_both)
+
+# ggsave("dspi_vs_growth_ulva.png",   plot = dspi_growth_ulva,   path = "/Users/angela/src/Photosynthesis/analyze/wastewater/plots", width = 6, height = 5, dpi = 300)
+# ggsave("dspi_vs_growth_hypnea.png", plot = dspi_growth_hypnea, path = "/Users/angela/src/Photosynthesis/analyze/wastewater/plots", width = 6, height = 5, dpi = 300)
+# ggsave("dspi_vs_growth_both.png",   plot = dspi_growth_both,   path = "/Users/angela/src/Photosynthesis/analyze/wastewater/plots", width = 11, height = 5, dpi = 300)

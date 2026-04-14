@@ -221,9 +221,10 @@ comparison_long <- dat_filtered %>%
     names_to  = "method",
     values_to = "dspi"
   ) %>%
-  mutate(method = recode(method,
-                         dspi_old_mol   = "2023 paper method\n(avg-daily Hsat × Pmax)",
-                         dspi_day_mean  = "Current method\n(total DSPI ÷ run days)"))
+  mutate(method = case_when(
+    method == "dspi_old_mol"  ~ "2023 paper method\n(avg-daily Hsat \u00d7 Pmax)",
+    method == "dspi_day_mean" ~ "Current method\n(total DSPI \u00f7 run days)"
+  ))
 
 plot_comparison <- comparison_long %>%
   ggplot(aes(x = treatment_graph, y = dspi, color = temp)) +
