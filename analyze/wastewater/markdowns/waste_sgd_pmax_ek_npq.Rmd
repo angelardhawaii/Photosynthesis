@@ -37,13 +37,14 @@ library(multcomp)
 library(ggeffects)
 library(performance)
 library(ggpubr)
+library(sjPlot)
 # optional for plots
 library(RColorBrewer)
 ```
 
 ### Load this file (data normalized to quantum efficiency of photosynthesis per Silsbe and Kromkamp)
 ```{r}
-ww_lmm <- read_csv("/Users/angela/src/Photosynthesis/data/wastewater/transformed/ww_combo_ek_alpha_norm.csv")
+ww_lmm <- read.csv("/Users/angela/src/Photosynthesis/data/wastewater/transformed/ww_combo_ek_alpha_norm.csv")
 
 glimpse(ww_lmm)
 
@@ -81,20 +82,11 @@ ww_lmm <- ww_lmm %>%
 ```{r}
 ww_lmm <- ww_lmm %>%
   mutate(treatment_graph = case_when(
-    treat_letter == "a" ~ "1) 0.5 μmol",
-    treat_letter == "b" ~ "3) 14 μmol",
-    treat_letter == "c" ~ "4) 27 μmol",
-    treat_letter == "d" ~ "6) 53 μmol",
-    treat_letter == "e" ~ "7) 53 μmol",
-    treat_letter == "f" ~ "9) 80 μmol",
-    treat_letter == "g" ~ "2) 0.5 μmol",
-    treat_letter == "h" ~ "5) 37 μmol",
-    treat_letter == "i" ~ "8) 53 μmol",
-    treat_letter == "j" ~ "10) 86 μmol",
-    treat_letter == "k" ~ "11) 80 μmol",
-    treat_letter == "l" ~ "12) 245 μmol",
-    treat_letter == "m" ~ "13) 748 μmol",
-    treat_letter == "n" ~ "14) 2287 μmol"
+    treat_letter == "f" ~ "1) 80 μmol",
+    treat_letter == "k" ~ "2) 80 μmol",
+    treat_letter == "l" ~ "3) 245 μmol",
+    treat_letter == "m" ~ "4) 748 μmol",
+    treat_letter == "n" ~ "5) 2287 μmol"
   ))
 ```
 
@@ -111,8 +103,10 @@ sgd_ww <- ww_lmm %>%
   filter(
     # keep:
     (
-      year %in% c(2021, 2022) & 
-        nitrate == "80"   ) |
+      year %in% c(2021, 2022) &
+        nitrate == "80" &
+        temp != 30
+    ) |
       year == 2025
   )
 ```
@@ -125,6 +119,10 @@ ww_lmm_d9 <- sgd_ww %>%
 ulva_ww <- subset(ww_lmm_d9, species == "u")
 
 hypnea_ww <- subset(ww_lmm_d9, species == "h")
+
+# 2025-only subsets
+ulva_2025   <- subset(ww_lmm_d9, species == "u" & year == 2025)
+hypnea_2025 <- subset(ww_lmm_d9, species == "h" & year == 2025)
 ```
 
 # Run the models -- start with the performance checks and means
@@ -195,8 +193,20 @@ compare_lmer_models <- function(data, response, predictors_list, random_effects)
   )
 }
 
-predictors_list <- c("salinity", "nitrate", "temp")
-predictors_list_species <- c("salinity", "nitrate", "species") # for species comparisons
+predictors_list <- c("nitrate", "temp")
+predictors_list_species <- c("nitrate", "temp", "species")
+
+# Tables function — defined here so it is available for both combined and 2025 model tables
+print_model <- function(model, species, response) {
+  sjPlot::tab_model(
+    model,
+    title = paste(species, "-", response),
+    show.intercept = TRUE,
+    show.se = TRUE,
+    show.stat = TRUE,
+    show.df = TRUE
+  )
+}
 ```
 ## Fv/Fm________________________________________________________________
 ### Inputs for Ulva Fv/Fm
@@ -216,11 +226,9 @@ summary(ulva_ww_fvfm_results$model_all_reml)
 ```
 
 ```{r}
-# Does salinity effect Ulva FvFm?
-ulva_ww_fvfm_results$anova_result[["salinity"]]
 # Does nitrate effect Ulva FvFm?
 ulva_ww_fvfm_results$anova_result[["nitrate"]]
-#Does temp effect Ulva FvFm?
+# Does temp effect Ulva FvFm?
 ulva_ww_fvfm_results$anova_result[["temp"]]
 ```
 
@@ -247,13 +255,10 @@ summary(hypnea_ww_fvfm_results$model_all_reml)
 ```
 
 ```{r}
-# Does salinity effect hypnea FvFm?
-hypnea_ww_fvfm_results$anova_result[["salinity"]]
-# Does nitrate effect hypnea FvFm?
+# Does nitrate effect Hypnea FvFm?
 hypnea_ww_fvfm_results$anova_result[["nitrate"]]
-#Does temp effect hypnea FvFm?
+# Does temp effect Hypnea FvFm?
 hypnea_ww_fvfm_results$anova_result[["temp"]]
-
 ```
 
 ### Check model fit
@@ -276,21 +281,12 @@ ulva_ww_pmax_results <- compare_lmer_models(
 ### Access results Ulva Pmax
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
 summary(ulva_ww_pmax_results$model_all_reml)
-
-# Drop-one summaries to inspect each
-summary(ulva_ww_pmax_results$models[["salinity"]])
-summary(ulva_ww_pmax_results$models[["nitrate"]])
-summary(ulva_ww_pmax_results$models[["temp"]])
-
-# Does salinity effect Ulva Pmax?
-ulva_ww_pmax_results$anova_result[["salinity"]]
 # Does nitrate effect Ulva Pmax?
 ulva_ww_pmax_results$anova_result[["nitrate"]]
-#Does temp effect Ulva Pmax?
+# Does temp effect Ulva Pmax?
 ulva_ww_pmax_results$anova_result[["temp"]]
-
 check_model_fit(ulva_ww_pmax_results$model_all_reml, terms = predictors_list)
- ulva_ww_pmax_results$data_means
+ulva_ww_pmax_results$data_means
 ```
 
 
@@ -300,19 +296,16 @@ hypnea_ww_pmax_results <- compare_lmer_models(
   data = hypnea_ww,
   response = "pmax",
   predictors_list,
-  random_effects = c("plant_id", "run_combo", "rlc_order1")
+  random_effects = c("plant_id", "run_combo")
 )
 ```
 ### Access results Hypnea Pmax
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
 summary(hypnea_ww_pmax_results$model_all_reml)
-# Does salinity effect Hypnea Pmax?
-hypnea_ww_pmax_results$anova_result[["salinity"]]
 # Does nitrate effect Hypnea Pmax?
 hypnea_ww_pmax_results$anova_result[["nitrate"]]
-#Does temp effect Hypnea Pmax?
+# Does temp effect Hypnea Pmax?
 hypnea_ww_pmax_results$anova_result[["temp"]]
-
 check_model_fit(hypnea_ww_pmax_results$model_all_reml, terms = predictors_list)
 hypnea_ww_pmax_results$data_means
 ```
@@ -323,20 +316,15 @@ ww_pmax_results <- compare_lmer_models(
   data = ww_lmm_d9,
   response = "pmax",
   predictors_list_species,
-  random_effects = c("plant_id", "rlc_order1")
+  random_effects = c("run_combo")
 )
 ```
 
 ### Access results Species Pmax
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
 summary(ww_pmax_results$model_all_reml)
-
-# Drop-one summaries (if you want to inspect them)
-summary(ww_pmax_results$models[["species"]])
-
 # Does species effect Pmax?
 ww_pmax_results$anova_result[["species"]]
-
 check_model_fit(ww_pmax_results$model_all_reml, terms = predictors_list_species)
 ww_pmax_results$data_means
 ```
@@ -348,25 +336,17 @@ ulva_ww_npqmax_results <- compare_lmer_models(
   data = ulva_ww,
   response = "npq_max",
   predictors_list,
-  random_effects = c("plant_id", "run_combo", "rlc_order1")
+  random_effects = c("plant_id", "run_combo")
 )
 ```
 
 ### Access results Ulva NPQmax
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
 summary(ulva_ww_npqmax_results$model_all_reml)
-# Drop-one summaries (to inspect them)
-summary(ulva_ww_npqmax_results$models[["salinity"]])
-summary(ulva_ww_npqmax_results$models[["nitrate"]])
-summary(ulva_ww_npqmax_results$models[["temp"]])
-
-# Does salinity effect Ulva NPQmax?
-ulva_ww_npqmax_results$anova_result[["salinity"]]
 # Does nitrate effect Ulva NPQmax?
 ulva_ww_npqmax_results$anova_result[["nitrate"]]
 # Does temperature effect Ulva NPQmax?
 ulva_ww_npqmax_results$anova_result[["temp"]]
-
 check_model_fit(ulva_ww_npqmax_results$model_all_reml, terms = predictors_list)
 ulva_ww_npqmax_results$data_means
 ```
@@ -378,20 +358,17 @@ hypnea_ww_npqmax_results <- compare_lmer_models(
   data = hypnea_ww,
   response = "npq_max",
   predictors_list,
-  random_effects = c("plant_id", "run_combo", "rlc_order1")
+  random_effects = c("run_combo")
 )
 ```
 
 ### Access results Hypnea NPQmax
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
 summary(hypnea_ww_npqmax_results$model_all_reml)
-# Does salinity effect Hypnea NPQmax?
-hypnea_ww_npqmax_results$anova_result[["salinity"]]
 # Does nitrate effect Hypnea NPQmax?
 hypnea_ww_npqmax_results$anova_result[["nitrate"]]
-#Does temp effect Hypnea NPQmax?
+# Does temp effect Hypnea NPQmax?
 hypnea_ww_npqmax_results$anova_result[["temp"]]
-
 check_model_fit(hypnea_ww_npqmax_results$model_all_reml, terms = predictors_list)
 hypnea_ww_npqmax_results$data_means
 ```
@@ -402,20 +379,15 @@ ww_npq_max_results <- compare_lmer_models(
   data = ww_lmm_d9,
   response = "npq_max",
   predictors_list_species,
-  random_effects = c("plant_id", "run_combo", "rlc_order1")
+  random_effects = c("run_combo", "rlc_order1")
 )
 ```
 
 ### Access results Species NPQmax
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
 summary(ww_npq_max_results$model_all_reml)
-
-# Drop-one summaries
-summary(ww_npq_max_results$models[["species"]])
-
 # Does species effect NPQmax?
 ww_npq_max_results$anova_result[["species"]]
-
 check_model_fit(ww_npq_max_results$model_all_reml, terms = predictors_list_species)
 ww_npq_max_results$data_means
 ```
@@ -433,17 +405,10 @@ ulva_ww_delta_npq_results <- compare_lmer_models(
 ### Access results Ulva deltaNPQ
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
 summary(ulva_ww_delta_npq_results$model_all_reml)
-summary(ulva_ww_delta_npq_results$models[["nitrate"]])
-summary(ulva_ww_delta_npq_results$models[["salinity"]]) 
-summary(ulva_ww_delta_npq_results$models[["temp"]])
-
-# Does salinity effect Ulva deltaNPQ?
-ulva_ww_delta_npq_results$anova_result[["salinity"]]
 # Does nitrate effect Ulva deltaNPQ?
 ulva_ww_delta_npq_results$anova_result[["nitrate"]]
 # Does temperature effect Ulva deltaNPQ?
 ulva_ww_delta_npq_results$anova_result[["temp"]]
-
 check_model_fit(ulva_ww_delta_npq_results$model_all_reml, terms = predictors_list)
 ulva_ww_delta_npq_results$data_means
 ```
@@ -461,17 +426,10 @@ hypnea_ww_delta_npq_results <- compare_lmer_models(
 ### Access results Hypnea deltaNPQ
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
 summary(hypnea_ww_delta_npq_results$model_all_reml)
-summary(hypnea_ww_delta_npq_results$models[["nitrate"]])
-summary(hypnea_ww_delta_npq_results$models[["salinity"]]) 
-summary(hypnea_ww_delta_npq_results$models[["temp"]])
-
-# Does salinity effect Hypnea deltaNPQ?
-hypnea_ww_delta_npq_results$anova_result[["salinity"]]
 # Does nitrate effect Hypnea deltaNPQ?
 hypnea_ww_delta_npq_results$anova_result[["nitrate"]]
 # Does temperature effect Hypnea deltaNPQ?
 hypnea_ww_delta_npq_results$anova_result[["temp"]]
-
 check_model_fit(hypnea_ww_delta_npq_results$model_all_reml, terms = predictors_list)
 hypnea_ww_delta_npq_results$data_means
 ```
@@ -490,16 +448,10 @@ ulva_ww_ek_results <- compare_lmer_models(
 ### Access results Ulva Ek
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
 summary(ulva_ww_ek_results$model_all_reml)
-summary(ulva_ww_ek_results$models[["nitrate"]])
-summary(ulva_ww_ek_results$models[["salinity"]])
-summary(ulva_ww_ek_results$models[["temp"]])
-# Does salinity effect Ulva Ek?
-ulva_ww_ek_results$anova_result[["salinity"]]
 # Does nitrate effect Ulva Ek?
 ulva_ww_ek_results$anova_result[["nitrate"]]
 # Does temp effect Ulva Ek?
 ulva_ww_ek_results$anova_result[["temp"]]
-
 check_model_fit(ulva_ww_ek_results$model_all_reml, terms = predictors_list)
 ulva_ww_ek_results$data_means
 ```
@@ -517,16 +469,10 @@ hypnea_ww_ek_results <- compare_lmer_models(
 ### Access results Hypnea Ek
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
 summary(hypnea_ww_ek_results$model_all_reml)
-summary(hypnea_ww_ek_results$models[["nitrate"]])
-summary(hypnea_ww_ek_results$models[["salinity"]])
-summary(hypnea_ww_ek_results$models[["temp"]])
-# Does salinity effect Hypnea Ek?
-hypnea_ww_ek_results$anova_result[["salinity"]]
 # Does nitrate effect Hypnea Ek?
 hypnea_ww_ek_results$anova_result[["nitrate"]]
 # Does temp effect Hypnea Ek?
 hypnea_ww_ek_results$anova_result[["temp"]]
-
 check_model_fit(hypnea_ww_ek_results$model_all_reml, terms = predictors_list)
 hypnea_ww_ek_results$data_means
 ```
@@ -537,20 +483,15 @@ ww_ek_results <- compare_lmer_models(
   data = ww_lmm_d9,
   response = "ek_est",
   predictors_list_species,
-  random_effects = c("plant_id", "run_combo", "rlc_order1")
+  random_effects = c("run_combo", "rlc_order1")
 )
 ```
 
 ### Access results Species Ek
 ```{r, fig.width = 8, fig.height = 9, results ='markup'}
 summary(ww_ek_results$model_all_reml)
-
-# Drop-one summaries (if you want to inspect them)
-summary(ww_ek_results$models[["species"]])
-
 # Does species effect Ek?
 ww_ek_results$anova_result[["species"]]
-
 check_model_fit(ww_ek_results$model_all_reml, terms = predictors_list_species)
 ww_ek_results$data_means
 ```
@@ -617,7 +558,7 @@ fvfm_ulva <- raw_plots(
   title = "A - Ulva lactuca",
   title2 = "Ulva lactuca --- FvFm (AU) vs 9-Day Growth (%)",
   subtitle = "Fv/Fm",
-  ylim1 = 0, 
+  ylim1 = 0.25, 
   ylim2 = 1,
   color1 = "forestgreen",
   color2 = "darkolivegreen3",
@@ -654,7 +595,7 @@ fvfm_hypnea_ww <- raw_plots(
   title = "B - Hypnea musciformis",
   title2 = "Hypnea musciformis --- Fv/Fm vs 9-Day Growth (%)",
   subtitle = "Fv/Fm",
-  ylim1 = 0, 
+  ylim1 = 0.25, 
   ylim2 = 1,
   color1 = "deeppink4",
   color2 = "deeppink3",
@@ -763,7 +704,7 @@ npqmax_ulva_ww <- raw_plots(
   title = "C - Ulva lactuca",
   title2 = "Ulva lactuca --- NPQmax vs 9-Day Growth (%)",
   subtitle = "NPQmax",
-  ylim1 = -0.5, 
+  ylim1 = -0.25, 
   ylim2 = 2,
   color1 = "forestgreen",
   color2 = "darkolivegreen3",
@@ -798,7 +739,7 @@ npqmax_hypnea_ww <- raw_plots(
   title = "D - Hypnea musciformis",
   title2 = "Hypnea musciformis --- NPQmax vs 9-Day Growth (%)",
   subtitle = "NPQmax",
-  ylim1 = -0.5, 
+  ylim1 = -0.25, 
   ylim2 = 2,
   color1 = "deeppink4",
   color2 = "deeppink3",
@@ -964,29 +905,238 @@ plot(ek_hypnea_ww$histo)
 plot(ek_hypnea_ww$plot)
 ```
 
-### Tables________________________________________________________________
+# 2025-ONLY COMPARISON MODELS ________________________________________________
+### All 2025 data is at 22 degrees C so temp cannot be used as a predictor.
+### Check each model for singular fit and adjust random effects as needed.
 
 ```{r}
-print_model <- function(model, species, response) {
-  sjPlot::tab_model(
-    model,
-    title = paste(species, "-", response),
-    show.intercept = TRUE,
-    show.se = TRUE,
-    show.stat = TRUE,
-    show.df = TRUE
-  )
-}
-print_model(ulva_ww_pmax_results$model_all_reml, "Ulva", "Pmax")
-print_model(hypnea_ww_pmax_results$model_all_reml, "Hypnea", "Pmax")
+predictors_list_2025         <- c("nitrate", "salinity")
+predictors_list_2025_species <- c("nitrate", "salinity", "species")
+```
 
-print_model(ulva_ww_npqmax_results$model_all_reml, "Ulva", "NPQmax")
-print_model(hypnea_ww_npqmax_results$model_all_reml, "Hypnea", "NPQmax")
+## Fv/Fm — 2025 only
 
-print_model(ulva_ww_delta_npq_results$model_all_reml, "Ulva", "delta NPQ")
-print_model(hypnea_ww_delta_npq_results$model_all_reml, "Hypnea", "delta NPQ")
+### Ulva Fv/Fm 2025
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+ulva_2025_fvfm_results <- compare_lmer_models(
+  data = ulva_2025,
+  response = "fv_fm",
+  predictors_list_2025,
+  random_effects = c("plant_id", "run_combo")
+)
+summary(ulva_2025_fvfm_results$model_all_reml)
+ulva_2025_fvfm_results$anova_result[["nitrate"]]
+ulva_2025_fvfm_results$anova_result[["salinity"]]
+check_model_fit(ulva_2025_fvfm_results$model_all_reml, terms = predictors_list_2025)
+ulva_2025_fvfm_results$data_means
+```
 
-print_model(ulva_ww_ek_results$model_all_reml, "Ulva", "Ek")
+### Hypnea Fv/Fm 2025
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+hypnea_2025_fvfm_results <- compare_lmer_models(
+  data = hypnea_2025,
+  response = "fv_fm",
+  predictors_list_2025,
+  random_effects = c("plant_id", "run_combo")
+)
+summary(hypnea_2025_fvfm_results$model_all_reml)
+hypnea_2025_fvfm_results$anova_result[["nitrate"]]
+hypnea_2025_fvfm_results$anova_result[["salinity"]]
+check_model_fit(hypnea_2025_fvfm_results$model_all_reml, terms = predictors_list_2025)
+hypnea_2025_fvfm_results$data_means
+```
+
+## Pmax — 2025 only
+
+### Ulva Pmax 2025
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+ulva_2025_pmax_results <- compare_lmer_models(
+  data = ulva_2025,
+  response = "pmax",
+  predictors_list_2025,
+  random_effects = c("plant_id", "run_combo")
+)
+summary(ulva_2025_pmax_results$model_all_reml)
+ulva_2025_pmax_results$anova_result[["nitrate"]]
+ulva_2025_pmax_results$anova_result[["salinity"]]
+check_model_fit(ulva_2025_pmax_results$model_all_reml, terms = predictors_list_2025)
+ulva_2025_pmax_results$data_means
+```
+
+### Hypnea Pmax 2025
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+hypnea_2025_pmax_results <- compare_lmer_models(
+  data = hypnea_2025,
+  response = "pmax",
+  predictors_list_2025,
+  random_effects = c("run_combo", "rlc_order1")
+)
+summary(hypnea_2025_pmax_results$model_all_reml)
+hypnea_2025_pmax_results$anova_result[["nitrate"]]
+hypnea_2025_pmax_results$anova_result[["salinity"]]
+check_model_fit(hypnea_2025_pmax_results$model_all_reml, terms = predictors_list_2025)
+hypnea_2025_pmax_results$data_means
+```
+
+## NPQmax — 2025 only
+
+### Ulva NPQmax 2025
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+ulva_2025_npqmax_results <- compare_lmer_models(
+  data = ulva_2025,
+  response = "npq_max",
+  predictors_list_2025,
+  random_effects = c("plant_id", "run_combo")
+)
+summary(ulva_2025_npqmax_results$model_all_reml)
+ulva_2025_npqmax_results$anova_result[["nitrate"]]
+ulva_2025_npqmax_results$anova_result[["salinity"]]
+check_model_fit(ulva_2025_npqmax_results$model_all_reml, terms = predictors_list_2025)
+ulva_2025_npqmax_results$data_means
+```
+
+### Hypnea NPQmax 2025
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+hypnea_2025_npqmax_results <- compare_lmer_models(
+  data = hypnea_2025,
+  response = "npq_max",
+  predictors_list_2025,
+  random_effects = c("run_combo", "rlc_order1")
+)
+summary(hypnea_2025_npqmax_results$model_all_reml)
+hypnea_2025_npqmax_results$anova_result[["nitrate"]]
+hypnea_2025_npqmax_results$anova_result[["salinity"]]
+check_model_fit(hypnea_2025_npqmax_results$model_all_reml, terms = predictors_list_2025)
+hypnea_2025_npqmax_results$data_means
+```
+
+## deltaNPQ — 2025 only
+
+### Ulva deltaNPQ 2025
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+ulva_2025_delta_npq_results <- compare_lmer_models(
+  data = ulva_2025,
+  response = "delta_npq",
+  predictors_list_2025,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+summary(ulva_2025_delta_npq_results$model_all_reml)
+ulva_2025_delta_npq_results$anova_result[["nitrate"]]
+ulva_2025_delta_npq_results$anova_result[["salinity"]]
+check_model_fit(ulva_2025_delta_npq_results$model_all_reml, terms = predictors_list_2025)
+ulva_2025_delta_npq_results$data_means
+```
+
+### Hypnea deltaNPQ 2025
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+hypnea_2025_delta_npq_results <- compare_lmer_models(
+  data = hypnea_2025,
+  response = "delta_npq",
+  predictors_list_2025,
+  random_effects = c("run_combo", "rlc_order1")
+)
+summary(hypnea_2025_delta_npq_results$model_all_reml)
+hypnea_2025_delta_npq_results$anova_result[["nitrate"]]
+hypnea_2025_delta_npq_results$anova_result[["salinity"]]
+check_model_fit(hypnea_2025_delta_npq_results$model_all_reml, terms = predictors_list_2025)
+hypnea_2025_delta_npq_results$data_means
+```
+
+## Ek — 2025 only
+
+### Ulva Ek 2025
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+ulva_2025_ek_results <- compare_lmer_models(
+  data = ulva_2025,
+  response = "ek_est",
+  predictors_list_2025,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+summary(ulva_2025_ek_results$model_all_reml)
+ulva_2025_ek_results$anova_result[["nitrate"]]
+ulva_2025_ek_results$anova_result[["salinity"]]
+check_model_fit(ulva_2025_ek_results$model_all_reml, terms = predictors_list_2025)
+ulva_2025_ek_results$data_means
+```
+
+### Hypnea Ek 2025
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+hypnea_2025_ek_results <- compare_lmer_models(
+  data = hypnea_2025,
+  response = "ek_est",
+  predictors_list_2025,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+summary(hypnea_2025_ek_results$model_all_reml)
+hypnea_2025_ek_results$anova_result[["nitrate"]]
+hypnea_2025_ek_results$anova_result[["salinity"]]
+check_model_fit(hypnea_2025_ek_results$model_all_reml, terms = predictors_list_2025)
+hypnea_2025_ek_results$data_means
+```
+
+## Species comparisons — 2025 only
+
+```{r, fig.width = 8, fig.height = 9, results ='markup'}
+ww_2025_fvfm_species_results <- compare_lmer_models(
+  data = subset(ww_lmm_d9, year == 2025),
+  response = "fv_fm",
+  predictors_list_2025_species,
+  random_effects = c("plant_id")
+)
+ww_2025_fvfm_species_results$anova_result[["species"]]
+
+ww_2025_pmax_species_results <- compare_lmer_models(
+  data = subset(ww_lmm_d9, year == 2025),
+  response = "pmax",
+  predictors_list_2025_species,
+  random_effects = c("plant_id")
+)
+ww_2025_pmax_species_results$anova_result[["species"]]
+
+ww_2025_npqmax_species_results <- compare_lmer_models(
+  data = subset(ww_lmm_d9, year == 2025),
+  response = "npq_max",
+  predictors_list_2025_species,
+  random_effects = c("run_combo")
+)
+ww_2025_npqmax_species_results$anova_result[["species"]]
+
+ww_2025_delta_npq_species_results <- compare_lmer_models(
+  data = subset(ww_lmm_d9, year == 2025),
+  response = "delta_npq",
+  predictors_list_2025_species,
+  random_effects = c("plant_id")
+)
+ww_2025_delta_npq_species_results$anova_result[["species"]]
+
+ww_2025_ek_species_results <- compare_lmer_models(
+  data = subset(ww_lmm_d9, year == 2025),
+  response = "ek_est",
+  predictors_list_2025_species,
+  random_effects = c("plant_id", "run_combo", "rlc_order1")
+)
+ww_2025_ek_species_results$anova_result[["species"]]
+```
+
+## Model summary tables — 2025 only
+
+```{r}
+print_model(ulva_2025_fvfm_results$model_all_reml,       "Ulva 2025",   "FvFm")
+print_model(hypnea_2025_fvfm_results$model_all_reml,     "Hypnea 2025", "FvFm")
+print_model(ulva_2025_pmax_results$model_all_reml,       "Ulva 2025",   "Pmax")
+print_model(hypnea_2025_pmax_results$model_all_reml,     "Hypnea 2025", "Pmax")
+print_model(ulva_2025_npqmax_results$model_all_reml,     "Ulva 2025",   "NPQmax")
+print_model(hypnea_2025_npqmax_results$model_all_reml,   "Hypnea 2025", "NPQmax")
+print_model(ulva_2025_delta_npq_results$model_all_reml,  "Ulva 2025",   "delta NPQ")
+print_model(hypnea_2025_delta_npq_results$model_all_reml,"Hypnea 2025", "delta NPQ")
+print_model(ulva_2025_ek_results$model_all_reml,         "Ulva 2025",   "Ek")
+print_model(hypnea_2025_ek_results$model_all_reml,       "Hypnea 2025", "Ek")
+```
+
+### Tables — combined dataset________________________________________________________________
+
+```{r}
+print_model(ulva_ww_fvfm_results$model_all_reml, "Ulva", "FvFm")
 print_model(hypnea_ww_ek_results$model_all_reml, "Hypnea", "Ek")
 ```
 

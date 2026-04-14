@@ -4,17 +4,12 @@
 #The script is meant to open, clean, and plot some spectral reflectance data in prep for doing some analysis
 
 #load some helpful libraries
-library(dplyr)
-library(tidyr)
 library(prospectr)
 library(hyperSpec)
 library(pavo)
 library(spectrolab)
-library(tidyverse)
-library(purrr)
-library (tibble)
+library(tidyverse) #includes ggplot2, readr, forcats, tibble, purrr, tidyr, dplyr, stringr
 library(janitor)
-library(readr)
 library(signal)
 library(scales)
 library(grid)
@@ -49,7 +44,7 @@ refl_mat <- spec_all %>%
   as.matrix()
 
 smooth_sg <- function(x, w = 11, p = 2, m = 0) {
-  sgolayfilt(x, p = p, n = w, m = m)
+  signal::sgolayfilt(x, p = p, n = w, m = m)
 }
 
 #Smooth each row, keeping the same dimensions
@@ -65,12 +60,14 @@ smoothed_wl <- as.numeric(wl_cols)
 # sanity check: these must be equal
 stopifnot(length(smoothed_wl) == ncol(sm_mat))
 
-# reassemble your smoothed data.frame with the correct names
+# assign column names before converting so as_tibble() doesn't need to repair them
+colnames(sm_mat) <- as.character(smoothed_wl)
+
+# reassemble smoothed data frame
 spec_smoothed <- bind_cols(
   tibble(id = spec_all$id),
   as_tibble(sm_mat)
-) %>%
-  set_names(c("id", as.character(smoothed_wl)))
+)
 
 
 # pivot back to long for plotting
@@ -118,7 +115,7 @@ spec_mean <- spec_snv %>%
 spec_norm <- spec_mean %>%
   group_by(id) %>%
   mutate(
-    baseline749 = absorptance_snv[which.min(abs(wavelength - 700.44)) ],
+    baseline749 = absorptance_snv[which.min(abs(wavelength - 749)) ],
     absorptance_zero = absorptance_snv - baseline749
   ) %>%
   ungroup()
@@ -133,13 +130,25 @@ treatment_pattern <- c(7, 8, 9, 10) # 7, 8, 9, 10 are the treatment numbers
 
 spec_norm <- spec_norm %>%
   mutate(
-    treatment = as.factor(treatment_pattern[(id_num - 1) %% 4 + 1])
+    treatment = treatment_pattern[(id_num - 1) %% 4 + 1],
+    nitrate   = case_when(
+      treatment == 7  ~ 80,
+      treatment == 8  ~ 245,
+      treatment == 9  ~ 748,
+      treatment == 10 ~ 2287
+    ),
+    treatment = as.factor(treatment),
+    nitrate   = as.factor(nitrate)
   )
 
 spec_norm <- spec_norm %>%
   mutate(
     salinity = as.factor(if_else(((id_num - 1) %/% 4) %% 2 == 0, 18, 22))
   )
+
+# Save wrangled long-format data for use in analyze script
+write_csv(spec_norm,
+          "/Users/angela/src/Photosynthesis/data/wastewater/transformed/spec_norm_long.csv")
 
 #Subset for the two species to plot
 spec_u <- spec_norm %>%
