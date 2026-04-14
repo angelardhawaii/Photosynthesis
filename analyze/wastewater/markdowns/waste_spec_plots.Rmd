@@ -1,0 +1,414 @@
+---
+title: "Spectral Reflectance — Ulva lactuca & Hypnea musciformis"
+subtitle: "Wastewater SGD 2025 Experiment"
+author: "Angela Richards Dona"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: flatly
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width  = 9,
+  fig.height = 5
+)
+```
+
+```{r libraries}
+library(tidyverse)
+library(scales)
+library(grid)
+```
+
+```{r load-data}
+spec_norm <- read_csv(
+  "/Users/angela/src/Photosynthesis/data/wastewater/transformed/spec_norm_long.csv",
+  show_col_types = FALSE
+) %>%
+  mutate(
+    nitrate  = factor(nitrate,  levels = sort(unique(nitrate))),
+    salinity = factor(salinity, levels = sort(unique(salinity))),
+    species  = as.character(species)
+  )
+
+spec_u <- filter(spec_norm, species == "u")
+spec_h <- filter(spec_norm, species == "h")
+```
+
+```{r peak-annotations}
+# Species-specific pigment peak wavelengths
+peaks_ulva <- tibble(
+  wavelength = c(435, 560, 653, 675),
+  label      = c("Chl a/b + Car", "Green peak", "Chl b", "Chl a")
+)
+
+peaks_hypnea <- tibble(
+  wavelength = c(435, 500, 560, 620, 675),
+  label      = c("Chl a/b + Car", "B-PE", "R-PE", "PC", "Chl a")
+)
+```
+
+---
+
+## Overview
+
+Spectral absorptance was measured on Day 9 of the wastewater SGD 2025 experiment for *Ulva lactuca* (green alga) and *Hypnea musciformis* (red alga) across four nitrate concentrations (80, 245, 748, 2287 µmol) and two salinities (18 and 22 ppt).
+
+Raw reflectance was smoothed (Savitzky-Golay, window = 11, polynomial order = 2), converted to absorptance (100 − reflectance), normalized by SNV (standard normal variate), and baseline-corrected to zero at 749 nm.
+
+Key absorptance peaks annotated:
+
+| Species | Wavelength | Pigment |
+|---------|-----------|---------|
+| Both | 435 nm | Chl a/b + carotenoids (Soret band) |
+| *Hypnea* | 500 nm | B-phycoerythrin (observed peak) |
+| Both / *Ulva* | 560 nm | R-phycoerythrin (*Hypnea*); green reflectance trough (*Ulva*) |
+| *Hypnea* | 620 nm | Phycocyanin |
+| *Ulva* | 653 nm | Chl b red absorption peak (observed ~650–655 nm) |
+| Both | 675 nm | Chl a red absorption maximum |
+
+---
+
+## 1. Individual Spectra
+
+### *Ulva lactuca*
+
+```{r ulva-individual, fig.height=5}
+ggplot(spec_u, aes(x = wavelength, y = absorptance_zero, color = id)) +
+  geom_vline(data = peaks_ulva, aes(xintercept = wavelength),
+             linetype = "dashed", color = "grey60", linewidth = 0.35, inherit.aes = FALSE) +
+  geom_line(linewidth = 0.3, alpha = 0.8) +
+  facet_wrap(salinity ~ nitrate, nrow = 2,
+             labeller = labeller(
+               salinity = function(x) paste0(x, " ppt"),
+               nitrate  = function(x) paste0(x, " µmol")
+             )) +
+  xlim(400, 750) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(
+    x       = "Wavelength (nm)",
+    y       = "Zero-baseline absorptance (SNV)",
+    title   = expression(italic("Ulva lactuca") ~ "— Individual Spectra by Treatment"),
+    caption = "Dashed lines: 435 nm | 560 nm | 653 nm Chl b | 675 nm Chl a"
+  )
+```
+
+### *Hypnea musciformis*
+
+```{r hypnea-individual, fig.height=5}
+ggplot(spec_h, aes(x = wavelength, y = absorptance_zero, color = id)) +
+  geom_vline(data = peaks_hypnea, aes(xintercept = wavelength),
+             linetype = "dashed", color = "grey60", linewidth = 0.35, inherit.aes = FALSE) +
+  geom_line(linewidth = 0.3, alpha = 0.8) +
+  facet_wrap(salinity ~ nitrate, nrow = 2,
+             labeller = labeller(
+               salinity = function(x) paste0(x, " ppt"),
+               nitrate  = function(x) paste0(x, " µmol")
+             )) +
+  xlim(400, 750) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(
+    x       = "Wavelength (nm)",
+    y       = "Zero-baseline absorptance (SNV)",
+    title   = expression(italic("Hypnea musciformis") ~ "— Individual Spectra by Treatment"),
+    caption = "Dashed lines: 435 nm | 500 nm B-PE | 560 nm R-PE | 620 nm PC | 675 nm Chl a"
+  )
+```
+
+---
+
+## 2. Mean Spectra by Nitrate Treatment
+
+Mean ± SE absorptance across all replicates, grouped by nitrate concentration. Salinity is pooled to highlight the nitrate signal.
+
+```{r mean-spectra-nitrate}
+spec_summ_nitrate <- spec_norm %>%
+  filter(wavelength >= 400, wavelength <= 750) %>%
+  group_by(species, nitrate, wavelength) %>%
+  summarise(
+    mean_abs = mean(absorptance_zero, na.rm = TRUE),
+    se_abs   = sd(absorptance_zero,   na.rm = TRUE) / sqrt(n()),
+    .groups  = "drop"
+  ) %>%
+  mutate(
+    species_label = recode(species, u = "Ulva lactuca", h = "Hypnea musciformis")
+  )
+```
+
+### *Ulva lactuca*
+
+```{r ulva-mean-nitrate, fig.height=4.5}
+spec_summ_nitrate %>%
+  filter(species == "u") %>%
+  ggplot(aes(x = wavelength, y = mean_abs, color = nitrate, fill = nitrate)) +
+  geom_vline(data = peaks_ulva, aes(xintercept = wavelength),
+             linetype = "dashed", color = "grey55", linewidth = 0.4, inherit.aes = FALSE) +
+  geom_ribbon(aes(ymin = mean_abs - se_abs, ymax = mean_abs + se_abs),
+              alpha = 0.15, color = NA) +
+  geom_line(linewidth = 0.65) +
+  scale_color_viridis_d(option = "plasma", direction = -1) +
+  scale_fill_viridis_d(option = "plasma", direction = -1) +
+  theme_bw() +
+  labs(
+    x       = "Wavelength (nm)",
+    y       = "Mean zero-baseline absorptance (SNV)",
+    color   = "Nitrate (µmol)",
+    fill    = "Nitrate (µmol)",
+    title   = expression(italic("Ulva lactuca") ~ "— Mean Absorptance ± SE by Nitrate"),
+    caption = "Dashed lines: 435 nm Chl a/b+Car | 560 nm Green peak | 653 nm Chl b | 675 nm Chl a"
+  )
+```
+
+### *Hypnea musciformis*
+
+```{r hypnea-mean-nitrate, fig.height=4.5}
+spec_summ_nitrate %>%
+  filter(species == "h") %>%
+  ggplot(aes(x = wavelength, y = mean_abs, color = nitrate, fill = nitrate)) +
+  geom_vline(data = peaks_hypnea, aes(xintercept = wavelength),
+             linetype = "dashed", color = "grey55", linewidth = 0.4, inherit.aes = FALSE) +
+  geom_ribbon(aes(ymin = mean_abs - se_abs, ymax = mean_abs + se_abs),
+              alpha = 0.15, color = NA) +
+  geom_line(linewidth = 0.65) +
+  scale_color_viridis_d(option = "plasma", direction = -1) +
+  scale_fill_viridis_d(option = "plasma", direction = -1) +
+  theme_bw() +
+  labs(
+    x       = "Wavelength (nm)",
+    y       = "Mean zero-baseline absorptance (SNV)",
+    color   = "Nitrate (µmol)",
+    fill    = "Nitrate (µmol)",
+    title   = expression(italic("Hypnea musciformis") ~ "— Mean Absorptance ± SE by Nitrate"),
+    caption = "Dashed lines: 435 nm Chl a/b+Car | 500 nm B-PE | 560 nm R-PE | 620 nm PC | 675 nm Chl a"
+  )
+```
+
+---
+
+## 3. Mean Spectra by Salinity
+
+```{r mean-spectra-salinity}
+spec_summ_sal <- spec_norm %>%
+  filter(wavelength >= 400, wavelength <= 750) %>%
+  group_by(species, salinity, wavelength) %>%
+  summarise(
+    mean_abs = mean(absorptance_zero, na.rm = TRUE),
+    se_abs   = sd(absorptance_zero,   na.rm = TRUE) / sqrt(n()),
+    .groups  = "drop"
+  )
+```
+
+```{r ulva-mean-salinity, fig.height=4.5}
+spec_summ_sal %>%
+  filter(species == "u") %>%
+  ggplot(aes(x = wavelength, y = mean_abs, color = salinity, fill = salinity)) +
+  geom_vline(data = peaks_ulva, aes(xintercept = wavelength),
+             linetype = "dashed", color = "grey55", linewidth = 0.4, inherit.aes = FALSE) +
+  geom_ribbon(aes(ymin = mean_abs - se_abs, ymax = mean_abs + se_abs),
+              alpha = 0.2, color = NA) +
+  geom_line(linewidth = 0.65) +
+  scale_color_manual(values = c("18" = "#4DBBEE", "22" = "#E8844A")) +
+  scale_fill_manual( values = c("18" = "#4DBBEE", "22" = "#E8844A")) +
+  theme_bw() +
+  labs(
+    x       = "Wavelength (nm)",
+    y       = "Mean zero-baseline absorptance (SNV)",
+    color   = "Salinity (ppt)",
+    fill    = "Salinity (ppt)",
+    title   = expression(italic("Ulva lactuca") ~ "— Mean Absorptance ± SE by Salinity"),
+    caption = "Dashed lines: 435 nm Chl a/b+Car | 560 nm Green peak | 653 nm Chl b | 675 nm Chl a"
+  )
+```
+
+```{r hypnea-mean-salinity, fig.height=4.5}
+spec_summ_sal %>%
+  filter(species == "h") %>%
+  ggplot(aes(x = wavelength, y = mean_abs, color = salinity, fill = salinity)) +
+  geom_vline(data = peaks_hypnea, aes(xintercept = wavelength),
+             linetype = "dashed", color = "grey55", linewidth = 0.4, inherit.aes = FALSE) +
+  geom_ribbon(aes(ymin = mean_abs - se_abs, ymax = mean_abs + se_abs),
+              alpha = 0.2, color = NA) +
+  geom_line(linewidth = 0.65) +
+  scale_color_manual(values = c("18" = "#4DBBEE", "22" = "#E8844A")) +
+  scale_fill_manual( values = c("18" = "#4DBBEE", "22" = "#E8844A")) +
+  theme_bw() +
+  labs(
+    x       = "Wavelength (nm)",
+    y       = "Mean zero-baseline absorptance (SNV)",
+    color   = "Salinity (ppt)",
+    fill    = "Salinity (ppt)",
+    title   = expression(italic("Hypnea musciformis") ~ "— Mean Absorptance ± SE by Salinity"),
+    caption = "Dashed lines: 435 nm Chl a/b+Car | 500 nm B-PE | 560 nm R-PE | 620 nm PC | 675 nm Chl a"
+  )
+```
+
+---
+
+## 4. Mean Spectra by Treatment Group (Nitrate × Salinity)
+
+Eight treatment combinations (4 nitrate × 2 salinity), each plotted as a single mean line.
+
+```{r mean-spectra-combo}
+spec_summ_combo <- spec_norm %>%
+  filter(wavelength >= 400, wavelength <= 750) %>%
+  mutate(group = paste0(nitrate, " µmol / ", salinity, " ppt")) %>%
+  group_by(species, nitrate, salinity, group, wavelength) %>%
+  summarise(
+    mean_abs = mean(absorptance_zero, na.rm = TRUE),
+    .groups  = "drop"
+  ) %>%
+  mutate(
+    nitrate_f  = factor(nitrate,  levels = sort(unique(as.numeric(as.character(nitrate))))),
+    salinity_f = factor(salinity, levels = sort(unique(as.numeric(as.character(salinity)))))
+  )
+```
+
+```{r ulva-combo, fig.height=4.5}
+spec_summ_combo %>%
+  filter(species == "u") %>%
+  ggplot(aes(x = wavelength, y = mean_abs,
+             color = nitrate_f, linetype = salinity_f)) +
+  geom_vline(data = peaks_ulva, aes(xintercept = wavelength),
+             linetype = "dashed", color = "grey70", linewidth = 0.35, inherit.aes = FALSE) +
+  geom_line(linewidth = 0.55) +
+  scale_color_viridis_d(option = "plasma", direction = -1) +
+  scale_linetype_manual(values = c("18" = "solid", "22" = "dashed")) +
+  theme_bw() +
+  labs(
+    x        = "Wavelength (nm)",
+    y        = "Mean zero-baseline absorptance (SNV)",
+    color    = "Nitrate (µmol)",
+    linetype = "Salinity (ppt)",
+    title    = expression(italic("Ulva lactuca") ~ "— Mean Spectra by Treatment × Salinity"),
+    caption  = "Dashed lines: 435 nm Chl a/b+Car | 560 nm Green peak | 653 nm Chl b | 675 nm Chl a"
+  )
+```
+
+```{r hypnea-combo, fig.height=4.5}
+spec_summ_combo %>%
+  filter(species == "h") %>%
+  ggplot(aes(x = wavelength, y = mean_abs,
+             color = nitrate_f, linetype = salinity_f)) +
+  geom_vline(data = peaks_hypnea, aes(xintercept = wavelength),
+             linetype = "dashed", color = "grey70", linewidth = 0.35, inherit.aes = FALSE) +
+  geom_line(linewidth = 0.55) +
+  scale_color_viridis_d(option = "plasma", direction = -1) +
+  scale_linetype_manual(values = c("18" = "solid", "22" = "dashed")) +
+  theme_bw() +
+  labs(
+    x        = "Wavelength (nm)",
+    y        = "Mean zero-baseline absorptance (SNV)",
+    color    = "Nitrate (µmol)",
+    linetype = "Salinity (ppt)",
+    title    = expression(italic("Hypnea musciformis") ~ "— Mean Spectra by Treatment × Salinity"),
+    caption  = "Dashed lines: 435 nm Chl a/b+Car | 500 nm B-PE | 560 nm R-PE | 620 nm PC | 675 nm Chl a"
+  )
+```
+
+---
+
+## 5. Faceted by Nitrate and Salinity
+
+Individual panels for each nitrate × salinity combination, showing mean ± SD across all individuals in that group.
+
+```{r ulva-faceted, fig.height=6, fig.width=11}
+spec_norm %>%
+  filter(species == "u", wavelength >= 400, wavelength <= 750) %>%
+  group_by(nitrate, salinity, wavelength) %>%
+  summarise(
+    mean_abs = mean(absorptance_zero, na.rm = TRUE),
+    sd_abs   = sd(absorptance_zero,   na.rm = TRUE),
+    .groups  = "drop"
+  ) %>%
+  ggplot(aes(x = wavelength, y = mean_abs)) +
+  geom_vline(data = peaks_ulva, aes(xintercept = wavelength),
+             linetype = "dashed", color = "grey60", linewidth = 0.35, inherit.aes = FALSE) +
+  geom_ribbon(aes(ymin = mean_abs - sd_abs, ymax = mean_abs + sd_abs),
+              fill = "#4dbb8e", alpha = 0.25) +
+  geom_line(color = "#1a6b45", linewidth = 0.6) +
+  facet_grid(salinity ~ nitrate,
+             labeller = labeller(
+               salinity = function(x) paste0(x, " ppt"),
+               nitrate  = function(x) paste0(x, " µmol NO₃")
+             )) +
+  theme_bw() +
+  labs(
+    x       = "Wavelength (nm)",
+    y       = "Mean ± SD absorptance (SNV)",
+    title   = expression(italic("Ulva lactuca") ~ "— Absorptance by Nitrate × Salinity"),
+    caption = "Ribbon = ±1 SD  |  Dashed lines: 435 | 560 | 653 nm Chl b | 675 nm Chl a"
+  )
+```
+
+```{r hypnea-faceted, fig.height=6, fig.width=11}
+spec_norm %>%
+  filter(species == "h", wavelength >= 400, wavelength <= 750) %>%
+  group_by(nitrate, salinity, wavelength) %>%
+  summarise(
+    mean_abs = mean(absorptance_zero, na.rm = TRUE),
+    sd_abs   = sd(absorptance_zero,   na.rm = TRUE),
+    .groups  = "drop"
+  ) %>%
+  ggplot(aes(x = wavelength, y = mean_abs)) +
+  geom_vline(data = peaks_hypnea, aes(xintercept = wavelength),
+             linetype = "dashed", color = "grey60", linewidth = 0.35, inherit.aes = FALSE) +
+  geom_ribbon(aes(ymin = mean_abs - sd_abs, ymax = mean_abs + sd_abs),
+              fill = "#bb4d7a", alpha = 0.25) +
+  geom_line(color = "#7a1a45", linewidth = 0.6) +
+  facet_grid(salinity ~ nitrate,
+             labeller = labeller(
+               salinity = function(x) paste0(x, " ppt"),
+               nitrate  = function(x) paste0(x, " µmol NO₃")
+             )) +
+  theme_bw() +
+  labs(
+    x       = "Wavelength (nm)",
+    y       = "Mean ± SD absorptance (SNV)",
+    title   = expression(italic("Hypnea musciformis") ~ "— Absorptance by Nitrate × Salinity"),
+    caption = "Ribbon = ±1 SD  |  Dashed lines: 435 | 500 nm B-PE | 560 nm R-PE | 620 nm PC | 675 nm Chl a"
+  )
+```
+
+---
+
+## 6. Both Species Overlaid
+
+Direct comparison of mean absorptance curves for both species across nitrate treatments (salinity pooled).
+
+```{r both-species, fig.height=5}
+spec_norm %>%
+  filter(wavelength >= 400, wavelength <= 750) %>%
+  group_by(species, nitrate, wavelength) %>%
+  summarise(
+    mean_abs = mean(absorptance_zero, na.rm = TRUE),
+    .groups  = "drop"
+  ) %>%
+  mutate(species_label = recode(species, u = "Ulva lactuca", h = "Hypnea musciformis")) %>%
+  ggplot(aes(x = wavelength, y = mean_abs,
+             color = nitrate, linetype = species_label)) +
+  geom_vline(xintercept = c(435, 500, 560, 620, 653, 675),
+             linetype = "dashed", color = "grey70", linewidth = 0.3) +
+  geom_line(linewidth = 0.6) +
+  scale_color_viridis_d(option = "plasma", direction = -1) +
+  scale_linetype_manual(values = c("Ulva lactuca" = "solid",
+                                   "Hypnea musciformis" = "dashed")) +
+  theme_bw() +
+  labs(
+    x        = "Wavelength (nm)",
+    y        = "Mean zero-baseline absorptance (SNV)",
+    color    = "Nitrate (µmol)",
+    linetype = "Species",
+    title    = "Both Species — Mean Absorptance by Nitrate Treatment",
+    caption  = "Dashed grey lines: 435 | 500 | 560 | 620 | 653 | 675 nm"
+  )
+```
