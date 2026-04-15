@@ -6,14 +6,31 @@
 # Computes algae-appropriate spectral indices, joins to ww_combo_hsat_dspi,
 # runs LMM per index.
 #
-# Wavelengths chosen from observed absorptance peaks and macroalgae pigment literature:
-#   435 nm — Chl a + Chl b + carotenoid blue absorption peak (both species)
-#   500 nm — B-phycoerythrin Soret peak (Hypnea; observed in spectra)
-#   560 nm — R-phycoerythrin peak (Hypnea); green reflectance trough (Ulva)
-#   620 nm — Phycocyanin absorption (Hypnea)
-#   653 nm — Chl b red absorption peak (Ulva; observed in spectra ~650–655 nm)
-#   675 nm — Chl a red absorption maximum (both species)
-#   750 nm — NIR reference baseline
+# Wavelengths chosen from observed absorptance peaks in processed spectra and literature:
+#
+#   BOTH species:
+#     435 nm — Chl a/b + carotenoid Soret absorption band
+#     500 nm — Ulva: carotenoid/accessory pigment absorption;
+#               Hypnea: B-phycoerythrin Soret peak (observed in spectra)
+#     572 nm — Ulva: green window trough (reflectance peak);
+#               Hypnea: R-phycoerythrin peak (observed in spectra; shifted from textbook ~560)
+#     675 nm — Chl a red absorption maximum (both; less prominent in Ulva)
+#     750 nm — NIR reference baseline (instrument max ~750.7 nm)
+#
+#   Ulva-specific:
+#     650 nm — Chl b red absorption peak (dominant red peak in these specimens;
+#               observed minimum reflectance ~650–655 nm in raw data)
+#
+#   Hypnea-specific:
+#     625 nm — Phycocyanin absorption (observed ~620–625 nm; shifted from textbook 620)
+#
+# NOTE on Ulva baseline:
+#   The spectrometer range ends at ~750.7 nm. Ulva's red edge reflectance peaks at ~688–691 nm
+#   and then DECLINES to 749 nm — the true NIR plateau is not captured. This makes the
+#   749 nm baseline correction push the 680–700 nm region negative for Ulva. The processed
+#   Ulva absorptance_zero peaks at ~650–655 nm (Chl b) and is near-zero or negative by
+#   675 nm. This is real spectral behavior given the limited wavelength range, not a
+#   wrangling error. Ratio-based indices using R_750 as a relative reference remain valid.
 
 library(tidyverse)#includes ggplot2, readr, forcats, tibble, purrr, tidyr, dplyr, stringr
 library(lme4)
@@ -36,61 +53,59 @@ spec_long <- read_csv(
 # ── 2. Compute spectral indices from reflectance ──────────────────────────────
 # Indices computed on raw reflectance at nearest available wavelength.
 # Both-species indices: chl_ratio, car_chl, rg_ratio
-# Hypnea-only indices: pe_index (phycoerythrin), pc_index (phycocyanin)
+# Ulva-only: acc500, chlb_ratio, chl_ab
+# Hypnea-only: pe_b_index (500 nm), pe_index (572 nm), pc_index (625 nm)
 
 spec_wide <- spec_long %>%
   select(id, replicate, wavelength, reflectance, nitrate, salinity, species, run) %>%
   group_by(id, replicate, nitrate, salinity, species, run) %>%
   summarise(
-    R_435 = reflectance[which.min(abs(wavelength - 435))],  # Chl a/b + carotenoid
-    R_500 = reflectance[which.min(abs(wavelength - 500))],  # B-phycoerythrin Soret (Hypnea)
-    R_560 = reflectance[which.min(abs(wavelength - 560))],  # R-phycoerythrin / green peak
-    R_620 = reflectance[which.min(abs(wavelength - 620))],  # Phycocyanin
-    R_653 = reflectance[which.min(abs(wavelength - 653))],  # Chl b red peak (Ulva ~650-655)
-    R_675 = reflectance[which.min(abs(wavelength - 675))],  # Chl a red absorption max
+    R_435 = reflectance[which.min(abs(wavelength - 435))],  # Chl a/b + carotenoid (both)
+    R_500 = reflectance[which.min(abs(wavelength - 500))],  # Ulva: carotenoid; Hypnea: B-PE
+    R_572 = reflectance[which.min(abs(wavelength - 572))],  # Ulva: green trough; Hypnea: R-PE
+    R_625 = reflectance[which.min(abs(wavelength - 625))],  # Phycocyanin (Hypnea)
+    R_650 = reflectance[which.min(abs(wavelength - 650))],  # Chl b red peak (Ulva ~650-655)
+    R_675 = reflectance[which.min(abs(wavelength - 675))],  # Chl a red max (both)
     R_750 = reflectance[which.min(abs(wavelength - 750))],  # NIR baseline
     .groups = "drop"
   ) %>%
   mutate(
     # ── Both-species indices ──────────────────────────────────────────────────
-    # Chlorophyll a ratio — primary Chl a proxy for macroalgae
-    # Gitelson et al.; widely used for aquatic macrophytes
+    # Chlorophyll a ratio — primary Chl a proxy; R750/R675 (Gitelson et al.)
     chl_ratio = R_750 / R_675,
 
-    # Carotenoid:Chlorophyll ratio — increases under nutrient/light stress
-    # High value = relatively more carotenoid than Chl a
+    # Carotenoid:Chlorophyll a ratio — increases under nutrient/light stress
     car_chl   = R_675 / R_435,
 
-    # Red:Green ratio — broad pigment load indicator
-    # Reflects overall absorptance balance between red and green regions
-    rg_ratio  = R_675 / R_560,
+    # Red:Green ratio — broad pigment load indicator; R675/R572
+    rg_ratio  = R_675 / R_572,
 
-    # ── Ulva-specific indices (Chlorophyll b) ─────────────────────────────────
-    # Chl b ratio — Chl b analog of chl_ratio; observed absorptance peak ~653 nm
-    # Chl b is an accessory pigment in green algae (Chlorophyta); absent in red algae
-    chlb_ratio = R_750 / R_653,
+    # ── Ulva-specific indices ─────────────────────────────────────────────────
+    # 500 nm normalized difference — carotenoid/accessory pigment absorption in Ulva
+    # (same formula as pe_b_index; different pigment target in Chlorophyta)
+    acc500     = (R_750 - R_500) / (R_750 + R_500),
 
-    # Chl a:b ratio — increases when Chl b degrades relative to Chl a (stress indicator)
-    # Low-light adapted algae have lower ratios; nutrient stress tends to raise it
-    chl_ab     = R_675 / R_653,
+    # Chl b ratio — observed peak ~650 nm in these specimens; Chl b absent in red algae
+    chlb_ratio = R_750 / R_650,
+
+    # Chl a:b ratio — stress indicator; rises when Chl b degrades faster than Chl a
+    chl_ab     = R_675 / R_650,
 
     # ── Hypnea-specific indices (phycobiliproteins) ───────────────────────────
-    # B-phycoerythrin index — Soret absorption peak at ~500 nm; observed in Hypnea spectra
-    # Distinct from R-phycoerythrin (560 nm); both are phycobiliprotein markers
+    # B-phycoerythrin index — Soret peak at ~500 nm; observed in Hypnea spectra
     pe_b_index = (R_750 - R_500) / (R_750 + R_500),
 
-    # R-Phycoerythrin index — dominant accessory pigment in red algae
-    # Absorbs strongly at ~560 nm; not present in Ulva
-    pe_index   = (R_750 - R_560) / (R_750 + R_560),
+    # R-phycoerythrin index — dominant phycobiliprotein; observed peak ~572 nm
+    pe_index   = (R_750 - R_572) / (R_750 + R_572),
 
-    # Phycocyanin index — secondary phycobiliprotein in red algae
-    pc_index   = (R_750 - R_620) / (R_750 + R_620)
+    # Phycocyanin index — secondary phycobiliprotein; observed ~625 nm
+    pc_index   = (R_750 - R_625) / (R_750 + R_625)
   )
 
 # Average across replicates — one row per individual
 indices_both   <- c("chl_ratio", "car_chl", "rg_ratio")
-indices_ulva   <- c("chlb_ratio", "chl_ab")          # Chl b indices; Ulva only
-indices_hypnea <- c("pe_b_index", "pe_index", "pc_index")  # phycobiliproteins; Hypnea only
+indices_ulva   <- c("acc500", "chlb_ratio", "chl_ab")      # Ulva-only: 500, 650 nm peaks
+indices_hypnea <- c("pe_b_index", "pe_index", "pc_index")  # Hypnea-only: 500, 572, 625 nm
 indices_all    <- c(indices_both, indices_ulva, indices_hypnea)
 
 spec_idx <- spec_wide %>%
@@ -131,14 +146,14 @@ hypnea_spec <- filter(ww_spec, species.x == "h")
 # ── 5. Mean absorptance spectra by nitrate (visual check) ────────────────────
 # Annotate key pigment wavelengths for reference
 
-# Species-specific peak annotations
+# Species-specific peak annotations (observed peak wavelengths)
 pigment_lines_ulva <- tibble(
-  wavelength = c(435, 560, 653, 675),
-  label      = c("Chl a/b + Car", "Green peak", "Chl b", "Chl a")
+  wavelength = c(435, 500, 572, 650, 675),
+  label      = c("Chl a/b + Car", "Carotenoid", "Green trough", "Chl b", "Chl a")
 )
 
 pigment_lines_hypnea <- tibble(
-  wavelength = c(435, 500, 560, 620, 675),
+  wavelength = c(435, 500, 572, 625, 675),
   label      = c("Chl a/b + Car", "B-PE", "R-PE", "PC", "Chl a")
 )
 
@@ -178,12 +193,12 @@ plot_mean_spectra <- function(spp_label, title, peak_lines, caption_text) {
 plot_mean_spectra(
   "u", "Ulva lactuca — Mean Absorptance by Nitrate (Day 9)",
   pigment_lines_ulva,
-  "Dashed lines: 435 nm Chl a/b+Car | 560 nm Green peak | 653 nm Chl b | 675 nm Chl a"
+  "Dashed lines: 435 nm Chl a/b+Car | 500 nm Carotenoid | 572 nm Green trough | 650 nm Chl b | 675 nm Chl a"
 )
 plot_mean_spectra(
   "h", "Hypnea musciformis — Mean Absorptance by Nitrate (Day 9)",
   pigment_lines_hypnea,
-  "Dashed lines: 435 nm Chl a/b+Car | 500 nm B-PE | 560 nm R-PE | 620 nm PC | 675 nm Chl a"
+  "Dashed lines: 435 nm Chl a/b+Car | 500 nm B-PE | 572 nm R-PE | 625 nm PC | 675 nm Chl a"
 )
 
 # ── 6. LMM: both-species indices ─────────────────────────────────────────────
@@ -222,8 +237,8 @@ for (idx in indices_both) {
   print(hypnea_spec_results[[idx]]$summary)
 }
 
-# ── 7a. LMM: Ulva-only Chl b indices ─────────────────────────────────────────
-# chlb_ratio and chl_ab target Chl b (650-655 nm), present in green algae only
+# ── 7a. LMM: Ulva-only indices (500 nm + Chl b 650 nm) ──────────────────────
+# acc500: carotenoid/accessory at 500 nm; chlb_ratio and chl_ab: Chl b at 650 nm
 
 ulva_chlb_results <- map(indices_ulva, ~ fit_spec_lmm(ulva_spec, .x)) %>%
   set_names(indices_ulva)
@@ -237,7 +252,7 @@ for (idx in indices_ulva) {
 }
 
 # ── 7b. LMM: Hypnea-only phycobiliprotein indices ────────────────────────────
-# pe_b_index (500 nm), pe_index (560 nm), pc_index (620 nm): Hypnea only
+# pe_b_index (500 nm), pe_index (572 nm), pc_index (625 nm): Hypnea only
 
 hypnea_phyco_results <- map(indices_hypnea, ~ fit_spec_lmm(hypnea_spec, .x)) %>%
   set_names(indices_hypnea)
@@ -272,8 +287,8 @@ ww_spec %>%
     y        = "Index value",
     fill     = "Salinity (ppt)",
     title    = "Spectral indices by nitrate treatment and salinity",
-    caption  = paste("pe_b/pe/pc indices: Hypnea only (phycobiliproteins absent in Ulva);",
-                     "chlb/chl_ab indices: Ulva only (Chl b absent in red algae)")
+    caption  = paste("acc500/chlb_ratio/chl_ab: Ulva only (500 nm carotenoid, 650 nm Chl b);",
+                     "pe_b/pe/pc indices: Hypnea only (phycobiliproteins absent in Ulva)")
   )
 
 # ── 9. Chl ratio vs. DSPI scatter (pigment-photosynthesis decoupling) ─────────

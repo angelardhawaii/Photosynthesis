@@ -44,14 +44,14 @@ spec_h <- filter(spec_norm, species == "h")
 ```
 
 ```{r peak-annotations}
-# Species-specific pigment peak wavelengths
+# Species-specific pigment peak wavelengths (observed in spectra)
 peaks_ulva <- tibble(
-  wavelength = c(435, 560, 653, 675),
-  label      = c("Chl a/b + Car", "Green peak", "Chl b", "Chl a")
+  wavelength = c(435, 500, 572, 650, 675),
+  label      = c("Chl a/b + Car", "Carotenoid", "Green trough", "Chl b", "Chl a")
 )
 
 peaks_hypnea <- tibble(
-  wavelength = c(435, 500, 560, 620, 675),
+  wavelength = c(435, 500, 572, 625, 675),
   label      = c("Chl a/b + Car", "B-PE", "R-PE", "PC", "Chl a")
 )
 ```
@@ -64,15 +64,19 @@ Spectral absorptance was measured on Day 9 of the wastewater SGD 2025 experiment
 
 Raw reflectance was smoothed (Savitzky-Golay, window = 11, polynomial order = 2), converted to absorptance (100 − reflectance), normalized by SNV (standard normal variate), and baseline-corrected to zero at 749 nm.
 
-Key absorptance peaks annotated:
+**Note on Ulva spectra:** The spectrometer range ends at ~750.7 nm. For *Ulva*, the red edge reflectance peaks at ~688–691 nm and then *declines* to 749 nm — the true NIR plateau is not captured. As a result, the 749 nm baseline correction pushes the 680–700 nm region negative in the processed spectra. The dominant absorptance peak for *Ulva* in these specimens is at ~650 nm (Chl b), consistent with the observed reflectance minimum in the raw data. This is a real spectral characteristic of these specimens, not a processing artifact.
 
-| Species | Wavelength | Pigment |
+Key absorptance peaks annotated (observed wavelengths):
+
+| Species | Wavelength | Pigment / Feature |
 |---------|-----------|---------|
 | Both | 435 nm | Chl a/b + carotenoids (Soret band) |
-| *Hypnea* | 500 nm | B-phycoerythrin (observed peak) |
-| Both / *Ulva* | 560 nm | R-phycoerythrin (*Hypnea*); green reflectance trough (*Ulva*) |
-| *Hypnea* | 620 nm | Phycocyanin |
-| *Ulva* | 653 nm | Chl b red absorption peak (observed ~650–655 nm) |
+| *Ulva* | 500 nm | Carotenoid / accessory pigment absorption |
+| *Hypnea* | 500 nm | B-phycoerythrin Soret peak (observed) |
+| *Ulva* | 572 nm | Green reflectance trough |
+| *Hypnea* | 572 nm | R-phycoerythrin absorption peak (observed; shifted from textbook 560 nm) |
+| *Hypnea* | 625 nm | Phycocyanin (observed; shifted from textbook 620 nm) |
+| *Ulva* | 650 nm | Chl b red absorption peak (dominant red peak in these specimens) |
 | Both | 675 nm | Chl a red absorption maximum |
 
 ---
@@ -98,7 +102,7 @@ ggplot(spec_u, aes(x = wavelength, y = absorptance_zero, color = id)) +
     x       = "Wavelength (nm)",
     y       = "Zero-baseline absorptance (SNV)",
     title   = expression(italic("Ulva lactuca") ~ "— Individual Spectra by Treatment"),
-    caption = "Dashed lines: 435 nm | 560 nm | 653 nm Chl b | 675 nm Chl a"
+    caption = "Dashed lines: 435 nm | 500 nm Carotenoid | 572 nm Green trough | 650 nm Chl b | 675 nm Chl a"
   )
 ```
 
@@ -121,7 +125,7 @@ ggplot(spec_h, aes(x = wavelength, y = absorptance_zero, color = id)) +
     x       = "Wavelength (nm)",
     y       = "Zero-baseline absorptance (SNV)",
     title   = expression(italic("Hypnea musciformis") ~ "— Individual Spectra by Treatment"),
-    caption = "Dashed lines: 435 nm | 500 nm B-PE | 560 nm R-PE | 620 nm PC | 675 nm Chl a"
+    caption = "Dashed lines: 435 nm | 500 nm B-PE | 572 nm R-PE | 625 nm PC | 675 nm Chl a"
   )
 ```
 
@@ -165,7 +169,7 @@ spec_summ_nitrate %>%
     color   = "Nitrate (µmol)",
     fill    = "Nitrate (µmol)",
     title   = expression(italic("Ulva lactuca") ~ "— Mean Absorptance ± SE by Nitrate"),
-    caption = "Dashed lines: 435 nm Chl a/b+Car | 560 nm Green peak | 653 nm Chl b | 675 nm Chl a"
+    caption = "Dashed lines: 435 nm Chl a/b+Car | 500 nm Carotenoid | 572 nm Green trough | 650 nm Chl b | 675 nm Chl a"
   )
 ```
 
@@ -189,7 +193,7 @@ spec_summ_nitrate %>%
     color   = "Nitrate (µmol)",
     fill    = "Nitrate (µmol)",
     title   = expression(italic("Hypnea musciformis") ~ "— Mean Absorptance ± SE by Nitrate"),
-    caption = "Dashed lines: 435 nm Chl a/b+Car | 500 nm B-PE | 560 nm R-PE | 620 nm PC | 675 nm Chl a"
+    caption = "Dashed lines: 435 nm Chl a/b+Car | 500 nm B-PE | 572 nm R-PE | 625 nm PC | 675 nm Chl a"
   )
 ```
 
@@ -226,7 +230,7 @@ spec_summ_sal %>%
     color   = "Salinity (ppt)",
     fill    = "Salinity (ppt)",
     title   = expression(italic("Ulva lactuca") ~ "— Mean Absorptance ± SE by Salinity"),
-    caption = "Dashed lines: 435 nm Chl a/b+Car | 560 nm Green peak | 653 nm Chl b | 675 nm Chl a"
+    caption = "Dashed lines: 435 nm Chl a/b+Car | 500 nm Carotenoid | 572 nm Green trough | 650 nm Chl b | 675 nm Chl a"
   )
 ```
 
@@ -248,7 +252,7 @@ spec_summ_sal %>%
     color   = "Salinity (ppt)",
     fill    = "Salinity (ppt)",
     title   = expression(italic("Hypnea musciformis") ~ "— Mean Absorptance ± SE by Salinity"),
-    caption = "Dashed lines: 435 nm Chl a/b+Car | 500 nm B-PE | 560 nm R-PE | 620 nm PC | 675 nm Chl a"
+    caption = "Dashed lines: 435 nm Chl a/b+Car | 500 nm B-PE | 572 nm R-PE | 625 nm PC | 675 nm Chl a"
   )
 ```
 
@@ -290,7 +294,7 @@ spec_summ_combo %>%
     color    = "Nitrate (µmol)",
     linetype = "Salinity (ppt)",
     title    = expression(italic("Ulva lactuca") ~ "— Mean Spectra by Treatment × Salinity"),
-    caption  = "Dashed lines: 435 nm Chl a/b+Car | 560 nm Green peak | 653 nm Chl b | 675 nm Chl a"
+    caption  = "Dashed lines: 435 nm | 500 nm Carotenoid | 572 nm Green trough | 650 nm Chl b | 675 nm Chl a"
   )
 ```
 
@@ -311,7 +315,7 @@ spec_summ_combo %>%
     color    = "Nitrate (µmol)",
     linetype = "Salinity (ppt)",
     title    = expression(italic("Hypnea musciformis") ~ "— Mean Spectra by Treatment × Salinity"),
-    caption  = "Dashed lines: 435 nm Chl a/b+Car | 500 nm B-PE | 560 nm R-PE | 620 nm PC | 675 nm Chl a"
+    caption  = "Dashed lines: 435 nm | 500 nm B-PE | 572 nm R-PE | 625 nm PC | 675 nm Chl a"
   )
 ```
 
@@ -346,7 +350,7 @@ spec_norm %>%
     x       = "Wavelength (nm)",
     y       = "Mean ± SD absorptance (SNV)",
     title   = expression(italic("Ulva lactuca") ~ "— Absorptance by Nitrate × Salinity"),
-    caption = "Ribbon = ±1 SD  |  Dashed lines: 435 | 560 | 653 nm Chl b | 675 nm Chl a"
+    caption = "Ribbon = ±1 SD  |  Dashed lines: 435 | 500 | 572 | 650 nm Chl b | 675 nm Chl a"
   )
 ```
 
@@ -375,7 +379,7 @@ spec_norm %>%
     x       = "Wavelength (nm)",
     y       = "Mean ± SD absorptance (SNV)",
     title   = expression(italic("Hypnea musciformis") ~ "— Absorptance by Nitrate × Salinity"),
-    caption = "Ribbon = ±1 SD  |  Dashed lines: 435 | 500 nm B-PE | 560 nm R-PE | 620 nm PC | 675 nm Chl a"
+    caption = "Ribbon = ±1 SD  |  Dashed lines: 435 | 500 nm B-PE | 572 nm R-PE | 625 nm PC | 675 nm Chl a"
   )
 ```
 
@@ -396,7 +400,7 @@ spec_norm %>%
   mutate(species_label = recode(species, u = "Ulva lactuca", h = "Hypnea musciformis")) %>%
   ggplot(aes(x = wavelength, y = mean_abs,
              color = nitrate, linetype = species_label)) +
-  geom_vline(xintercept = c(435, 500, 560, 620, 653, 675),
+  geom_vline(xintercept = c(435, 500, 572, 625, 650, 675),
              linetype = "dashed", color = "grey70", linewidth = 0.3) +
   geom_line(linewidth = 0.6) +
   scale_color_viridis_d(option = "plasma", direction = -1) +
@@ -409,6 +413,6 @@ spec_norm %>%
     color    = "Nitrate (µmol)",
     linetype = "Species",
     title    = "Both Species — Mean Absorptance by Nitrate Treatment",
-    caption  = "Dashed grey lines: 435 | 500 | 560 | 620 | 653 | 675 nm"
+    caption  = "Dashed grey lines: 435 | 500 | 572 | 625 | 650 | 675 nm"
   )
 ```
